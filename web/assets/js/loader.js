@@ -1,0 +1,38 @@
+// Ortak header/footer'ı enjekte eder ve JSON veri çekme yardımcılarını sağlar.
+// Her sayfa <body data-page="..."> ile kendi sayfa kimliğini bildirir.
+
+async function ortakParcalariYukle() {
+  const sayfa = document.body.dataset.page;
+
+  const [headerHtml, footerHtml] = await Promise.all([
+    fetch("components/header.html").then((r) => r.text()),
+    fetch("components/footer.html").then((r) => r.text()),
+  ]);
+
+  const headerYer = document.getElementById("site-header");
+  const footerYer = document.getElementById("site-footer");
+  if (headerYer) headerYer.innerHTML = headerHtml;
+  if (footerYer) footerYer.innerHTML = footerHtml;
+
+  if (sayfa) {
+    const aktifLink = document.querySelector(`nav a[data-nav="${sayfa}"]`);
+    if (aktifLink) aktifLink.setAttribute("aria-current", "page");
+  }
+}
+
+async function veriYukle(ad) {
+  const res = await fetch(`assets/data/${ad}.json`);
+  if (!res.ok) {
+    throw new Error(`${ad}.json yüklenemedi (HTTP ${res.status})`);
+  }
+  return res.json();
+}
+
+function sayiFormatla(deger, ondalik = 0) {
+  return new Intl.NumberFormat("tr-TR", {
+    minimumFractionDigits: ondalik,
+    maximumFractionDigits: ondalik,
+  }).format(deger);
+}
+
+document.addEventListener("DOMContentLoaded", ortakParcalariYukle);

@@ -94,5 +94,14 @@ Kodun içine sabit değer gömülmez.
   `cografi.json`, `nedenler.json`, `karsilastirma.json`, `metodoloji.json`
   üretildi ve `web/assets/data/` altına kopyalandı — bu şema artık sabit,
   site bu altı dosyayı okuyacak.
-- Sıradaki adım: Faz 5, site iskeleti (sayfa şablonları, ortak header/
-  footer, loader.js) — pilot sayfa olarak trend.html baştan bitirilecek.
+- Faz 5 — tamamlandı: site iskeleti kuruldu (`web/components/` header/
+  footer, `loader.js`, `charts.js`, `style.css` — light/dark tema,
+  dataviz paletinden vurgu/bağlam renkleri). Pilot sayfa `trend.html`
+  baştan sona bitti: 3 çizgi grafik (yangın sayısı, yanan alan, ortalama
+  büyüklük), her biri hareketli ortalama + tablo görünümü ile. `index.html`
+  KPI kartlarıyla çalışıyor, `metodoloji.html` tam. `cografi.html`,
+  `nedenler.html`, `karsilastirma.html` iskelet halinde (görselleştirme
+  Faz 6'da). Playwright ile masaüstü+mobil ekran görüntüleri alındı,
+  6 sayfada da konsol hatası yok.
+- Sıradaki adım: Faz 6, görselleştirme — il haritası (Leaflet), neden
+  dağılımı (yığılmış alan), ülke karşılaştırması (çok serili çizgi).

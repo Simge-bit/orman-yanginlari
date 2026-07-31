@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Türkiye Orman Yangınları — Metodoloji</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="metodoloji">
+  <div id="site-header"></div>
+
+  <main>
+    <h1>Metodoloji ve Kaynaklar</h1>
+    <p class="aciklama">
+      Bu sayfa, sitedeki her rakamın nereden geldiğini, nasıl hesaplandığını
+      ve hangi sınırlamaları taşıdığını belgeler. Sadece birincil/resmi
+      istatistik kaynakları kullanılmıştır; haber, blog veya STK derlemesi
+      kaynak olarak alınmamıştır.
+    </p>
+
+    <h2>Kaynaklar</h2>
+    <div id="kaynaklar-listesi"></div>
+
+    <h2>Metrik tanımları</h2>
+    <ul id="metrik-listesi" class="metodoloji-liste"></ul>
+
+    <h2>Kapsam</h2>
+    <p id="kapsam-metni" class="aciklama"></p>
+
+    <h2>Bilinen sınırlamalar</h2>
+    <ul id="sinirlama-listesi" class="metodoloji-liste"></ul>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/loader.js"></script>
+  <script>
+    async function metodolojiyiCiz() {
+      const veri = await veriYukle("metodoloji");
+
+      const kaynaklarYer = document.getElementById("kaynaklar-listesi");
+      veri.kaynaklar.forEach((kaynak) => {
+        const kart = document.createElement("div");
+        kart.className = "kaynak-karti";
+
+        const ad = document.createElement("div");
+        ad.className = "ad";
+        ad.textContent = kaynak.ad;
+        kart.appendChild(ad);
+
+        const detay = document.createElement("div");
+        detay.className = "detay";
+        detay.textContent = kaynak.kurum;
+        kart.appendChild(detay);
+
+        kaynaklarYer.appendChild(kart);
+      });
+
+      const metrikYer = document.getElementById("metrik-listesi");
+      veri.metrikler.forEach((metrik) => {
+        const li = document.createElement("li");
+        const kod = document.createElement("code");
+        kod.textContent = metrik.id;
+        li.appendChild(kod);
+        li.appendChild(document.createTextNode(` — ${metrik.tanim} (${metrik.birim})`));
+        metrikYer.appendChild(li);
+      });
+
+      document.getElementById("kapsam-metni").textContent =
+        `Yıl aralığı: ${veri.kapsam.yil_araligi.join("–")} · ` +
+        `İl bazında kırılım yılı: ${veri.kapsam.il_bazinda_yil} · ` +
+        `Karşılaştırma ülkeleri: ${veri.kapsam.karsilastirma_ulkeleri.join(", ")}`;
+
+      const sinirlamaYer = document.getElementById("sinirlama-listesi");
+      veri.bilinen_sinirlamalar.forEach((not) => {
+        const li = document.createElement("li");
+        li.textContent = not;
+        sinirlamaYer.appendChild(li);
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", metodolojiyiCiz);
+  </script>
+</body>
+</html>

@@ -58,7 +58,10 @@ def export_ozet():
 
 def export_trend():
     df = pd.read_csv(data_path("interim", "yillik_metrikler.csv")).sort_values("yil")
-    kolonlar = ["yil", "yangin_sayisi", "yanan_alan_ha", "ortalama_buyukluk_ha", "ma_yangin_sayisi", "ma_yanan_alan_ha"]
+    kolonlar = [
+        "yil", "yangin_sayisi", "yanan_alan_ha", "ortalama_buyukluk_ha",
+        "ma_yangin_sayisi", "ma_yanan_alan_ha", "ma_ortalama_buyukluk_ha",
+    ]
     df["yil"] = df["yil"].astype(int)
     kayitlar = json.loads(df[kolonlar].round(2).to_json(orient="records"))
     _yaz("trend", {"yillik": kayitlar})
@@ -89,6 +92,9 @@ def export_karsilastirma():
 
 
 def export_metodoloji(config: dict):
+    yillik = pd.read_csv(data_path("interim", "yillik_seri.csv"))
+    gercek_yil_araligi = [int(yillik["yil"].min()), int(yillik["yil"].max())]
+
     veri = {
         "kaynaklar": [
             {"ad": "OGM Ormancılık İstatistikleri 2024", "kurum": config["kaynaklar"]["ogm"]},
@@ -103,7 +109,7 @@ def export_metodoloji(config: dict):
             {"id": "alan_payi_yuzde", "tanim": "Ülkenin, o yıl karşılaştırma grubundaki (5 ülke) toplam yanan alan içindeki payı", "birim": "%"},
         ],
         "kapsam": {
-            "yil_araligi": config["yil_araligi"],
+            "yil_araligi": gercek_yil_araligi,
             "il_bazinda_yil": 2024,
             "karsilastirma_ulkeleri": config["karsilastirma_ulkeler"],
         },

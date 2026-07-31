@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Türkiye Orman Yangınları — Zaman Trendi</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="trend">
+  <div id="site-header"></div>
+
+  <main>
+    <h1>Zaman Trendi (1988-2024)</h1>
+    <p class="aciklama">
+      Gri çizgi o yılın ham değeri, mavi çizgi 5 yıllık hareketli ortalamadır —
+      yıldan yıla dalgalanmanın altındaki asıl eğilimi gösterir.
+    </p>
+
+    <div class="chart-karti">
+      <h3>Yıllık yangın sayısı</h3>
+      <canvas id="grafik-sayi"></canvas>
+      <details class="tablo-goster" id="tablo-sayi">
+        <summary>Tabloyu göster</summary>
+      </details>
+    </div>
+
+    <div class="chart-karti">
+      <h3>Yıllık yanan alan (hektar)</h3>
+      <canvas id="grafik-alan"></canvas>
+      <details class="tablo-goster" id="tablo-alan">
+        <summary>Tabloyu göster</summary>
+      </details>
+    </div>
+
+    <div class="chart-karti">
+      <h3>Ortalama yangın büyüklüğü (ha / yangın)</h3>
+      <p class="aciklama" style="margin-top: -0.5rem">
+        Yangın sayısı düşse bile bu değer yükseliyorsa, daha az ama daha büyük
+        yangınlar çıkıyor demektir.
+      </p>
+      <canvas id="grafik-buyukluk"></canvas>
+      <details class="tablo-goster" id="tablo-buyukluk">
+        <summary>Tabloyu göster</summary>
+      </details>
+    </div>
+
+    <p class="kaynak-notu">
+      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.11 (1988-2024).
+      Mevsimsel/aylık kırılım bu yayında yok.
+    </p>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="assets/js/loader.js"></script>
+  <script src="assets/js/charts.js"></script>
+  <script>
+    async function trendiCiz() {
+      const { yillik } = await veriYukle("trend");
+      const yillar = yillik.map((s) => s.yil);
+
+      cizgiKartiOlustur({
+        canvasId: "grafik-sayi",
+        yillar,
+        hamDeger: yillik.map((s) => s.yangin_sayisi),
+        maDeger: yillik.map((s) => s.ma_yangin_sayisi),
+        hamEtiket: "Yıllık",
+        maEtiket: "5 yıllık hareketli ortalama",
+      });
+      tabloOlustur({
+        detailsId: "tablo-sayi",
+        basliklar: ["Yıl", "Yangın sayısı", "5 yıllık hareketli ortalama"],
+        satirlar: yillik.map((s) => [s.yil, sayiFormatla(s.yangin_sayisi), sayiFormatla(s.ma_yangin_sayisi, 1)]),
+      });
+
+      cizgiKartiOlustur({
+        canvasId: "grafik-alan",
+        yillar,
+        hamDeger: yillik.map((s) => s.yanan_alan_ha),
+        maDeger: yillik.map((s) => s.ma_yanan_alan_ha),
+        hamEtiket: "Yıllık",
+        maEtiket: "5 yıllık hareketli ortalama",
+      });
+      tabloOlustur({
+        detailsId: "tablo-alan",
+        basliklar: ["Yıl", "Yanan alan (ha)", "5 yıllık hareketli ortalama"],
+        satirlar: yillik.map((s) => [s.yil, sayiFormatla(s.yanan_alan_ha), sayiFormatla(s.ma_yanan_alan_ha, 1)]),
+      });
+
+      cizgiKartiOlustur({
+        canvasId: "grafik-buyukluk",
+        yillar,
+        hamDeger: yillik.map((s) => s.ortalama_buyukluk_ha),
+        maDeger: yillik.map((s) => s.ma_ortalama_buyukluk_ha),
+        hamEtiket: "Yıllık",
+        maEtiket: "5 yıllık hareketli ortalama",
+      });
+      tabloOlustur({
+        detailsId: "tablo-buyukluk",
+        basliklar: ["Yıl", "Ortalama büyüklük (ha)", "5 yıllık hareketli ortalama"],
+        satirlar: yillik.map((s) => [s.yil, sayiFormatla(s.ortalama_buyukluk_ha, 2), sayiFormatla(s.ma_ortalama_buyukluk_ha, 2)]),
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", trendiCiz);
+  </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Türkiye Orman Yangınları — Özet</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="index">
+  <div id="site-header"></div>
+
+  <main>
+    <h1>Türkiye Orman Yangınları</h1>
+    <p class="aciklama">
+      OGM (Orman Genel Müdürlüğü) ve EFFIS/Copernicus'un resmi istatistiklerine
+      dayanan veri analizi. 1988-2024 arası yıllık seri, 2024 için il bazında
+      dağılım ve Akdeniz ülkeleriyle karşılaştırma.
+    </p>
+
+    <div id="kpi-satiri" class="kpi-satiri" aria-live="polite"></div>
+
+    <p class="kaynak-notu">
+      Kaynak: OGM Ormancılık İstatistikleri 2024, EFFIS/Copernicus. Detaylar
+      için <a href="metodoloji.html">Metodoloji</a> sayfasına bakın.
+    </p>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/loader.js"></script>
+  <script>
+    async function ozetiYukleVeCiz() {
+      const ozet = await veriYukle("ozet");
+      const kpi = document.getElementById("kpi-satiri");
+
+      const sayiDegisimYon = ozet.onceki_yila_gore_sayi_degisim_yuzde >= 0 ? "up" : "down";
+      const alanDegisimYon = ozet.onceki_yila_gore_alan_degisim_yuzde >= 0 ? "up" : "down";
+
+      const karolar = [
+        {
+          label: `${ozet.son_yil} yangın sayısı`,
+          value: sayiFormatla(ozet.son_yil_yangin_sayisi),
+          delta: `${ozet.onceki_yila_gore_sayi_degisim_yuzde > 0 ? "+" : ""}${sayiFormatla(ozet.onceki_yila_gore_sayi_degisim_yuzde, 1)}% (önceki yıla göre)`,
+          yon: sayiDegisimYon,
+        },
+        {
+          label: `${ozet.son_yil} yanan alan (ha)`,
+          value: sayiFormatla(ozet.son_yil_yanan_alan_ha),
+          delta: `${ozet.onceki_yila_gore_alan_degisim_yuzde > 0 ? "+" : ""}${sayiFormatla(ozet.onceki_yila_gore_alan_degisim_yuzde, 1)}% (önceki yıla göre)`,
+          yon: alanDegisimYon,
+        },
+        {
+          label: "Ortalama yangın büyüklüğü",
+          value: `${sayiFormatla(ozet.son_yil_ortalama_buyukluk_ha, 2)} ha`,
+        },
+        {
+          label: "En büyük yıl (alan)",
+          value: `${ozet.en_buyuk_yil.yil}`,
+          delta: `${sayiFormatla(ozet.en_buyuk_yil.yanan_alan_ha)} ha`,
+        },
+        {
+          label: `En çok etkilenen il (${ozet.son_yil})`,
+          value: ozet.en_cok_etkilenen_il_2024.il,
+          delta: `${sayiFormatla(ozet.en_cok_etkilenen_il_2024.yanan_alan_ha)} ha`,
+        },
+        {
+          label: "Nedeni bilinmeyen yangın payı",
+          value: `%${sayiFormatla(ozet.bilinmeyen_neden_orani_son_yil_yuzde, 1)}`,
+        },
+      ];
+
+      karolar.forEach((karo) => {
+        const kutu = document.createElement("div");
+        kutu.className = "stat-tile";
+
+        const label = document.createElement("div");
+        label.className = "label";
+        label.textContent = karo.label;
+        kutu.appendChild(label);
+
+        const value = document.createElement("div");
+        value.className = "value";
+        value.textContent = karo.value;
+        kutu.appendChild(value);
+
+        if (karo.delta) {
+          const delta = document.createElement("div");
+          delta.className = `delta${karo.yon ? " " + karo.yon : ""}`;
+          delta.textContent = karo.delta;
+          kutu.appendChild(delta);
+        }
+
+        kpi.appendChild(kutu);
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", ozetiYukleVeCiz);
+  </script>
+</body>
+</html>

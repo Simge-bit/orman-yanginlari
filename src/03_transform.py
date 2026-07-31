@@ -16,6 +16,7 @@ def transform_yillik_metrikler(config: dict):
     pencere = config["hareketli_ort_penceresi"]
     df["ma_yangin_sayisi"] = df["yangin_sayisi"].rolling(pencere, min_periods=1).mean()
     df["ma_yanan_alan_ha"] = df["yanan_alan_ha"].rolling(pencere, min_periods=1).mean()
+    df["ma_ortalama_buyukluk_ha"] = df["ortalama_buyukluk_ha"].rolling(pencere, min_periods=1).mean()
 
     for kategori in NEDEN_KATEGORILERI:
         sayi_col, alan_col = f"{kategori}_sayi", f"{kategori}_alan_ha"
