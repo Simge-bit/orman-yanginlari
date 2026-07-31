@@ -85,4 +85,48 @@ async function haritayiCiz({ containerId, legendId }) {
       legend.appendChild(satir);
     });
   }
+
+  return harita;
+}
+
+// Canlı sıcak nokta katmanı (NASA FIRMS/VIIRS, CI'da periyodik çekilir —
+// bkz. src/fetch_hotspots.py). 2024 yoğunluk haritasından tamamen farklı
+// bir zaman dilimini gösterdiği için ayrı bir katman + ayrı efsane olarak,
+// açıkça "canlı/son 24 saat" etiketiyle sunuluyor.
+async function canliSicakNoktalariEkle({ harita, freshnessId }) {
+  const veri = await fetch("assets/data/hotspots.json").then((r) => (r.ok ? r.json() : null));
+  const freshnessYer = document.getElementById(freshnessId);
+
+  if (!veri) {
+    if (freshnessYer) freshnessYer.textContent = "Canlı katman şu an yüklenemedi.";
+    return;
+  }
+
+  const katman = L.layerGroup();
+  veri.noktalar.forEach((nokta) => {
+    const yaricap = Math.min(4 + (nokta.frp || 1) / 5, 12);
+    L.circleMarker([nokta.latitude, nokta.longitude], {
+      radius: yaricap,
+      color: "#fff",
+      weight: 1,
+      fillColor: "#d03b3b",
+      fillOpacity: 0.85,
+    })
+      .bindTooltip(
+        `Tespit: ${nokta.acq_date} ${String(nokta.acq_time).padStart(4, "0").replace(/(\d{2})(\d{2})/, "$1:$2")} UTC<br>` +
+          `Güven: ${nokta.confidence === "h" ? "yüksek" : nokta.confidence === "n" ? "nominal" : nokta.confidence}` +
+          (nokta.frp != null ? `<br>Radyatif güç: ${nokta.frp} MW` : "")
+      )
+      .addTo(katman);
+  });
+  katman.addTo(harita);
+
+  if (freshnessYer) {
+    const zaman = new Date(veri.guncelleme_zamani);
+    const zamanMetni = zaman.toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" });
+    freshnessYer.textContent =
+      veri.nokta_sayisi > 0
+        ? `${veri.nokta_sayisi} sıcak nokta tespit edildi · son ${veri.gun_araligi ?? 1} gün · kaynak: ${veri.kaynak} · güncelleme: ${zamanMetni} UTC`
+        : `Şu anda algılanan sıcak nokta yok · kaynak: ${veri.kaynak} · güncelleme: ${zamanMetni} UTC`;
+  }
 }

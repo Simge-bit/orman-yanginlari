@@ -11,17 +11,28 @@
   <div id="site-header"></div>
 
   <main>
-    <h1>Coğrafi Dağılım (2024)</h1>
+    <h1>Coğrafi Dağılım (2024) ve Canlı Sıcak Noktalar</h1>
     <p class="aciklama">
-      Renk, ilin <strong>yoğunluk indeksini</strong> gösterir: 2024'te yanan
+      İl renkleri <strong>yoğunluk indeksini</strong> gösterir: 2024'te yanan
       alanın, o ilin toplam orman alanına oranı. Yalnızca yanan hektara
       bakmak büyük ama ormanı az olan illeri yanıltıcı şekilde öne
-      çıkarabilir — oranlama bunu düzeltir.
+      çıkarabilir — oranlama bunu düzeltir. Kırmızı noktalar ise 2024 ile
+      ilgisi olmayan, <strong>şu anki</strong> uydu tabanlı sıcak nokta
+      tespitleridir (NASA FIRMS/VIIRS, son 24 saat) — bir tespit yangın
+      olabilir ama olmayabilir de (duman, endüstriyel ısı kaynağı vb.
+      karışabilir), kesin teyit için resmi kaynaklara bakılmalı.
     </p>
 
     <div class="chart-karti">
       <div id="il-haritasi"></div>
       <div id="harita-legend" class="harita-legend"></div>
+      <div class="harita-legend" style="margin-top: 0.3rem">
+        <span class="legend-satiri">
+          <span class="legend-kutusu" style="background: #d03b3b; border-radius: 50%"></span>
+          Canlı sıcak nokta (uydu, son 24 saat)
+        </span>
+      </div>
+      <p id="canli-tazelik" class="kaynak-notu">Canlı katman yükleniyor…</p>
     </div>
 
     <h2>En çok etkilenen 10 il (yanan alan)</h2>
@@ -42,7 +53,8 @@
   <script src="assets/js/map.js"></script>
   <script>
     async function ciz() {
-      await haritayiCiz({ containerId: "il-haritasi", legendId: "harita-legend" });
+      const harita = await haritayiCiz({ containerId: "il-haritasi", legendId: "harita-legend" });
+      canliSicakNoktalariEkle({ harita, freshnessId: "canli-tazelik" });
 
       const cografi = await veriYukle("cografi");
       const ilk10 = [...cografi.iller].sort((a, b) => a.sira_alan - b.sira_alan).slice(0, 10);

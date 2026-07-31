@@ -102,6 +102,20 @@ başlar.
   benzeri farklar (örn. bazı kaynaklarda "Şanlıurfa" vs "Sanliurfa" ascii
   yazımı) elle kontrol edilmeli.
 
+## Canlı katman (istisna: bu bir "raw" dosyası değil)
+
+`web/assets/data/hotspots.json`, diğer her şeyin aksine `data/raw/`'dan
+gelmiyor — `src/fetch_hotspots.py` tarafından CI'da (hem push'ta hem
+3 saatte bir cron ile) NASA FIRMS'in VIIRS_SNPP_NRT sıcak nokta API'sinden
+canlı çekiliyor, `tr_iller.geojson` sınırıyla kırpılıyor. Kaynak:
+https://firms.modaps.eosdis.nasa.gov/ , API key `FIRMS_MAP_KEY` GitHub
+Actions secret'ı olarak saklanıyor (repo'da veya kodda hiçbir yerde açık
+yazılı değil). FIRMS API'sinin CORS desteği olmadığı için tarayıcıdan
+doğrudan çağrılamıyor — bu yüzden sunucu tarafında (CI) çekilip statik
+JSON olarak gömülüyor. Cografi sayfasında 2024 choropleth'inden ayrı,
+açıkça "canlı/son 24 saat" etiketiyle gösteriliyor — iki katman farklı
+zaman dilimlerini temsil ediyor, karıştırılmamalı.
+
 ## İkincil kaynaklar kullanılmıyor
 
 Bilinçli karar: haber sitesi, blog ve dernek/STK derlemesi gibi ikincil

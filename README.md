@@ -48,6 +48,24 @@ Her adım bir öncekinin çıktısını okur, kendininkini yazar. Veri güncelle
 sadece `data/raw/` değiştirilir, pipeline baştan çalıştırılır, JSON'lar
 otomatik yenilenir.
 
+## Canlı sıcak nokta katmanı
+
+`cografi.html` haritasında 2024 choropleth'in üzerinde, NASA FIRMS'ten
+(VIIRS uydu verisi) çekilen canlı sıcak nokta katmanı da var. Bu,
+01-05 pipeline'ının bir parçası değil — ayrı çalışan `src/fetch_hotspots.py`
+tarafından besleniyor:
+
+```bash
+FIRMS_MAP_KEY=... python src/fetch_hotspots.py
+```
+
+Ücretsiz anahtar: https://firms.modaps.eosdis.nasa.gov/api/map_key/ .
+CI'da bu anahtar `FIRMS_MAP_KEY` adında bir GitHub Actions secret'ı olarak
+saklanır, koda veya repoya asla açık yazılmaz. FIRMS API'sinin CORS desteği
+olmadığı için tarayıcıdan doğrudan çağrılamıyor — bu yüzden veri CI'da
+(hem her push'ta hem 3 saatte bir cron ile) sunucu tarafında çekilip
+`web/assets/data/hotspots.json` olarak statik gömülüyor.
+
 ## Testleri çalıştırma
 
 ```bash
@@ -132,3 +150,13 @@ Kodun içine sabit değer gömülmez.
 Proje tamamlandı: veri toplamadan (Faz 1) canlı siteye (Faz 8) kadar tüm
 fazlar bitti. Veri güncellemek için `data/raw/`'ı değiştirip `main`'e push
 yeterli — CI pipeline'ı otomatik çalıştırıp siteyi günceller.
+
+**Sonradan eklenenler (2026-07-31):**
+- 2025 yılı ulusal rakamları eklendi (OGM'nin "Ormancılık İstatistikleri"
+  yıllığının 2025 sürümü henüz yayınlanmadığı için ayrı bir resmi kaynaktan,
+  "2025 Faaliyet Raporu"ndan). Site artık en güncel yılı otomatik gösteriyor
+  — sayfa başlıkları yıl aralığını veriden dinamik okuyor, elle
+  güncellenmesi gerekmiyor.
+- `cografi.html`'e NASA FIRMS/VIIRS tabanlı canlı sıcak nokta katmanı
+  eklendi (yukarıya bkz.) — GitHub Actions'ta 3 saatte bir otomatik
+  tazeleniyor.

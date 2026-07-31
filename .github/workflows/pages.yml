@@ -10,6 +10,9 @@ on:
       - "config.yaml"
       - "requirements.txt"
       - ".github/workflows/pages.yml"
+  schedule:
+    # Canlı sıcak nokta katmanının tazeliği için — kod değişmese de veri tazelenir.
+    - cron: "0 */3 * * *"
   workflow_dispatch:
 
 permissions:
@@ -42,6 +45,10 @@ jobs:
           python src/05_export.py
       - name: Testleri çalıştır
         run: pytest tests/ -q
+      - name: Canlı sıcak nokta katmanını çek (NASA FIRMS)
+        env:
+          FIRMS_MAP_KEY: ${{ secrets.FIRMS_MAP_KEY }}
+        run: python src/fetch_hotspots.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
