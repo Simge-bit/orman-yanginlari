@@ -18,6 +18,15 @@ async function ortakParcalariYukle() {
     const aktifLink = document.querySelector(`nav a[data-nav="${sayfa}"]`);
     if (aktifLink) aktifLink.setAttribute("aria-current", "page");
   }
+
+  const menuDugmesi = document.getElementById("menu-dugmesi");
+  const nav = document.getElementById("site-nav");
+  if (menuDugmesi && nav) {
+    menuDugmesi.addEventListener("click", () => {
+      const acik = nav.classList.toggle("acik");
+      menuDugmesi.setAttribute("aria-expanded", acik ? "true" : "false");
+    });
+  }
 }
 
 async function veriYukle(ad) {
