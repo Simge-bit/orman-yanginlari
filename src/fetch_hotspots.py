@@ -56,6 +56,10 @@ NOMINATIM_MAX_SORGU = 80  # aşırı yangın günlerinde bile Nominatim'e nazik 
 KOY_ALANLARI = ["hamlet", "village", "neighbourhood", "suburb", "quarter"]
 ILCE_ALANLARI = ["town", "municipality", "city_district", "county"]
 
+LIVE_HOTSPOTS_URL = "https://simge-bit.github.io/orman-yanginlari/assets/data/hotspots.json"
+MAKS_DENEME = 3
+DENEME_BEKLEME_SANIYE = 5
+
 
 def _saat_once_hesapla(acq_date: str, acq_time: int) -> float | None:
     try:
@@ -173,6 +177,22 @@ def _kumeleri_olustur(df: pd.DataFrame, il_poligonlari) -> list[dict]:
     return sonuc
 
 
+def _onceki_yayini_koru() -> bool:
+    # FIRMS'e ulaşılamadığında (ör. runner'ın ağ erişimi geçici kesildiğinde,
+    # birkaç kez bu oturumda görüldü) hiç dosya yazmamak yerine, hâlâ yayında
+    # olan hotspots.json'u olduğu gibi (zaman damgasını sahtelemeden) korumak
+    # daha iyi bir çökme biçimi — katman aniden kaybolmak yerine bayatlar.
+    try:
+        yanit = requests.get(LIVE_HOTSPOTS_URL, timeout=15)
+        yanit.raise_for_status()
+        veri = yanit.json()
+    except (requests.RequestException, ValueError):
+        return False
+    _yaz(veri)
+    print(f"[hotspots] Önceki yayındaki veri korundu (güncelleme: {veri.get('guncelleme_zamani')}).")
+    return True
+
+
 def main():
     map_key = os.environ.get("FIRMS_MAP_KEY")
     if not map_key:
@@ -180,8 +200,26 @@ def main():
         return
 
     url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{map_key}/{KAYNAK_SENSORU}/{TURKIYE_BBOX}/{GUN_ARALIGI}"
-    yanit = requests.get(url, timeout=30)
-    yanit.raise_for_status()
+
+    yanit = None
+    son_hata = None
+    for deneme in range(1, MAKS_DENEME + 1):
+        try:
+            yanit = requests.get(url, timeout=30)
+            yanit.raise_for_status()
+            son_hata = None
+            break
+        except requests.RequestException as hata:
+            son_hata = hata
+            print(f"[hotspots] FIRMS isteği başarısız (deneme {deneme}/{MAKS_DENEME}): {hata}")
+            if deneme < MAKS_DENEME:
+                time.sleep(DENEME_BEKLEME_SANIYE)
+
+    if son_hata is not None:
+        print("[hotspots] FIRMS'e tüm denemelerde ulaşılamadı.")
+        if not _onceki_yayini_koru():
+            print("[hotspots] Önceki yayın da alınamadı; bu çalıştırmada canlı katman üretilmedi.")
+        return
 
     metin = yanit.text.strip()
     guncelleme_zamani = datetime.now(timezone.utc).isoformat()
