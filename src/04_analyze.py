@@ -4,6 +4,7 @@ arası Türkiye'nin konumu. Çıktılar 05_export.py'nin girdisidir.
 """
 import numpy as np
 import pandas as pd
+from scipy import stats
 from utils import data_path
 
 
@@ -109,20 +110,48 @@ def analyze_yogunlasma():
 def analyze_orman_kaplama_korelasyonu():
     # Daha ormanlık iller orantılı olarak daha mı çok yanıyor? il_metrikler
     # (yoğunluk indeksi) ile orman_alani_il (orman kaplama %) birleştirilip
-    # Pearson korelasyonu hesaplanır.
+    # Pearson korelasyonu VE anlamlılığı (p-değeri) hesaplanır — sadece r
+    # katsayısı tek başına "ilişki yok/var" iddiası için yeterli değil.
     il_df = pd.read_csv(data_path("interim", "il_metrikler.csv"))
     orman_df = pd.read_csv(data_path("interim", "orman_alani_il.csv"))[["il", "orman_kaplama_yuzde"]]
     df = il_df.merge(orman_df, on="il", how="inner")
 
-    r = df["orman_kaplama_yuzde"].corr(df["yogunluk_indeksi_yuzde"])
+    r, p_degeri = stats.pearsonr(df["orman_kaplama_yuzde"], df["yogunluk_indeksi_yuzde"])
     sonuc = pd.DataFrame([{
         "iliski": "orman_kaplama_yuzde vs yogunluk_indeksi_yuzde",
         "pearson_r": round(float(r), 3),
+        "p_degeri": round(float(p_degeri), 3),
+        "anlamli_mi": bool(p_degeri < 0.05),
         "il_sayisi": len(df),
         "kapsam_yili": 2024,
     }])
     sonuc.to_csv(data_path("interim", "korelasyon.csv"), index=False)
-    print(f"[analyze] korelasyon.csv: orman kaplama %% ile yoğunluk indeksi arasında r={r:.3f} (n={len(df)})")
+    anlamli_metni = "anlamlı" if p_degeri < 0.05 else "anlamlı değil"
+    print(f"[analyze] korelasyon.csv: orman kaplama %% ile yoğunluk indeksi arasında "
+          f"r={r:.3f}, p={p_degeri:.3f} (istatistiksel olarak {anlamli_metni}, n={len(df)})")
+
+
+def analyze_ulke_egimleri():
+    # Türkiye'nin karşılaştırma grubundaki 5 ülke arasında SADECE anlık
+    # sırası değil, zaman içindeki kendi eğilimi de merak ediliyor: yanan
+    # alan azalıyor mu artıyor mu, ve bu diğer ülkelere göre nasıl?
+    df = pd.read_csv(data_path("interim", "ulke_metrikler.csv"))
+    satirlar = []
+    for ulke, grup in df.groupby("ulke"):
+        veri = grup.dropna(subset=["yanan_alan_ha"]).sort_values("yil")
+        if len(veri) < 5:
+            continue
+        satirlar.append({
+            "ulke": ulke,
+            "kapsam": f"{int(veri['yil'].min())}-{int(veri['yil'].max())}",
+            "veri_yil_sayisi": len(veri),
+            "egim_ha_yil": _egim(veri["yil"], veri["yanan_alan_ha"]),
+        })
+    sonuc = pd.DataFrame(satirlar).sort_values("egim_ha_yil", ascending=False)
+    sonuc.to_csv(data_path("interim", "ulke_egim.csv"), index=False)
+    tr = sonuc[sonuc["ulke"] == "Türkiye"].iloc[0]
+    print(f"[analyze] ulke_egim.csv: Türkiye'nin yıllık eğimi={tr['egim_ha_yil']:.1f} ha/yıl "
+          f"({tr['kapsam']}); {len(sonuc)} ülke için hesaplandı")
 
 
 def analyze_neden_egimi():
@@ -155,6 +184,7 @@ def main():
     analyze_yogunlasma()
     analyze_orman_kaplama_korelasyonu()
     analyze_neden_egimi()
+    analyze_ulke_egimleri()
 
 
 if __name__ == "__main__":

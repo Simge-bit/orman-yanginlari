@@ -265,9 +265,18 @@ function ulkeKartiOlustur({ canvasId, yillar, seriler }) {
 // Yatay çubuk grafik — sıralama/magnitude verisi için (tek seri, tek hue).
 // "En çok etkilenen il" gibi kategorik sıralamalarda tablodan çok daha
 // okunaklı; renk kimlik değil büyüklük taşıdığı için tek vurgu rengi yeter.
-function cubukKartiOlustur({ canvasId, etiketler, degerler, birim }) {
+function cubukKartiOlustur({ canvasId, etiketler, degerler, birim, iyiKotuRenklendir }) {
   const ctx = document.getElementById(canvasId);
   if (!ctx) return;
+
+  // iyiKotuRenklendir: pozitif/negatif değerler bir sıralama değil bir yön
+  // (artıyor/azalıyor) taşıdığında (ör. ülke eğilimleri) tek vurgu rengi
+  // yerine durum rengi kullanılır — artış=kötü/kırmızı, azalış=iyi/yeşil
+  // (sitedeki KPI karolarıyla aynı kural, bkz. .delta.up/.down).
+  const renk = (deger) =>
+    iyiKotuRenklendir
+      ? hexOpaklikEkle(cssDegisken(deger >= 0 ? "--kotu" : "--iyi"), 0.85)
+      : hexOpaklikEkle(cssDegisken("--seri-vurgu"), 0.85);
 
   new Chart(ctx, {
     type: "bar",
@@ -276,7 +285,7 @@ function cubukKartiOlustur({ canvasId, etiketler, degerler, birim }) {
       datasets: [
         {
           data: degerler,
-          backgroundColor: hexOpaklikEkle(cssDegisken("--seri-vurgu"), 0.85),
+          backgroundColor: degerler.map(renk),
           borderRadius: 4,
           barThickness: 16,
         },

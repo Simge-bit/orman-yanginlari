@@ -33,6 +33,21 @@
       ülkeler erken yıllarda EFFIS'e veri bildirmemiştir (grafikte boşluk
       olarak görünür).
     </p>
+
+    <h2>Ülkelerin Kendi Zaman İçindeki Eğilimi</h2>
+    <p class="aciklama" id="egim-aciklama"></p>
+    <div class="chart-karti">
+      <canvas id="grafik-ulke-egim"></canvas>
+      <details class="tablo-goster" id="tablo-ulke-egim">
+        <summary>Tabloyu göster</summary>
+      </details>
+    </div>
+    <p class="kaynak-notu">
+      Her ülkenin kendi veri bulunan yıllarına göre doğrusal eğilim (basit
+      doğrusal regresyon eğimi); ülkeler arasında kapsanan yıl aralığı farklı
+      olabileceği için birebir kıyaslama değil, yön (artıyor/azalıyor)
+      göstergesidir — bkz. <a href="metodoloji.html">Metodoloji</a>.
+    </p>
   </main>
 
   <div id="site-footer"></div>
@@ -42,7 +57,7 @@
   <script src="assets/js/charts.js"></script>
   <script>
     async function karsilastirmayiCiz() {
-      const { ulkeler } = await veriYukle("karsilastirma");
+      const { ulkeler, ulke_egimleri: ulkeEgimleri } = await veriYukle("karsilastirma");
 
       const yillar = [...new Set(ulkeler.map((s) => s.yil))].sort((a, b) => a - b);
       const ulkeAdlari = [...new Set(ulkeler.map((s) => s.ulke))];
@@ -71,6 +86,39 @@
         basliklar: ["Yıl", ...ulkeAdlari],
         satirlar: yillar.map((yil, i) => [yil, ...seriler.map((s) => (s.data[i] == null ? "—" : sayiFormatla(s.data[i])))]),
       });
+
+      const siraliEgimler = [...ulkeEgimleri].sort((a, b) => b.egim_ha_yil - a.egim_ha_yil);
+      cubukKartiOlustur({
+        canvasId: "grafik-ulke-egim",
+        etiketler: siraliEgimler.map((e) => e.ulke),
+        degerler: siraliEgimler.map((e) => e.egim_ha_yil),
+        birim: "ha/yıl",
+        iyiKotuRenklendir: true,
+      });
+      tabloOlustur({
+        detailsId: "tablo-ulke-egim",
+        basliklar: ["Ülke", "Kapsam", "Veri yılı sayısı", "Eğim (ha/yıl)"],
+        satirlar: siraliEgimler.map((e) => [e.ulke, e.kapsam, e.veri_yil_sayisi, egimIsaretli(e.egim_ha_yil)]),
+      });
+
+      const turkiyeEgim = ulkeEgimleri.find((e) => e.ulke === "Türkiye");
+      const digerleri = ulkeEgimleri.filter((e) => e.ulke !== "Türkiye");
+      const dahaHizliArtan = digerleri.filter((e) => e.egim_ha_yil > turkiyeEgim.egim_ha_yil);
+      const azalanlar = digerleri.filter((e) => e.egim_ha_yil < 0);
+      const yon = turkiyeEgim.egim_ha_yil >= 0 ? "artıyor" : "azalıyor";
+      let egilimMetni =
+        `Türkiye'nin yanan alanı (${turkiyeEgim.kapsam}) yılda ortalama ${egimIsaretli(turkiyeEgim.egim_ha_yil)} ${yon}. `;
+      if (dahaHizliArtan.length) {
+        egilimMetni += `Karşılaştırma grubunda ${dahaHizliArtan.map((e) => e.ulke).join(", ")} Türkiye'den daha hızlı artıyor. `;
+      }
+      if (azalanlar.length) {
+        egilimMetni += `${azalanlar.map((e) => e.ulke).join(", ")} ise zamanla azalma eğiliminde.`;
+      }
+      document.getElementById("egim-aciklama").textContent = egilimMetni;
+    }
+
+    function egimIsaretli(deger) {
+      return `${deger > 0 ? "+" : ""}${sayiFormatla(deger, 0)} ha/yıl`;
     }
 
     document.addEventListener("DOMContentLoaded", karsilastirmayiCiz);

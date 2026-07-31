@@ -155,7 +155,8 @@
 
       const kor = cografi.orman_kaplama_korelasyonu;
       document.getElementById("korelasyon-notu").textContent =
-        `Bulgu: orman kaplama oranı ile yoğunluk indeksi arasında r=${sayiFormatla(kor.pearson_r, 2)} (${kor.il_sayisi} il, 2024). ${kor.aciklama}`;
+        `Bulgu: orman kaplama oranı ile yoğunluk indeksi arasında r=${sayiFormatla(kor.pearson_r, 2)}, ` +
+        `p=${sayiFormatla(kor.p_degeri, 3)} (${kor.il_sayisi} il, 2024). ${kor.aciklama}`;
       saciliminOlustur({
         canvasId: "grafik-korelasyon",
         noktalar: cografi.iller

@@ -125,9 +125,9 @@
       document.getElementById("rapor-cografi-il").textContent =
         `İl bazında yayınlanmış en güncel resmi veri ${cografi.yil}'e ait. O yıl en çok yanan il ` +
         `${ilkIller[0].il} (${sayiFormatla(ilkIller[0].yanan_alan_ha)} ha) oldu, onu ${ilkIller[1].il} ve ` +
-        `${ilkIller[2].il} izledi. Orman kaplama oranı ile yangın yoğunluğu arasında anlamlı bir ilişki ` +
-        `bulunmadı (r=${sayiFormatla(kor.pearson_r, 2)}, ${kor.il_sayisi} il) — yani daha ormanlık iller orantılı ` +
-        `olarak daha çok yanmıyor.`;
+        `${ilkIller[2].il} izledi. Orman kaplama oranı ile yangın yoğunluğu arasındaki ilişki istatistiksel olarak ` +
+        `${kor.anlamli_mi ? "anlamlı" : "anlamlı değil"} (r=${sayiFormatla(kor.pearson_r, 2)}, ` +
+        `p=${sayiFormatla(kor.p_degeri, 3)}, ${kor.il_sayisi} il)${kor.anlamli_mi ? "" : " — yani daha ormanlık iller orantılı olarak daha çok yanmıyor"}.`;
 
       const ilkBolge = [...cografi.bolge_2025.bolgeler].sort((a, b) => a.sira_alan - b.sira_alan)[0];
       const ilkKasitBolge = [...cografi.bolge_2025.kasit_orani_siralama.bolgeler].sort(
@@ -144,10 +144,23 @@
       const ortalamaSira = turkiyeSatirlari.reduce((t, u) => t + u.sira_alan, 0) / turkiyeSatirlari.length;
       const yillar = karsilastirma.ulkeler.map((u) => u.yil);
       const ulkeAdlari = [...new Set(karsilastirma.ulkeler.map((u) => u.ulke))].filter((u) => u !== "Türkiye");
+      const turkiyeEgim = karsilastirma.ulke_egimleri.find((e) => e.ulke === "Türkiye");
+      const azalanUlkeler = karsilastirma.ulke_egimleri.filter((e) => e.ulke !== "Türkiye" && e.egim_ha_yil < 0);
+      const dahaHizliArtanUlkeler = karsilastirma.ulke_egimleri.filter(
+        (e) => e.ulke !== "Türkiye" && e.egim_ha_yil > turkiyeEgim.egim_ha_yil
+      );
       document.getElementById("rapor-karsilastirma").textContent =
         `EFFIS/Copernicus verisine göre Türkiye, karşılaştırma grubundaki 5 Akdeniz ülkesi (Türkiye, ` +
         `${ulkeAdlari.join(", ")}) arasında yanan alan bakımından ortalama sırası ${sayiFormatla(ortalamaSira, 1)} ` +
-        `(${Math.min(...yillar)}-${Math.max(...yillar)} arası, 1. sıra en çok yanan ülkeyi gösterir).`;
+        `(${Math.min(...yillar)}-${Math.max(...yillar)} arası, 1. sıra en çok yanan ülkeyi gösterir). Türkiye'nin ` +
+        `kendi yanan alan serisi (${turkiyeEgim.kapsam}) yılda ortalama ${turkiyeEgim.egim_ha_yil > 0 ? "+" : ""}` +
+        `${sayiFormatla(turkiyeEgim.egim_ha_yil, 0)} hektar ${turkiyeEgim.egim_ha_yil >= 0 ? "artış" : "azalış"} ` +
+        `eğiliminde` +
+        (azalanUlkeler.length
+          ? `; buna karşın ${azalanUlkeler.map((e) => e.ulke).join(", ")} zamanla azalma eğiliminde` +
+            (dahaHizliArtanUlkeler.length ? `, sadece ${dahaHizliArtanUlkeler.map((e) => e.ulke).join(", ")} Türkiye'den daha hızlı artıyor` : "")
+          : "") +
+        `.`;
 
       // --- Kaynaklar ---
       const istatistikselKaynaklar = metodoloji.kaynaklar.filter(

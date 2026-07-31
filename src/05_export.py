@@ -102,12 +102,16 @@ def export_cografi():
         "iller": kayitlar,
         "orman_kaplama_korelasyonu": {
             "pearson_r": float(korelasyon["pearson_r"]),
+            "p_degeri": float(korelasyon["p_degeri"]),
+            "anlamli_mi": bool(korelasyon["anlamli_mi"]),
             "il_sayisi": int(korelasyon["il_sayisi"]),
             "aciklama": (
-                "Orman kaplama oranı (%) ile yangın yoğunluk indeksi arasındaki "
-                "Pearson korelasyon katsayısı. |r| < 0,3 zayıf/anlamsız bir ilişki "
-                "olduğunu gösterir — yani daha ormanlık iller orantılı olarak daha "
-                "çok yanmıyor; konum, iklim ve insan etkeni daha belirleyici olabilir."
+                "Orman kaplama oranı (%) ile yangın yoğunluk indeksi arasındaki Pearson "
+                "korelasyon katsayısı ve anlamlılık testi (p-değeri, α=0,05). "
+                + ("İstatistiksel olarak anlamlı bir ilişki bulundu." if korelasyon["anlamli_mi"]
+                   else "İlişki istatistiksel olarak anlamlı değil — yani daha ormanlık iller "
+                        "orantılı olarak daha çok yanmıyor; konum, iklim ve insan etkeni daha "
+                        "belirleyici olabilir.")
             ),
         },
         "bolge_2025": {
@@ -154,7 +158,13 @@ def export_karsilastirma():
     kolonlar = ["yil", "ulke", "yanan_alan_ha", "yangin_sayisi", "ortalama_buyukluk_ha", "alan_payi_yuzde", "sira_alan"]
     df["yil"] = df["yil"].astype(int)
     kayitlar = json.loads(df[kolonlar].where(df[kolonlar].notna(), None).to_json(orient="records"))
-    _yaz("karsilastirma", {"ulkeler": kayitlar})
+
+    egim_df = pd.read_csv(data_path("interim", "ulke_egim.csv")).sort_values("egim_ha_yil", ascending=False)
+    egim_kayitlar = json.loads(
+        egim_df[["ulke", "kapsam", "veri_yil_sayisi", "egim_ha_yil"]].round(1).to_json(orient="records")
+    )
+
+    _yaz("karsilastirma", {"ulkeler": kayitlar, "ulke_egimleri": egim_kayitlar})
 
 
 def export_metodoloji(config: dict):
@@ -178,8 +188,10 @@ def export_metodoloji(config: dict):
             {"id": "alan_payi_yuzde", "tanim": "Ülkenin, o yıl karşılaştırma grubundaki (5 ülke) toplam yanan alan içindeki payı", "birim": "%"},
             {"id": "yogunlasma.orani_yuzde", "tanim": "En kötü 5 yılın, tüm dönemin toplam yanan alanı içindeki payı", "birim": "%"},
             {"id": "orman_kaplama_korelasyonu.pearson_r", "tanim": "İl bazında orman kaplama oranı (%) ile yoğunluk indeksi arasındaki Pearson korelasyon katsayısı", "birim": "-1 ile 1 arası"},
+            {"id": "orman_kaplama_korelasyonu.p_degeri", "tanim": "Pearson korelasyonunun anlamlılık testi (iki yönlü); p < 0,05 istatistiksel olarak anlamlı kabul edilir (α=0,05)", "birim": "0 ile 1 arası"},
             {"id": "kasit_orani_siralama.kasit_alan_oran / kasit_sayi_oran", "tanim": "Bölge müdürlüğü başına kasıt (kundaklama) kaynaklı yangınların payı, en az 15 yangınlık bölgeler arasında", "birim": "%"},
             {"id": "nedenler.egim.*_oran_egimi_puan_yil", "tanim": "Neden kategorisinin (kasıt/ihmal-kaza/doğal/bilinmeyen) yıllık payındaki doğrusal eğilim (basit doğrusal regresyon eğimi)", "birim": "yüzde puan/yıl"},
+            {"id": "ulke_egimleri.egim_ha_yil", "tanim": "Ülkenin kendi yanan alan serisindeki doğrusal eğilim (basit doğrusal regresyon eğimi); pozitif değer artış, negatif değer azalış gösterir", "birim": "hektar/yıl"},
         ],
         "kapsam": {
             "yil_araligi": gercek_yil_araligi,
@@ -197,6 +209,7 @@ def export_metodoloji(config: dict):
             "EFFIS ülke karşılaştırmasında bazı ülkeler erken yıllarda (1980'ler) veri bildirmemiş; grafikte ve tabloda bu yıllar boşluk olarak görünür.",
             "Bölge müdürlüğü bazında 2025 neden kırılımı (Ek 6), ulusal tablonun 4 kategorisinden farklı olarak İhmal ve Kaza'yı ayrı sütunlarda veriyor; siteyle tutarlı olsun diye ikisi 'ihmal_kaza' olarak toplanıyor. Kasıt oranı sıralaması, tesadüfen çarpık oran çıkmasın diye en az 15 yangınlık bölgelerle sınırlı.",
             "Orman kaplama % ile yoğunluk indeksi arasındaki korelasyon sadece 2024 kesitinde (81 il, tek yıl) hesaplandı — zaman içindeki değişimi yakalamaz, sadece o yılki iller-arası ilişkiyi gösterir.",
+            "Ülke eğimleri (ulke_egimleri), her ülkenin kendi veri bulunan yıllarına göre hesaplandı; bazı ülkeler erken yıllarda EFFIS'e veri bildirmediği için ülkeler arasında kapsanan yıl sayısı farklı olabilir (en az 5 yıllık veri şartı arandı). Bu yüzden eğimler doğrudan aynı yıl aralığına göre birebir kıyaslanabilir değildir.",
             "Neden payı eğilimi (nedenler.egim) tek bir doğrusal eğim özetidir; yıldan yıla dalgalanmayı veya eğilimin yön değiştirdiği dönemleri yakalamaz. Sadece neden kırılımı yayınlanan yıllar (1997+) dahil edildi.",
             "Tüm istatistiksel rakamlar (yangın sayısı, alan, oran) birincil/resmi kaynaklardan (OGM, EFFIS) gelir; haber/blog/STK derlemesi istatistik kaynağı olarak alınmadı. Canlı harita katmanı (NASA FIRMS) ve yer adı etiketleme (OpenStreetMap Nominatim) bu kuralın istisnası değil ama farklı bir kategoridir: ilki ham gözlem verisi, ikincisi sadece görüntüleme amaçlı yer-adı sorgusu — hiçbiri istatistiksel bir iddia taşımıyor.",
         ],
