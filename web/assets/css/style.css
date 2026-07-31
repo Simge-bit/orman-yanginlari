@@ -225,6 +225,19 @@ table.veri-tablosu td:first-child { text-align: left; }
   display: inline-block;
 }
 
+/* Sadece "taze" (≤12 saat) canlı sıcak nokta kümeleri yanıp söner — eskiyen
+   kümeler de yanıp sönerse rengin taşıdığı "daha az güncel" sinyali kaybolur. */
+@keyframes sicak-nokta-nabiz-anim {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.sicak-nokta-nabiz {
+  animation: sicak-nokta-nabiz-anim 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sicak-nokta-nabiz { animation: none; }
+}
+
 .yakinda-kutusu {
   border: 1px dashed var(--kenar);
   border-radius: 10px;

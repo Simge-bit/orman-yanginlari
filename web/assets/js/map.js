@@ -98,9 +98,11 @@ async function haritayiCiz({ containerId, legendId }) {
 // soluk göstererek kesinlik iddia etmeden bir sinyal veriyoruz.
 function _kumeStili(nokta) {
   const saat = nokta.en_yeni_saat_once;
-  if (saat == null || saat <= 12) return { renk: "#d03b3b", opaklik: 0.9, agirlik: 1 };
-  if (saat <= 36) return { renk: "#e37b5a", opaklik: 0.6, agirlik: 1 };
-  return { renk: "#e3a58a", opaklik: 0.35, agirlik: 0.75 };
+  // Sadece "taze" katman nabız atar — eskiyen kümeler de yanıp sönerse
+  // rengin taşıdığı "bu daha az güncel" sinyali kaybolur.
+  if (saat == null || saat <= 12) return { renk: "#d03b3b", opaklik: 0.9, agirlik: 1, nabiz: true };
+  if (saat <= 36) return { renk: "#e37b5a", opaklik: 0.6, agirlik: 1, nabiz: false };
+  return { renk: "#e3a58a", opaklik: 0.35, agirlik: 0.75, nabiz: false };
 }
 
 async function canliSicakNoktalariEkle({ harita, freshnessId, ilOzetiId }) {
@@ -125,6 +127,7 @@ async function canliSicakNoktalariEkle({ harita, freshnessId, ilOzetiId }) {
       weight: stil.agirlik,
       fillColor: stil.renk,
       fillOpacity: stil.opaklik,
+      className: stil.nabiz ? "sicak-nokta-nabiz" : "",
     })
       .bindTooltip(
         `<strong>${nokta.yer ? `${nokta.yer}, ${nokta.il}` : nokta.il || "Konum belirlenemedi"}</strong><br>` +
