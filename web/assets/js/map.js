@@ -114,7 +114,7 @@ async function canliSicakNoktalariEkle({ harita, freshnessId, ilOzetiId }) {
       fillOpacity: 0.85,
     })
       .bindTooltip(
-        `<strong>${nokta.il || "İl belirlenemedi"}</strong><br>` +
+        `<strong>${nokta.yer ? `${nokta.yer}, ${nokta.il}` : nokta.il || "Konum belirlenemedi"}</strong><br>` +
           `Tespit: ${nokta.acq_date} ${String(nokta.acq_time).padStart(4, "0").replace(/(\d{2})(\d{2})/, "$1:$2")} UTC<br>` +
           `Güven: ${nokta.confidence === "h" ? "yüksek" : nokta.confidence === "n" ? "nominal" : nokta.confidence}` +
           (nokta.frp != null ? `<br>Radyatif güç: ${nokta.frp} MW` : "")

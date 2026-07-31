@@ -10,10 +10,19 @@ sunucu tarafında (CI) çekilip statik JSON'a gömülüyor.
 Gerekli: FIRMS_MAP_KEY ortam değişkeni (ücretsiz anahtar:
 https://firms.modaps.eosdis.nasa.gov/api/map_key/). Anahtar yoksa script
 sessizce atlanır (yerel geliştirmede bu adımı zorunlu kılmamak için).
+
+İl adı kendi tr_iller.geojson'umuzdan (nokta-içinde-poligon) geliyor — bu
+her zaman çalışır. İlçe/köy adı için OpenStreetMap Nominatim'in ücretsiz
+reverse-geocoding servisi kullanılıyor; bu servisin kullanım politikası
+saniyede en fazla 1 istek ve tanımlayıcı bir User-Agent gerektiriyor, bu
+yüzden yakın noktalar (aynı ~1km hücre) tek sorguda gruplanıyor ve toplam
+sorgu sayısı sabit bir tavanla sınırlanıyor — büyük bir yangında yüzlerce
+nokta gelse bile servise aşırı yüklenilmiyor.
 """
 import json
 import os
 import shutil
+import time
 from datetime import datetime, timezone
 from io import StringIO
 
@@ -28,6 +37,13 @@ TURKIYE_BBOX = "25,35,45,43"  # west,south,east,north — Türkiye + yakın çev
 KAYNAK_SENSORU = "VIIRS_SNPP_NRT"
 GUN_ARALIGI = 1
 DUSUK_GUVEN_HARIC = True  # VIIRS confidence='l' (low) kayıtlarını çıkar
+
+NOMINATIM_KULLANICI_ARACI = "orman-yanginlari-site/1.0 (kisisel/politik veri sitesi; iletisim: repo issue)"
+NOMINATIM_MAX_SORGU = 60  # aşırı yangın günlerinde bile Nominatim'e nazik davranmak için tavan
+NOMINATIM_HUCRE_ONDALIK = 2  # ~1.1 km — yakın noktaları tek sorguda grupla
+
+KOY_ALANLARI = ["hamlet", "village", "neighbourhood", "suburb", "quarter"]
+ILCE_ALANLARI = ["town", "municipality", "city_district", "county"]
 
 
 def _yaz(veri: dict) -> None:
@@ -58,6 +74,46 @@ def _il_bul(nokta: Point, il_poligonlari) -> str:
         if en_yakin_mesafe is None or mesafe < en_yakin_mesafe:
             en_yakin_il, en_yakin_mesafe = il_adi, mesafe
     return en_yakin_il
+
+
+def _yer_metni(address: dict) -> str | None:
+    koy = next((address[a] for a in KOY_ALANLARI if a in address), None)
+    ilce = next((address[a] for a in ILCE_ALANLARI if a in address), None)
+    parcalar = [p for p in [koy, ilce] if p]
+    return ", ".join(parcalar) if parcalar else None
+
+
+def _ilce_koy_bul(lat: float, lon: float) -> str | None:
+    try:
+        yanit = requests.get(
+            "https://nominatim.openstreetmap.org/reverse",
+            params={"lat": lat, "lon": lon, "format": "jsonv2", "accept-language": "tr", "zoom": 14},
+            headers={"User-Agent": NOMINATIM_KULLANICI_ARACI},
+            timeout=10,
+        )
+        if not yanit.ok:
+            return None
+        return _yer_metni(yanit.json().get("address", {}))
+    except requests.RequestException:
+        return None
+
+
+def _ilce_koy_ekle(noktalar: list[dict]) -> None:
+    hucreler: dict[tuple, str | None] = {}
+    sorgu_sayaci = 0
+
+    for nokta in noktalar:
+        hucre = (round(nokta["latitude"], NOMINATIM_HUCRE_ONDALIK), round(nokta["longitude"], NOMINATIM_HUCRE_ONDALIK))
+        if hucre not in hucreler:
+            if sorgu_sayaci >= NOMINATIM_MAX_SORGU:
+                hucreler[hucre] = None
+                continue
+            hucreler[hucre] = _ilce_koy_bul(nokta["latitude"], nokta["longitude"])
+            sorgu_sayaci += 1
+            time.sleep(1)  # Nominatim kullanım politikası: saniyede en fazla 1 istek
+        nokta["yer"] = hucreler[hucre]
+
+    print(f"[hotspots] {sorgu_sayaci} benzersiz konum Nominatim'e soruldu ({len(noktalar)} nokta için)")
 
 
 def main():
@@ -100,6 +156,9 @@ def main():
                 "frp": float(satir["frp"]) if "frp" in satir and pd.notna(satir["frp"]) else None,
                 "il": _il_bul(nokta, il_poligonlari),
             })
+
+    if noktalar:
+        _ilce_koy_ekle(noktalar)
 
     _yaz({
         "guncelleme_zamani": guncelleme_zamani,

@@ -116,6 +116,19 @@ JSON olarak gömülüyor. Cografi sayfasında 2024 choropleth'inden ayrı,
 açıkça "canlı/son 24 saat" etiketiyle gösteriliyor — iki katman farklı
 zaman dilimlerini temsil ediyor, karıştırılmamalı.
 
+Her noktanın il adı kendi `tr_iller.geojson`'umuzdan (nokta-içinde-poligon,
+her zaman güvenilir). İlçe/köy adı ise OpenStreetMap Nominatim'in ücretsiz
+reverse-geocoding servisinden (https://nominatim.openstreetmap.org) —
+bu, resmi bir istatistik kaynağı değil, sadece "bu koordinat nerede"
+sorusuna cevap veren bir yer-adı servisi; VIIRS'in ~375m piksel
+çözünürlüğü nedeniyle zaten yaklaşık bir konum, ilçe/köy adı da buna göre
+"en yakın yerleşim" olarak okunmalı, kesin nokta olarak değil. Nominatim'in
+kullanım politikasına uymak için yakın noktalar (~1km hücre) tek sorguda
+gruplanıyor ve toplam sorgu sayısı 60 ile sınırlanıyor (bkz.
+src/fetch_hotspots.py NOMINATIM_MAX_SORGU) — büyük bir yangın günü
+yüzlerce nokta gelse bile servise aşırı yüklenilmiyor, sınırı aşan
+noktalar için sadece il adı gösterilir.
+
 ## İkincil kaynaklar kullanılmıyor
 
 Bilinçli karar: haber sitesi, blog ve dernek/STK derlemesi gibi ikincil
