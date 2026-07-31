@@ -17,7 +17,11 @@ def load_config(path: str = "config.yaml") -> dict:
 
 
 def data_path(*parts: str) -> Path:
-    return ROOT.joinpath("data", *parts)
+    # data/interim ve data/processed .gitignore'da (üretilir, saklanmaz),
+    # yani temiz bir clone'da bu klasörler hiç yok — burada garanti ediyoruz.
+    path = ROOT.joinpath("data", *parts)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 def standardize_il(name: str) -> str:
