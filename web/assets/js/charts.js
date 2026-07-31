@@ -108,6 +108,130 @@ function cizgiKartiOlustur({ canvasId, yillar, hamDeger, maDeger, hamEtiket, maE
   });
 }
 
+function hexOpaklikEkle(hex, opaklik) {
+  const temiz = hex.replace("#", "");
+  const r = parseInt(temiz.substring(0, 2), 16);
+  const g = parseInt(temiz.substring(2, 4), 16);
+  const b = parseInt(temiz.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${opaklik})`;
+}
+
+// %100'e tamamlanan yığılmış alan grafiği — neden kategorisi payları (part-to-whole).
+// Kategorik renkler style.css'teki --kategori-1..4 (dataviz skill validate_palette.js ile
+// doğrulandı). Katmanlar arasında yüzey renginde ince bir çizgi (2px "surface gap") var.
+function yiginKartiOlustur({ canvasId, yillar, seriler }) {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+
+  const datasets = seriler.map((seri, i) => ({
+    label: seri.label,
+    data: seri.data,
+    backgroundColor: hexOpaklikEkle(cssDegisken(seri.renkDegiskeni), 0.82),
+    borderColor: cssDegisken("--yuzey"),
+    borderWidth: 1,
+    pointRadius: 0,
+    tension: 0.15,
+    fill: i === 0 ? "origin" : "-1",
+  }));
+
+  new Chart(ctx, {
+    type: "line",
+    data: { labels: yillar, datasets },
+    options: {
+      responsive: true,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: {
+          position: "top",
+          align: "start",
+          labels: { color: cssDegisken("--metin-ikincil"), boxWidth: 14, boxHeight: 14 },
+        },
+        tooltip: {
+          backgroundColor: cssDegisken("--yuzey"),
+          titleColor: cssDegisken("--metin-birincil"),
+          bodyColor: cssDegisken("--metin-birincil"),
+          borderColor: cssDegisken("--kenar"),
+          borderWidth: 1,
+          padding: 10,
+          callbacks: {
+            label(context) {
+              return `${context.dataset.label}: %${new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 1 }).format(context.parsed.y)}`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: cssDegisken("--metin-soluk"), maxTicksLimit: 12 } },
+        y: {
+          stacked: true,
+          min: 0,
+          max: 100,
+          grid: { color: cssDegisken("--izgara") },
+          ticks: { color: cssDegisken("--metin-soluk"), callback: (v) => `%${v}` },
+        },
+      },
+    },
+  });
+}
+
+// "Vurgu" (emphasis) desenli çok serili çizgi grafik: bir seri (ör. Türkiye) vurgu
+// renginde ve kalın, diğerleri tek bir soluk gri tonda "bağlam" — kimlik hâlâ
+// tooltip/legend/tablo üzerinden tam olarak ulaşılabilir.
+function ulkeKartiOlustur({ canvasId, yillar, seriler }) {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+
+  const datasets = seriler.map((seri) => ({
+    label: seri.label,
+    data: seri.data,
+    borderColor: seri.vurgu ? cssDegisken("--seri-vurgu") : cssDegisken("--seri-baglam"),
+    borderWidth: seri.vurgu ? 2.5 : 1.25,
+    pointRadius: 0,
+    pointStyle: "line",
+    tension: 0.15,
+    order: seri.vurgu ? 1 : 2,
+  }));
+
+  new Chart(ctx, {
+    type: "line",
+    data: { labels: yillar, datasets },
+    options: {
+      responsive: true,
+      layout: { padding: { right: 8 } },
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: {
+          position: "top",
+          align: "start",
+          labels: { color: cssDegisken("--metin-ikincil"), usePointStyle: true, pointStyleWidth: 14 },
+        },
+        tooltip: {
+          backgroundColor: cssDegisken("--yuzey"),
+          titleColor: cssDegisken("--metin-birincil"),
+          bodyColor: cssDegisken("--metin-birincil"),
+          borderColor: cssDegisken("--kenar"),
+          borderWidth: 1,
+          padding: 10,
+          usePointStyle: true,
+          callbacks: {
+            label(context) {
+              if (context.parsed.y == null) return `${context.dataset.label}: veri yok`;
+              return `${context.dataset.label}: ${new Intl.NumberFormat("tr-TR").format(context.parsed.y)} ha`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: cssDegisken("--metin-soluk"), maxTicksLimit: 12 } },
+        y: {
+          grid: { color: cssDegisken("--izgara") },
+          ticks: { color: cssDegisken("--metin-soluk"), callback: (v) => new Intl.NumberFormat("tr-TR").format(v) },
+        },
+      },
+    },
+  });
+}
+
 // Bir <details class="tablo-goster"> içine basit bir veri tablosu basar —
 // grafiğin erişilebilir/tablo karşılığı (dataviz: "a table view exists").
 function tabloOlustur({ detailsId, basliklar, satirlar }) {

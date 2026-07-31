@@ -126,6 +126,12 @@ def export_metodoloji(config: dict):
     _yaz("metodoloji", veri)
 
 
+def export_geojson():
+    kaynak = data_path("raw", "tr_iller.geojson")
+    shutil.copy(kaynak, WEB_DATA_DIR / "tr_iller.geojson")
+    print("[export] tr_iller.geojson web/assets/data/ altına kopyalandı")
+
+
 def main():
     config = load_config()
     export_ozet()
@@ -134,6 +140,7 @@ def main():
     export_nedenler()
     export_karsilastirma()
     export_metodoloji(config)
+    export_geojson()
 
 
 if __name__ == "__main__":

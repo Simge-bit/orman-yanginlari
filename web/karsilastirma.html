@@ -12,23 +12,58 @@
   <main>
     <h1>Ülke Karşılaştırması</h1>
     <p class="aciklama">
-      Türkiye, Yunanistan, İspanya, İtalya ve Portekiz için EFFIS/Copernicus
-      verisiyle yıllık yanan alan karşılaştırması. Çok serili çizgi grafik
-      Faz 6'da eklenecek.
+      EFFIS/Copernicus verisiyle Türkiye ve dört Akdeniz ülkesinin yıllık
+      yanan alanı (hektar). Türkiye vurgu renginde, diğer ülkeler bağlam
+      olarak gri — her ülkenin kesin değeri grafiğin üzerine gelerek veya
+      alttaki tablodan görülebilir.
     </p>
 
-    <div class="yakinda-kutusu">
-      Ülke karşılaştırma grafiği yakında — veri hazır
-      (<code>karsilastirma.json</code>), görselleştirme Faz 6'da.
+    <div class="chart-karti">
+      <h3>Yıllık yanan alan (hektar)</h3>
+      <canvas id="grafik-ulke"></canvas>
+      <details class="tablo-goster" id="tablo-ulke">
+        <summary>Tabloyu göster</summary>
+      </details>
     </div>
 
     <p class="kaynak-notu">
       Kaynak: EFFIS/Copernicus, "Forest Fires in Europe, Middle East and
-      North Africa" yıllık raporu (1980-2024).
+      North Africa" yıllık raporu. Bazı ülkeler erken yıllarda EFFIS'e veri
+      bildirmemiştir (grafikte boşluk olarak görünür).
     </p>
   </main>
 
   <div id="site-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script src="assets/js/loader.js"></script>
+  <script src="assets/js/charts.js"></script>
+  <script>
+    async function karsilastirmayiCiz() {
+      const { ulkeler } = await veriYukle("karsilastirma");
+
+      const yillar = [...new Set(ulkeler.map((s) => s.yil))].sort((a, b) => a - b);
+      const ulkeAdlari = [...new Set(ulkeler.map((s) => s.ulke))];
+
+      const seriler = ulkeAdlari.map((ulke) => {
+        const kayitlar = new Map(ulkeler.filter((s) => s.ulke === ulke).map((s) => [s.yil, s.yanan_alan_ha]));
+        return {
+          label: ulke,
+          data: yillar.map((yil) => (kayitlar.has(yil) ? kayitlar.get(yil) : null)),
+          vurgu: ulke === "Türkiye",
+        };
+      });
+
+      ulkeKartiOlustur({ canvasId: "grafik-ulke", yillar, seriler });
+
+      tabloOlustur({
+        detailsId: "tablo-ulke",
+        basliklar: ["Yıl", ...ulkeAdlari],
+        satirlar: yillar.map((yil, i) => [yil, ...seriler.map((s) => (s.data[i] == null ? "—" : sayiFormatla(s.data[i])))]),
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", karsilastirmayiCiz);
+  </script>
 </body>
 </html>

@@ -103,5 +103,12 @@ Kodun içine sabit değer gömülmez.
   `nedenler.html`, `karsilastirma.html` iskelet halinde (görselleştirme
   Faz 6'da). Playwright ile masaüstü+mobil ekran görüntüleri alındı,
   6 sayfada da konsol hatası yok.
-- Sıradaki adım: Faz 6, görselleştirme — il haritası (Leaflet), neden
-  dağılımı (yığılmış alan), ülke karşılaştırması (çok serili çizgi).
+- Faz 6 — tamamlandı: `cografi.html` Leaflet choropleth haritası (il
+  yoğunluk indeksi, 5 kova, sıralı mavi skala) + en çok etkilenen 10 il
+  tablosu. `nedenler.html` iki yığılmış alan grafiği (sayı payı, alan
+  payı — 4 kategori, dataviz paletiyle doğrulanmış). `karsilastirma.html`
+  "vurgu" desenli çok serili grafik: Türkiye vurgu renginde, 4 ülke
+  bağlam grisinde. Üçü de Playwright ile masaüstü+koyu tema test edildi,
+  konsol hatası yok.
+- Sıradaki adım: Faz 7, metodoloji/kalite gözden geçirme ve Faz 8,
+  dağıtım (GitHub Pages/Netlify/Vercel).

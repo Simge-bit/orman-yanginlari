@@ -4,29 +4,63 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Türkiye Orman Yangınları — Coğrafi Dağılım</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body data-page="cografi">
   <div id="site-header"></div>
 
   <main>
-    <h1>Coğrafi Dağılım</h1>
+    <h1>Coğrafi Dağılım (2024)</h1>
     <p class="aciklama">
-      81 il için 2024 yangın sayısı, yanan alan ve orman alanına oranlanmış
-      yoğunluk indeksi. İnteraktif il haritası (Leaflet) Faz 6'da eklenecek.
+      Renk, ilin <strong>yoğunluk indeksini</strong> gösterir: 2024'te yanan
+      alanın, o ilin toplam orman alanına oranı. Yalnızca yanan hektara
+      bakmak büyük ama ormanı az olan illeri yanıltıcı şekilde öne
+      çıkarabilir — oranlama bunu düzeltir.
     </p>
 
-    <div class="yakinda-kutusu">
-      Harita ve il sıralaması yakında — veri hazır (<code>cografi.json</code>),
-      görselleştirme Faz 6'da.
+    <div class="chart-karti">
+      <div id="il-haritasi"></div>
+      <div id="harita-legend" class="harita-legend"></div>
     </div>
 
+    <h2>En çok etkilenen 10 il (yanan alan)</h2>
+    <div id="tablo-il-siralama"></div>
+
     <p class="kaynak-notu">
-      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.14 (sadece 2024).
+      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.14 (il bazında,
+      sadece 2024) ve Tablo 1.6 (il orman alanı referansı). Çok yıllı il
+      serisi mevcut değil.
     </p>
   </main>
 
   <div id="site-footer"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="assets/js/loader.js"></script>
+  <script src="assets/js/charts.js"></script>
+  <script src="assets/js/map.js"></script>
+  <script>
+    async function ciz() {
+      await haritayiCiz({ containerId: "il-haritasi", legendId: "harita-legend" });
+
+      const cografi = await veriYukle("cografi");
+      const ilk10 = [...cografi.iller].sort((a, b) => a.sira_alan - b.sira_alan).slice(0, 10);
+
+      tabloOlustur({
+        detailsId: "tablo-il-siralama",
+        basliklar: ["#", "İl", "Yangın sayısı", "Yanan alan (ha)", "Yoğunluk indeksi (%)"],
+        satirlar: ilk10.map((il) => [
+          il.sira_alan,
+          il.il,
+          sayiFormatla(il.yangin_sayisi),
+          sayiFormatla(il.yanan_alan_ha),
+          sayiFormatla(il.yogunluk_indeksi_yuzde, 2),
+        ]),
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", ciz);
+  </script>
 </body>
 </html>

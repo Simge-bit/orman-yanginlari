@@ -10,15 +10,29 @@
   <div id="site-header"></div>
 
   <main>
-    <h1>Çıkış Nedenleri</h1>
+    <h1>Çıkış Nedenleri (1997-2024)</h1>
     <p class="aciklama">
-      1997-2024 arası kasıt, ihmal-kaza, doğal (yıldırım) ve nedeni bilinmeyen
-      yangınların yıllara göre payı. Yığılmış alan grafiği Faz 6'da eklenecek.
+      Kasıt, ihmal-kaza, doğal (yıldırım) ve nedeni bilinmeyen yangınların
+      yıllara göre payı. Yangın <strong>sayısı</strong> ile yanan
+      <strong>alan</strong> farklı taban olduğu için ayrı grafiklerde
+      gösteriliyor — sayıca az ama büyük yangınlar iki grafiği
+      birbirinden ayırabilir.
     </p>
 
-    <div class="yakinda-kutusu">
-      Neden dağılımı grafiği yakında — veri hazır (<code>nedenler.json</code>),
-      görselleştirme Faz 6'da.
+    <div class="chart-karti">
+      <h3>Yangın sayısına göre neden payı</h3>
+      <canvas id="grafik-neden-sayi"></canvas>
+      <details class="tablo-goster" id="tablo-neden-sayi">
+        <summary>Tabloyu göster</summary>
+      </details>
+    </div>
+
+    <div class="chart-karti">
+      <h3>Yanan alana göre neden payı</h3>
+      <canvas id="grafik-neden-alan"></canvas>
+      <details class="tablo-goster" id="tablo-neden-alan">
+        <summary>Tabloyu göster</summary>
+      </details>
     </div>
 
     <p class="kaynak-notu">
@@ -28,6 +42,54 @@
   </main>
 
   <div id="site-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script src="assets/js/loader.js"></script>
+  <script src="assets/js/charts.js"></script>
+  <script>
+    const NEDEN_TANIMLARI = [
+      { anahtar: "kasit", etiket: "Kasıt", renk: "--kategori-1" },
+      { anahtar: "ihmal_kaza", etiket: "İhmal-Kaza", renk: "--kategori-2" },
+      { anahtar: "dogal", etiket: "Doğal (yıldırım)", renk: "--kategori-3" },
+      { anahtar: "bilinmeyen", etiket: "Bilinmeyen", renk: "--kategori-4" },
+    ];
+
+    async function nedenleriCiz() {
+      const { yillik } = await veriYukle("nedenler");
+      const yillar = yillik.map((s) => s.yil);
+
+      yiginKartiOlustur({
+        canvasId: "grafik-neden-sayi",
+        yillar,
+        seriler: NEDEN_TANIMLARI.map((n) => ({
+          label: n.etiket,
+          data: yillik.map((s) => s[`${n.anahtar}_sayi_oran`]),
+          renkDegiskeni: n.renk,
+        })),
+      });
+      tabloOlustur({
+        detailsId: "tablo-neden-sayi",
+        basliklar: ["Yıl", ...NEDEN_TANIMLARI.map((n) => n.etiket)],
+        satirlar: yillik.map((s) => [s.yil, ...NEDEN_TANIMLARI.map((n) => `%${sayiFormatla(s[`${n.anahtar}_sayi_oran`], 1)}`)]),
+      });
+
+      yiginKartiOlustur({
+        canvasId: "grafik-neden-alan",
+        yillar,
+        seriler: NEDEN_TANIMLARI.map((n) => ({
+          label: n.etiket,
+          data: yillik.map((s) => s[`${n.anahtar}_alan_oran`]),
+          renkDegiskeni: n.renk,
+        })),
+      });
+      tabloOlustur({
+        detailsId: "tablo-neden-alan",
+        basliklar: ["Yıl", ...NEDEN_TANIMLARI.map((n) => n.etiket)],
+        satirlar: yillik.map((s) => [s.yil, ...NEDEN_TANIMLARI.map((n) => `%${sayiFormatla(s[`${n.anahtar}_alan_oran`], 1)}`)]),
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", nedenleriCiz);
+  </script>
 </body>
 </html>

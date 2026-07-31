@@ -18,6 +18,12 @@
   /* Chart tokenleri (references/palette.md) */
   --seri-vurgu: #2a78d6;   /* kategorik slot 1 - hareketli ortalama */
   --seri-baglam: #c3c2b7;  /* yıllık ham değer - gri, "bağlam" */
+
+  /* Kategorik palet (neden kırılımı, 4 seri) - validate_palette.js ile doğrulandı */
+  --kategori-1: #2a78d6; /* mavi - kasıt */
+  --kategori-2: #eb6834; /* turuncu - ihmal-kaza */
+  --kategori-3: #1baf7a; /* aqua - doğal */
+  --kategori-4: #eda100; /* sarı - bilinmeyen */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,6 +44,11 @@
 
     --seri-vurgu: #3987e5;
     --seri-baglam: #383835;
+
+    --kategori-1: #3987e5;
+    --kategori-2: #d95926;
+    --kategori-3: #199e70;
+    --kategori-4: #c98500;
   }
 }
 
@@ -188,6 +199,31 @@ table.veri-tablosu td {
 }
 table.veri-tablosu th:first-child,
 table.veri-tablosu td:first-child { text-align: left; }
+
+#il-haritasi {
+  height: 480px;
+  border-radius: 8px;
+}
+
+.harita-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.2rem;
+  margin-top: 0.8rem;
+  font-size: 0.82rem;
+  color: var(--metin-ikincil);
+}
+.legend-satiri {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.legend-kutusu {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  display: inline-block;
+}
 
 .yakinda-kutusu {
   border: 1px dashed var(--kenar);
