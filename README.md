@@ -4,6 +4,8 @@ Türkiye'deki orman yangınlarına dair kamuya açık verilerin (OGM, EFFIS, TÜ
 temizlenip analiz edildiği ve sonuçların statik bir çok sayfalı web sitesinde
 sunulduğu proje.
 
+**Canlı site:** https://simge-bit.github.io/orman-yanginlari/
+
 ## Mimari
 
 Üç katman, tek yönlü akış:
@@ -118,4 +120,15 @@ Kodun içine sabit değer gömülmez.
   EFFIS'in erken yıl veri boşluğu ve `ma_*` metrik ailesinin tam tanımı
   eklendi. HTML'de hardcoded istatistik olmadığı doğrulandı (tüm sayılar
   JSON'dan geliyor).
-- Sıradaki adım: Faz 8, dağıtım (GitHub Pages/Netlify/Vercel).
+- Faz 8 — tamamlandı: GitHub'da public repo (`Simge-bit/orman-yanginlari`)
+  oluşturuldu, GitHub Pages "GitHub Actions" kaynağıyla etkinleştirildi.
+  `.github/workflows/pages.yml` her `main` push'unda pipeline'ı çalıştırıp
+  testleri geçirip `web/`'i yayınlıyor. CI'da bir gerçek hata bulundu ve
+  düzeltildi: `data/interim`/`data/processed` .gitignore'da olduğu için
+  temiz bir clone'da hiç yoktu, `utils.py`'nin `data_path()`'i artık
+  yazmadan önce klasörü oluşturuyor. Site canlıda Playwright ile uçtan
+  uca test edildi, 6 sayfa da hatasız.
+
+Proje tamamlandı: veri toplamadan (Faz 1) canlı siteye (Faz 8) kadar tüm
+fazlar bitti. Veri güncellemek için `data/raw/`'ı değiştirip `main`'e push
+yeterli — CI pipeline'ı otomatik çalıştırıp siteyi günceller.
