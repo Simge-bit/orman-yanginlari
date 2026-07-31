@@ -244,6 +244,40 @@ table.veri-tablosu td:first-child { text-align: left; }
   .sicak-nokta-nabiz { animation: none; }
 }
 
+.rapor-eylemler { margin: 1rem 0 1.5rem; }
+.pdf-buton {
+  background: var(--marka);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.pdf-buton:hover { background: var(--marka-koyu); }
+
+.rapor-bolum { margin: 1.75rem 0; }
+.rapor-bolum p.aciklama { max-width: 72ch; }
+
+/* Yazdır/PDF olarak kaydet: gezinme ve etkileşim öğeleri gizlenir, tema
+   ne olursa olsun mürekkep dostu açık zemine sabitlenir. */
+@media print {
+  header.site-header nav,
+  footer.site-footer,
+  .rapor-eylemler {
+    display: none !important;
+  }
+  body, header.site-header {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  header.site-header a,
+  a { color: #000 !important; }
+  main { max-width: 100%; }
+}
+
 .metodoloji-liste { padding-left: 1.1rem; }
 .metodoloji-liste li { margin-bottom: 0.6rem; }
 .kaynak-karti {

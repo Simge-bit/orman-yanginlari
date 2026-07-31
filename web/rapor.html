@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Türkiye Orman Yangınları — Rapor</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body data-page="rapor">
+  <div id="site-header"></div>
+
+  <main>
+    <h1>Rapor: Türkiye Orman Yangınları</h1>
+    <p class="aciklama" id="rapor-kapsam-notu">Yükleniyor…</p>
+
+    <div class="rapor-eylemler">
+      <button id="pdf-indir" class="pdf-buton" type="button">📄 PDF olarak indir</button>
+    </div>
+
+    <section class="rapor-bolum">
+      <h2>Genel Durum</h2>
+      <p class="aciklama" id="rapor-genel"></p>
+    </section>
+
+    <section class="rapor-bolum">
+      <h2>Zaman İçindeki Eğilim</h2>
+      <p class="aciklama" id="rapor-egilim"></p>
+    </section>
+
+    <section class="rapor-bolum">
+      <h2>Çıkış Nedenleri</h2>
+      <p class="aciklama" id="rapor-nedenler"></p>
+    </section>
+
+    <section class="rapor-bolum">
+      <h2>Coğrafi Dağılım</h2>
+      <p class="aciklama" id="rapor-cografi-il"></p>
+      <p class="aciklama" id="rapor-cografi-bolge"></p>
+    </section>
+
+    <section class="rapor-bolum">
+      <h2>Ülke Karşılaştırması</h2>
+      <p class="aciklama" id="rapor-karsilastirma"></p>
+    </section>
+
+    <section class="rapor-bolum">
+      <h2>Kaynaklar</h2>
+      <div id="rapor-kaynaklar"></div>
+    </section>
+
+    <p class="kaynak-notu">
+      Bu rapor, sitenin resmi veri işlem hattı tarafından üretilen güncel
+      rakamlardan otomatik olarak derlenir; sayılar veri güncellendikçe
+      değişir. Yöntem ve sınırlamalar için <a href="metodoloji.html">Metodoloji</a>
+      sayfasına bakın.
+    </p>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="assets/js/loader.js"></script>
+  <script>
+    function yuzdeMetni(deger) {
+      return `%${sayiFormatla(Math.abs(deger), 1)} ${deger >= 0 ? "arttı" : "azaldı"}`;
+    }
+
+    function egimMetni(deger, birim) {
+      return `${deger >= 0 ? "+" : ""}${sayiFormatla(deger, 2)} ${birim}`;
+    }
+
+    async function raporuOlustur() {
+      const [ozet, nedenler, cografi, karsilastirma, metodoloji] = await Promise.all([
+        veriYukle("ozet"),
+        veriYukle("nedenler"),
+        veriYukle("cografi"),
+        veriYukle("karsilastirma"),
+        veriYukle("metodoloji"),
+      ]);
+
+      document.getElementById("rapor-kapsam-notu").textContent =
+        `${ozet.kapsam_yil_araligi[0]}-${ozet.kapsam_yil_araligi[1]} arası resmi verilere (OGM, EFFIS) dayanan özet analiz.`;
+
+      // --- Genel Durum ---
+      document.getElementById("rapor-genel").textContent =
+        `${ozet.son_yil} yılında Türkiye'de ${sayiFormatla(ozet.son_yil_yangin_sayisi)} orman yangını çıktı ve ` +
+        `toplam ${sayiFormatla(ozet.son_yil_yanan_alan_ha)} hektar orman alanı yandı (ortalama yangın büyüklüğü ` +
+        `${sayiFormatla(ozet.son_yil_ortalama_buyukluk_ha, 2)} ha). Bir önceki yıla göre yangın sayısı ` +
+        `${yuzdeMetni(ozet.onceki_yila_gore_sayi_degisim_yuzde)}, buna karşın yanan alan ` +
+        `${yuzdeMetni(ozet.onceki_yila_gore_alan_degisim_yuzde)} — yani daha az sayıda ama çok daha büyük yangınlar ` +
+        `yaşandı. ${ozet.kapsam_yil_araligi[0]}'den bu yana en çok alan yanan yıl ${ozet.en_buyuk_yil.yil} ` +
+        `(${sayiFormatla(ozet.en_buyuk_yil.yanan_alan_ha)} ha) oldu. En kötü ${ozet.yogunlasma.en_kotu_yil_sayisi} yıl ` +
+        `(${ozet.yogunlasma.en_kotu_yillar}), ${ozet.yogunlasma.toplam_yil_sayisi} yıllık toplam yanan alanın ` +
+        `%${sayiFormatla(ozet.yogunlasma.orani_yuzde, 1)}'ini tek başına oluşturuyor — yangın yükü birkaç istisnai ` +
+        `yılda yoğunlaşıyor, her yıl eşit derecede kötü geçmiyor.`;
+
+      // --- Zaman İçindeki Eğilim ---
+      const hizlanmaKati = ozet.son_10_yil_egim_ha_yil.deger / ozet.uzun_donem_egim_ha_yil.deger;
+      document.getElementById("rapor-egilim").textContent =
+        `Uzun dönemde (${ozet.uzun_donem_egim_ha_yil.kapsam}) yanan alan yılda ortalama ` +
+        `${sayiFormatla(ozet.uzun_donem_egim_ha_yil.deger, 0)} hektar artış eğiliminde. Ancak bu eğilim son ` +
+        `yıllarda belirgin şekilde hızlanmış görünüyor: son 10 yılda (${ozet.son_10_yil_egim_ha_yil.kapsam}) yıllık ` +
+        `artış ${sayiFormatla(ozet.son_10_yil_egim_ha_yil.deger, 0)} hektara çıktı — uzun dönem ortalamasının ` +
+        `yaklaşık ${sayiFormatla(hizlanmaKati, 1)} katı.`;
+
+      // --- Nedenler ---
+      const kategoriEtiket = { kasit: "kasıt (kundaklama)", ihmal_kaza: "ihmal-kaza", dogal: "doğal (yıldırım)", bilinmeyen: "nedeni belirlenemeyen" };
+      const bulKategori = (ad) => nedenler.egim.kategoriler.find((k) => k.kategori === ad);
+      const kasit = bulKategori("kasit");
+      const ihmalKaza = bulKategori("ihmal_kaza");
+      const bilinmeyen = bulKategori("bilinmeyen");
+      document.getElementById("rapor-nedenler").textContent =
+        `${ozet.son_yil} yılında yangınların %${sayiFormatla(ozet.bilinmeyen_neden_orani_son_yil_yuzde, 1)}'inin ` +
+        `nedeni belirlenemedi. ${nedenler.egim.kapsam} arasındaki eğilime bakıldığında, ${kategoriEtiket.kasit} ` +
+        `kaynaklı yangınların payı hem sayı hem alan bazında hafifçe azalıyor (yılda ` +
+        `${egimMetni(kasit.sayi_oran_egimi_puan_yil, "puan/yıl sayıca")}, ${egimMetni(kasit.alan_oran_egimi_puan_yil, "puan/yıl alanca")}), ` +
+        `${kategoriEtiket.ihmal_kaza} payı daha hızlı azalıyor (yılda ${egimMetni(ihmalKaza.sayi_oran_egimi_puan_yil, "puan sayıca")}, ` +
+        `${egimMetni(ihmalKaza.alan_oran_egimi_puan_yil, "puan alanca")}). Buna karşın nedeni belirlenemeyen ` +
+        `yangınların payı belirgin şekilde artıyor (yılda ${egimMetni(bilinmeyen.sayi_oran_egimi_puan_yil, "puan sayıca")}, ` +
+        `${egimMetni(bilinmeyen.alan_oran_egimi_puan_yil, "puan alanca")}) — bu, kayıt/sınıflandırma kalitesindeki ` +
+        `bir gerilemeye işaret ediyor olabilir.`;
+
+      // --- Coğrafi Dağılım ---
+      const ilkIller = [...cografi.iller].sort((a, b) => a.sira_alan - b.sira_alan).slice(0, 3);
+      const kor = cografi.orman_kaplama_korelasyonu;
+      document.getElementById("rapor-cografi-il").textContent =
+        `İl bazında yayınlanmış en güncel resmi veri ${cografi.yil}'e ait. O yıl en çok yanan il ` +
+        `${ilkIller[0].il} (${sayiFormatla(ilkIller[0].yanan_alan_ha)} ha) oldu, onu ${ilkIller[1].il} ve ` +
+        `${ilkIller[2].il} izledi. Orman kaplama oranı ile yangın yoğunluğu arasında anlamlı bir ilişki ` +
+        `bulunmadı (r=${sayiFormatla(kor.pearson_r, 2)}, ${kor.il_sayisi} il) — yani daha ormanlık iller orantılı ` +
+        `olarak daha çok yanmıyor.`;
+
+      const ilkBolge = [...cografi.bolge_2025.bolgeler].sort((a, b) => a.sira_alan - b.sira_alan)[0];
+      const ilkKasitBolge = [...cografi.bolge_2025.kasit_orani_siralama.bolgeler].sort(
+        (a, b) => a.sira_kasit_alan_oran - b.sira_kasit_alan_oran
+      )[0];
+      document.getElementById("rapor-cografi-bolge").textContent =
+        `${cografi.bolge_2025.yil} için il bazında resmi veri yok, ama OGM'nin Faaliyet Raporu'ndaki Orman Bölge ` +
+        `Müdürlüğü kırılımına göre en çok yanan bölge ${ilkBolge.bolge_muduru} (${sayiFormatla(ilkBolge.yanan_alan_ha)} ha) ` +
+        `oldu. Aynı verinin neden kırılımına göre, en az 15 yangınlık bölgeler arasında kasıt oranı en yüksek olan ` +
+        `bölge ${ilkKasitBolge.bolge_muduru} (alan bazında %${sayiFormatla(ilkKasitBolge.kasit_alan_oran, 1)}).`;
+
+      // --- Ülke Karşılaştırması ---
+      const turkiyeSatirlari = karsilastirma.ulkeler.filter((u) => u.ulke === "Türkiye" && u.sira_alan != null);
+      const ortalamaSira = turkiyeSatirlari.reduce((t, u) => t + u.sira_alan, 0) / turkiyeSatirlari.length;
+      const yillar = karsilastirma.ulkeler.map((u) => u.yil);
+      const ulkeAdlari = [...new Set(karsilastirma.ulkeler.map((u) => u.ulke))].filter((u) => u !== "Türkiye");
+      document.getElementById("rapor-karsilastirma").textContent =
+        `EFFIS/Copernicus verisine göre Türkiye, karşılaştırma grubundaki 5 Akdeniz ülkesi (Türkiye, ` +
+        `${ulkeAdlari.join(", ")}) arasında yanan alan bakımından ortalama sırası ${sayiFormatla(ortalamaSira, 1)} ` +
+        `(${Math.min(...yillar)}-${Math.max(...yillar)} arası, 1. sıra en çok yanan ülkeyi gösterir).`;
+
+      // --- Kaynaklar ---
+      const istatistikselKaynaklar = metodoloji.kaynaklar.filter(
+        (k) => !k.ad.toLowerCase().includes("sıcak nokta") && !k.ad.toLowerCase().includes("nominatim")
+      );
+      const kaynaklarYer = document.getElementById("rapor-kaynaklar");
+      istatistikselKaynaklar.forEach((k) => {
+        const kart = document.createElement("div");
+        kart.className = "kaynak-karti";
+        const ad = document.createElement("div");
+        ad.className = "ad";
+        ad.textContent = k.ad;
+        const detay = document.createElement("div");
+        detay.className = "detay";
+        detay.textContent = k.kurum;
+        kart.appendChild(ad);
+        kart.appendChild(detay);
+        kaynaklarYer.appendChild(kart);
+      });
+    }
+
+    document.getElementById("pdf-indir").addEventListener("click", () => window.print());
+    document.addEventListener("DOMContentLoaded", raporuOlustur);
+  </script>
+</body>
+</html>
