@@ -76,7 +76,12 @@ def export_trend():
 
 def export_cografi():
     df = pd.read_csv(data_path("interim", "il_siralama.csv"))
-    kolonlar = ["il", "yangin_sayisi", "yanan_alan_ha", "orman_alani_ha", "yogunluk_indeksi_yuzde", "sira_alan", "sira_yogunluk"]
+    orman_kaplama_df = pd.read_csv(data_path("interim", "orman_alani_il.csv"))[["il", "orman_kaplama_yuzde"]]
+    df = df.merge(orman_kaplama_df, on="il", how="left")
+    kolonlar = [
+        "il", "yangin_sayisi", "yanan_alan_ha", "orman_alani_ha", "orman_kaplama_yuzde",
+        "yogunluk_indeksi_yuzde", "sira_alan", "sira_yogunluk",
+    ]
     kayitlar = json.loads(df[kolonlar].round(3).to_json(orient="records"))
 
     bolge_df = pd.read_csv(data_path("interim", "bolge_siralama_2025.csv"))

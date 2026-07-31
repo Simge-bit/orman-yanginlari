@@ -54,7 +54,12 @@
       <strong>bölge müdürlüğü</strong> bazındaki) verisi aşağıda ayrı bir
       tabloda.
     </p>
-    <div id="tablo-il-siralama"></div>
+    <div class="chart-karti">
+      <canvas id="grafik-il-siralama"></canvas>
+      <details class="tablo-goster" id="tablo-il-siralama">
+        <summary>Tabloyu göster</summary>
+      </details>
+    </div>
 
     <p class="kaynak-notu">
       Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.14 (il bazında,
@@ -62,11 +67,20 @@
       serisi mevcut değil.
     </p>
 
+    <h2>Orman Kaplama Oranı ile Yoğunluk İndeksi İlişkisi (2024)</h2>
     <p class="aciklama" id="korelasyon-notu"></p>
+    <div class="chart-karti">
+      <canvas id="grafik-korelasyon"></canvas>
+    </div>
 
     <h2>2025: Bölge Müdürlüğü Bazında Yangınlar</h2>
     <p class="aciklama" id="bolge-2025-aciklama"></p>
-    <div id="tablo-bolge-2025"></div>
+    <div class="chart-karti">
+      <canvas id="grafik-bolge-2025"></canvas>
+      <details class="tablo-goster" id="tablo-bolge-2025">
+        <summary>Tabloyu göster</summary>
+      </details>
+    </div>
     <p class="kaynak-notu">
       Kaynak: OGM 2025 Faaliyet Raporu, Ek 6/Tablo (Orman Bölge Müdürlükleri
       dağılımı). Toplam (3.224 yangın / 81.473 ha), ulusal 2025 rakamıyla
@@ -75,7 +89,12 @@
 
     <h2>2025: En Yüksek Kasıt (Kundaklama) Oranına Sahip Bölgeler</h2>
     <p class="aciklama" id="kasit-orani-aciklama"></p>
-    <div id="tablo-kasit-orani"></div>
+    <div class="chart-karti">
+      <canvas id="grafik-kasit-orani"></canvas>
+      <details class="tablo-goster" id="tablo-kasit-orani">
+        <summary>Tabloyu göster</summary>
+      </details>
+    </div>
     <p class="kaynak-notu">
       Aynı Ek 6 tablosunun neden kırılımından; en az 15 yangınlık bölge
       müdürlükleri arasında, alan bazında kasıt oranına göre sıralanmıştır.
@@ -85,6 +104,7 @@
   <div id="site-footer"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script src="assets/js/loader.js"></script>
   <script src="assets/js/charts.js"></script>
   <script src="assets/js/map.js"></script>
@@ -96,6 +116,12 @@
       const cografi = await veriYukle("cografi");
       const ilk10 = [...cografi.iller].sort((a, b) => a.sira_alan - b.sira_alan).slice(0, 10);
 
+      cubukKartiOlustur({
+        canvasId: "grafik-il-siralama",
+        etiketler: ilk10.map((il) => il.il),
+        degerler: ilk10.map((il) => il.yanan_alan_ha),
+        birim: "ha",
+      });
       tabloOlustur({
         detailsId: "tablo-il-siralama",
         basliklar: ["#", "İl", "Yangın sayısı", "Yanan alan (ha)", "Yoğunluk indeksi (%)"],
@@ -109,6 +135,13 @@
       });
 
       document.getElementById("bolge-2025-aciklama").textContent = cografi.bolge_2025.kapsam_notu;
+      const ilk10Bolge = [...cografi.bolge_2025.bolgeler].sort((a, b) => a.sira_alan - b.sira_alan).slice(0, 10);
+      cubukKartiOlustur({
+        canvasId: "grafik-bolge-2025",
+        etiketler: ilk10Bolge.map((b) => b.bolge_muduru),
+        degerler: ilk10Bolge.map((b) => b.yanan_alan_ha),
+        birim: "ha",
+      });
       tabloOlustur({
         detailsId: "tablo-bolge-2025",
         basliklar: ["#", "Orman Bölge Müdürlüğü", "Yangın sayısı", "Yanan alan (ha)"],
@@ -123,11 +156,25 @@
       const kor = cografi.orman_kaplama_korelasyonu;
       document.getElementById("korelasyon-notu").textContent =
         `Bulgu: orman kaplama oranı ile yoğunluk indeksi arasında r=${sayiFormatla(kor.pearson_r, 2)} (${kor.il_sayisi} il, 2024). ${kor.aciklama}`;
+      saciliminOlustur({
+        canvasId: "grafik-korelasyon",
+        noktalar: cografi.iller
+          .filter((il) => il.orman_kaplama_yuzde != null)
+          .map((il) => ({ x: il.orman_kaplama_yuzde, y: il.yogunluk_indeksi_yuzde, il: il.il })),
+        xEtiket: "Orman kaplama oranı",
+        yEtiket: "Yoğunluk indeksi",
+      });
 
       const kasitOraniIlk10 = [...cografi.bolge_2025.kasit_orani_siralama.bolgeler]
         .sort((a, b) => a.sira_kasit_alan_oran - b.sira_kasit_alan_oran)
         .slice(0, 10);
       document.getElementById("kasit-orani-aciklama").textContent = cografi.bolge_2025.kasit_orani_siralama.kapsam_notu;
+      cubukKartiOlustur({
+        canvasId: "grafik-kasit-orani",
+        etiketler: kasitOraniIlk10.map((b) => b.bolge_muduru),
+        degerler: kasitOraniIlk10.map((b) => b.kasit_alan_oran),
+        birim: "%",
+      });
       tabloOlustur({
         detailsId: "tablo-kasit-orani",
         basliklar: ["#", "Orman Bölge Müdürlüğü", "Yangın sayısı", "Kasıt oranı (alan, %)", "Kasıt oranı (sayı, %)"],

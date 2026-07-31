@@ -232,6 +232,119 @@ function ulkeKartiOlustur({ canvasId, yillar, seriler }) {
   });
 }
 
+// Yatay çubuk grafik — sıralama/magnitude verisi için (tek seri, tek hue).
+// "En çok etkilenen il" gibi kategorik sıralamalarda tablodan çok daha
+// okunaklı; renk kimlik değil büyüklük taşıdığı için tek vurgu rengi yeter.
+function cubukKartiOlustur({ canvasId, etiketler, degerler, birim }) {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: etiketler,
+      datasets: [
+        {
+          data: degerler,
+          backgroundColor: hexOpaklikEkle(cssDegisken("--seri-vurgu"), 0.85),
+          borderRadius: 4,
+          barThickness: 16,
+        },
+      ],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: cssDegisken("--yuzey"),
+          titleColor: cssDegisken("--metin-birincil"),
+          bodyColor: cssDegisken("--metin-birincil"),
+          borderColor: cssDegisken("--kenar"),
+          borderWidth: 1,
+          padding: 10,
+          callbacks: {
+            label(context) {
+              const deger = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 1 }).format(context.parsed.x);
+              return birim ? `${deger} ${birim}` : deger;
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: cssDegisken("--izgara") },
+          ticks: { color: cssDegisken("--metin-soluk"), callback: (v) => new Intl.NumberFormat("tr-TR").format(v) },
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: cssDegisken("--metin-birincil") },
+        },
+      },
+    },
+  });
+}
+
+// Saçılım grafiği — iki sürekli değişken arasındaki ilişkiyi (korelasyonu)
+// göstermek için doğru grafik türü; metinde geçen bir Pearson r'nin görsel
+// karşılığı. Tek seri olduğu için tek vurgu rengiyle, il adı tooltip başlığında.
+function saciliminOlustur({ canvasId, noktalar, xEtiket, yEtiket }) {
+  const ctx = document.getElementById(canvasId);
+  if (!ctx) return;
+
+  new Chart(ctx, {
+    type: "scatter",
+    data: {
+      datasets: [
+        {
+          data: noktalar,
+          backgroundColor: hexOpaklikEkle(cssDegisken("--seri-vurgu"), 0.55),
+          borderColor: cssDegisken("--seri-vurgu"),
+          borderWidth: 1,
+          radius: 4,
+          hoverRadius: 6,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: cssDegisken("--yuzey"),
+          titleColor: cssDegisken("--metin-birincil"),
+          bodyColor: cssDegisken("--metin-birincil"),
+          borderColor: cssDegisken("--kenar"),
+          borderWidth: 1,
+          padding: 10,
+          callbacks: {
+            title: (context) => context[0]?.raw?.il ?? "",
+            label(context) {
+              const { x, y } = context.raw;
+              const xMetni = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 1 }).format(x);
+              const yMetni = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 2 }).format(y);
+              return `${xEtiket}: %${xMetni} · ${yEtiket}: %${yMetni}`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          title: { display: true, text: `${xEtiket} (%)`, color: cssDegisken("--metin-soluk") },
+          grid: { color: cssDegisken("--izgara") },
+          ticks: { color: cssDegisken("--metin-soluk") },
+        },
+        y: {
+          title: { display: true, text: `${yEtiket} (%)`, color: cssDegisken("--metin-soluk") },
+          grid: { color: cssDegisken("--izgara") },
+          ticks: { color: cssDegisken("--metin-soluk") },
+        },
+      },
+    },
+  });
+}
+
 // Bir <details class="tablo-goster"> içine basit bir veri tablosu basar —
 // grafiğin erişilebilir/tablo karşılığı (dataviz: "a table view exists").
 function tabloOlustur({ detailsId, basliklar, satirlar }) {
