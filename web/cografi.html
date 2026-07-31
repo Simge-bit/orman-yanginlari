@@ -33,6 +33,7 @@
         </span>
       </div>
       <p id="canli-tazelik" class="kaynak-notu">Canlı katman yükleniyor…</p>
+      <p id="canli-il-ozeti" class="kaynak-notu"></p>
     </div>
 
     <h2>En çok etkilenen 10 il (yanan alan)</h2>
@@ -54,7 +55,7 @@
   <script>
     async function ciz() {
       const harita = await haritayiCiz({ containerId: "il-haritasi", legendId: "harita-legend" });
-      canliSicakNoktalariEkle({ harita, freshnessId: "canli-tazelik" });
+      canliSicakNoktalariEkle({ harita, freshnessId: "canli-tazelik", ilOzetiId: "canli-il-ozeti" });
 
       const cografi = await veriYukle("cografi");
       const ilk10 = [...cografi.iller].sort((a, b) => a.sira_alan - b.sira_alan).slice(0, 10);

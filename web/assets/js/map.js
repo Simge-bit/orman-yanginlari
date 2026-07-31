@@ -93,9 +93,10 @@ async function haritayiCiz({ containerId, legendId }) {
 // bkz. src/fetch_hotspots.py). 2024 yoğunluk haritasından tamamen farklı
 // bir zaman dilimini gösterdiği için ayrı bir katman + ayrı efsane olarak,
 // açıkça "canlı/son 24 saat" etiketiyle sunuluyor.
-async function canliSicakNoktalariEkle({ harita, freshnessId }) {
+async function canliSicakNoktalariEkle({ harita, freshnessId, ilOzetiId }) {
   const veri = await fetch("assets/data/hotspots.json").then((r) => (r.ok ? r.json() : null));
   const freshnessYer = document.getElementById(freshnessId);
+  const ilOzetiYer = ilOzetiId ? document.getElementById(ilOzetiId) : null;
 
   if (!veri) {
     if (freshnessYer) freshnessYer.textContent = "Canlı katman şu an yüklenemedi.";
@@ -113,7 +114,8 @@ async function canliSicakNoktalariEkle({ harita, freshnessId }) {
       fillOpacity: 0.85,
     })
       .bindTooltip(
-        `Tespit: ${nokta.acq_date} ${String(nokta.acq_time).padStart(4, "0").replace(/(\d{2})(\d{2})/, "$1:$2")} UTC<br>` +
+        `<strong>${nokta.il || "İl belirlenemedi"}</strong><br>` +
+          `Tespit: ${nokta.acq_date} ${String(nokta.acq_time).padStart(4, "0").replace(/(\d{2})(\d{2})/, "$1:$2")} UTC<br>` +
           `Güven: ${nokta.confidence === "h" ? "yüksek" : nokta.confidence === "n" ? "nominal" : nokta.confidence}` +
           (nokta.frp != null ? `<br>Radyatif güç: ${nokta.frp} MW` : "")
       )
@@ -128,5 +130,24 @@ async function canliSicakNoktalariEkle({ harita, freshnessId }) {
       veri.nokta_sayisi > 0
         ? `${veri.nokta_sayisi} sıcak nokta tespit edildi · son ${veri.gun_araligi ?? 1} gün · kaynak: ${veri.kaynak} · güncelleme: ${zamanMetni} UTC`
         : `Şu anda algılanan sıcak nokta yok · kaynak: ${veri.kaynak} · güncelleme: ${zamanMetni} UTC`;
+  }
+
+  if (ilOzetiYer) {
+    ilOzetiYer.innerHTML = "";
+    if (veri.nokta_sayisi > 0) {
+      const ilSayilari = new Map();
+      veri.noktalar.forEach((nokta) => {
+        const ad = nokta.il || "İl belirlenemedi";
+        ilSayilari.set(ad, (ilSayilari.get(ad) || 0) + 1);
+      });
+      const siraliIller = [...ilSayilari.entries()].sort((a, b) => b[1] - a[1]);
+
+      const baslik = document.createElement("strong");
+      baslik.textContent = "İllere göre canlı tespit sayısı: ";
+      ilOzetiYer.appendChild(baslik);
+      ilOzetiYer.appendChild(
+        document.createTextNode(siraliIller.map(([il, adet]) => `${il} (${adet})`).join(", "))
+      );
+    }
   }
 }

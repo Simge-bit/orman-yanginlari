@@ -22,7 +22,7 @@ import requests
 from shapely.geometry import Point, shape
 from shapely.ops import unary_union
 
-from utils import ROOT, data_path
+from utils import ROOT, data_path, standardize_il
 
 TURKIYE_BBOX = "25,35,45,43"  # west,south,east,north — Türkiye + yakın çevresi
 KAYNAK_SENSORU = "VIIRS_SNPP_NRT"
@@ -40,10 +40,24 @@ def _yaz(veri: dict) -> None:
     shutil.copy(processed_path, web_dir / "hotspots.json")
 
 
-def _turkiye_sinirini_yukle():
+def _il_poligonlarini_yukle():
     geo = json.load(open(data_path("raw", "tr_iller.geojson"), encoding="utf-8"))
-    poligonlar = [shape(f["geometry"]) for f in geo["features"]]
-    return unary_union(poligonlar)
+    return [(standardize_il(f["properties"]["name"]), shape(f["geometry"])) for f in geo["features"]]
+
+
+def _il_bul(nokta: Point, il_poligonlari) -> str:
+    # Önce tam içinde olduğu ili ara; sınır/topoloji boşluğuna denk gelirse
+    # (bkz. KAYNAKLAR.md — GeoJSON kaynağı OSM türevi, komşu iller arasında
+    # küçük boşluklar olabiliyor) en yakın ile düşer.
+    for il_adi, poligon in il_poligonlari:
+        if poligon.contains(nokta):
+            return il_adi
+    en_yakin_il, en_yakin_mesafe = None, None
+    for il_adi, poligon in il_poligonlari:
+        mesafe = poligon.distance(nokta)
+        if en_yakin_mesafe is None or mesafe < en_yakin_mesafe:
+            en_yakin_il, en_yakin_mesafe = il_adi, mesafe
+    return en_yakin_il
 
 
 def main():
@@ -68,13 +82,24 @@ def main():
     if DUSUK_GUVEN_HARIC and "confidence" in df.columns:
         df = df[df["confidence"] != "l"]
 
+    noktalar = []
     if len(df):
-        sinir = _turkiye_sinirini_yukle()
-        icinde = df.apply(lambda satir: sinir.contains(Point(satir["longitude"], satir["latitude"])), axis=1)
-        df = df[icinde]
+        il_poligonlari = _il_poligonlarini_yukle()
+        sinir = unary_union([p for _, p in il_poligonlari])
 
-    kolonlar = [k for k in ["latitude", "longitude", "acq_date", "acq_time", "confidence", "frp"] if k in df.columns]
-    noktalar = df[kolonlar].to_dict(orient="records")
+        for _, satir in df.iterrows():
+            nokta = Point(float(satir["longitude"]), float(satir["latitude"]))
+            if not sinir.contains(nokta):
+                continue
+            noktalar.append({
+                "latitude": float(satir["latitude"]),
+                "longitude": float(satir["longitude"]),
+                "acq_date": str(satir.get("acq_date", "")),
+                "acq_time": int(satir.get("acq_time", 0)),
+                "confidence": str(satir.get("confidence", "")),
+                "frp": float(satir["frp"]) if "frp" in satir and pd.notna(satir["frp"]) else None,
+                "il": _il_bul(nokta, il_poligonlari),
+            })
 
     _yaz({
         "guncelleme_zamani": guncelleme_zamani,
