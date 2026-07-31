@@ -1,0 +1,24 @@
+yil_araligi: [2000, 2024]
+hareketli_ort_penceresi: 5
+
+karsilastirma_ulkeler:
+  - Türkiye
+  - Yunanistan
+  - İspanya
+  - İtalya
+  - Portekiz
+
+esikler:
+  mega_yangin_ha: 1000
+
+kaynaklar:
+  ogm: "OGM Yıllık İstatistikleri, erişim: "
+  effis: "EFFIS (European Forest Fire Information System), erişim: "
+  tuik: "TÜİK Çevre İstatistikleri, erişim: "
+  iklim: "opsiyonel iklim veri kaynağı, erişim: "
+
+yollar:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  web_data: web/assets/data
