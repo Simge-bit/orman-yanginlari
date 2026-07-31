@@ -128,7 +128,20 @@ def export_nedenler():
     kolonlar = ["yil"] + [f"{k}_{t}_oran" for k in NEDEN_KATEGORILERI for t in ("sayi", "alan")]
     df["yil"] = df["yil"].astype(int)
     kayitlar = json.loads(df[kolonlar].round(2).to_json(orient="records"))
-    _yaz("nedenler", {"kapsam_notu": "1997 öncesi neden kırılımı OGM tarafından yayınlanmamış", "yillik": kayitlar})
+
+    egim_df = pd.read_csv(data_path("interim", "neden_egimi.csv"))
+    egim_kayitlar = json.loads(
+        egim_df[["kategori", "sayi_oran_egimi_puan_yil", "alan_oran_egimi_puan_yil"]].round(3).to_json(orient="records")
+    )
+
+    _yaz("nedenler", {
+        "kapsam_notu": "1997 öncesi neden kırılımı OGM tarafından yayınlanmamış",
+        "yillik": kayitlar,
+        "egim": {
+            "kapsam": egim_df.iloc[0]["kapsam"],
+            "kategoriler": egim_kayitlar,
+        },
+    })
 
 
 def export_karsilastirma():
@@ -161,6 +174,7 @@ def export_metodoloji(config: dict):
             {"id": "yogunlasma.orani_yuzde", "tanim": "En kötü 5 yılın, tüm dönemin toplam yanan alanı içindeki payı", "birim": "%"},
             {"id": "orman_kaplama_korelasyonu.pearson_r", "tanim": "İl bazında orman kaplama oranı (%) ile yoğunluk indeksi arasındaki Pearson korelasyon katsayısı", "birim": "-1 ile 1 arası"},
             {"id": "kasit_orani_siralama.kasit_alan_oran / kasit_sayi_oran", "tanim": "Bölge müdürlüğü başına kasıt (kundaklama) kaynaklı yangınların payı, en az 15 yangınlık bölgeler arasında", "birim": "%"},
+            {"id": "nedenler.egim.*_oran_egimi_puan_yil", "tanim": "Neden kategorisinin (kasıt/ihmal-kaza/doğal/bilinmeyen) yıllık payındaki doğrusal eğilim (basit doğrusal regresyon eğimi)", "birim": "yüzde puan/yıl"},
         ],
         "kapsam": {
             "yil_araligi": gercek_yil_araligi,
@@ -178,6 +192,7 @@ def export_metodoloji(config: dict):
             "EFFIS ülke karşılaştırmasında bazı ülkeler erken yıllarda (1980'ler) veri bildirmemiş; grafikte ve tabloda bu yıllar boşluk olarak görünür.",
             "Bölge müdürlüğü bazında 2025 neden kırılımı (Ek 6), ulusal tablonun 4 kategorisinden farklı olarak İhmal ve Kaza'yı ayrı sütunlarda veriyor; siteyle tutarlı olsun diye ikisi 'ihmal_kaza' olarak toplanıyor. Kasıt oranı sıralaması, tesadüfen çarpık oran çıkmasın diye en az 15 yangınlık bölgelerle sınırlı.",
             "Orman kaplama % ile yoğunluk indeksi arasındaki korelasyon sadece 2024 kesitinde (81 il, tek yıl) hesaplandı — zaman içindeki değişimi yakalamaz, sadece o yılki iller-arası ilişkiyi gösterir.",
+            "Neden payı eğilimi (nedenler.egim) tek bir doğrusal eğim özetidir; yıldan yıla dalgalanmayı veya eğilimin yön değiştirdiği dönemleri yakalamaz. Sadece neden kırılımı yayınlanan yıllar (1997+) dahil edildi.",
             "Tüm istatistiksel rakamlar (yangın sayısı, alan, oran) birincil/resmi kaynaklardan (OGM, EFFIS) gelir; haber/blog/STK derlemesi istatistik kaynağı olarak alınmadı. Canlı harita katmanı (NASA FIRMS) ve yer adı etiketleme (OpenStreetMap Nominatim) bu kuralın istisnası değil ama farklı bir kategoridir: ilki ham gözlem verisi, ikincisi sadece görüntüleme amaçlı yer-adı sorgusu — hiçbiri istatistiksel bir iddia taşımıyor.",
         ],
         "olusturulma_notu": "Bu dosya src/05_export.py tarafından otomatik üretilir, elle düzenlenmez.",

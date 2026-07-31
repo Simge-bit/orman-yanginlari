@@ -35,6 +35,10 @@
       </details>
     </div>
 
+    <h2>Eğilim: kasıt artıyor mu, ihmal-kaza azalıyor mu?</h2>
+    <p class="aciklama" id="egim-aciklama"></p>
+    <div id="tablo-egim"></div>
+
     <p class="kaynak-notu">
       Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.11; en güncel yıl
       için OGM 2025 Faaliyet Raporu, Tablo 16/17 (bkz.
@@ -56,8 +60,16 @@
       { anahtar: "bilinmeyen", etiket: "Bilinmeyen", renk: "--kategori-4" },
     ];
 
+    const KATEGORI_ETIKET = {
+      kasit: "Kasıt", ihmal_kaza: "İhmal-Kaza", dogal: "Doğal (yıldırım)", bilinmeyen: "Bilinmeyen",
+    };
+
+    function isaretliFormatla(deger, ondalik) {
+      return `${deger > 0 ? "+" : ""}${sayiFormatla(deger, ondalik)}`;
+    }
+
     async function nedenleriCiz() {
-      const { yillik } = await veriYukle("nedenler");
+      const { yillik, egim } = await veriYukle("nedenler");
       const yillar = yillik.map((s) => s.yil);
       document.getElementById("yil-araligi").textContent = `${yillar[0]}-${yillar[yillar.length - 1]}`;
 
@@ -89,6 +101,24 @@
         detailsId: "tablo-neden-alan",
         basliklar: ["Yıl", ...NEDEN_TANIMLARI.map((n) => n.etiket)],
         satirlar: yillik.map((s) => [s.yil, ...NEDEN_TANIMLARI.map((n) => `%${sayiFormatla(s[`${n.anahtar}_alan_oran`], 1)}`)]),
+      });
+
+      const kasitEgim = egim.kategoriler.find((k) => k.kategori === "kasit");
+      const yon = kasitEgim.alan_oran_egimi_puan_yil >= 0 ? "artıyor" : "azalıyor";
+      document.getElementById("egim-aciklama").textContent =
+        `${egim.kapsam} arasında, kasıt (kundaklama) kaynaklı yangınların yanan alan içindeki payı yılda ortalama ` +
+        `${sayiFormatla(Math.abs(kasitEgim.alan_oran_egimi_puan_yil), 2)} puan ${yon}. Aşağıdaki tablo dört nedenin ` +
+        `hem yangın sayısı hem yanan alan payındaki yıllık ortalama değişimini (doğrusal eğilim) gösteriyor; ` +
+        `pozitif değer payın arttığını, negatif değer azaldığını gösterir.`;
+
+      tabloOlustur({
+        detailsId: "tablo-egim",
+        basliklar: ["Neden", "Sayı payı eğilimi (puan/yıl)", "Alan payı eğilimi (puan/yıl)"],
+        satirlar: egim.kategoriler.map((k) => [
+          KATEGORI_ETIKET[k.kategori],
+          isaretliFormatla(k.sayi_oran_egimi_puan_yil, 2),
+          isaretliFormatla(k.alan_oran_egimi_puan_yil, 2),
+        ]),
       });
     }
 

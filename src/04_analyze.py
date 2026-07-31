@@ -125,6 +125,27 @@ def analyze_orman_kaplama_korelasyonu():
     print(f"[analyze] korelasyon.csv: orman kaplama %% ile yoğunluk indeksi arasında r={r:.3f} (n={len(df)})")
 
 
+def analyze_neden_egimi():
+    # "Kasıt artıyor mu, ihmal-kaza azalıyor mu?" — her nedenin yıllık
+    # payının (sayı ve alan bazında) doğrusal eğilimi. Sadece neden
+    # kırılımı yayınlanan yıllarda (1997+) hesaplanır.
+    df = pd.read_csv(data_path("interim", "yillik_metrikler.csv")).sort_values("yil")
+    df = df[df["neden_kirilimi_var"]]
+    kapsam = f"{int(df['yil'].min())}-{int(df['yil'].max())}"
+    kategoriler = ["kasit", "ihmal_kaza", "dogal", "bilinmeyen"]
+    satirlar = [{
+        "kapsam": kapsam,
+        "kategori": kategori,
+        "sayi_oran_egimi_puan_yil": _egim(df["yil"], df[f"{kategori}_sayi_oran"]),
+        "alan_oran_egimi_puan_yil": _egim(df["yil"], df[f"{kategori}_alan_oran"]),
+    } for kategori in kategoriler]
+    sonuc = pd.DataFrame(satirlar)
+    sonuc.to_csv(data_path("interim", "neden_egimi.csv"), index=False)
+    kasit = sonuc[sonuc["kategori"] == "kasit"].iloc[0]
+    print(f"[analyze] neden_egimi.csv ({kapsam}): kasıt payı (alan) yılda "
+          f"{kasit['alan_oran_egimi_puan_yil']:+.2f} puan değişiyor")
+
+
 def main():
     analyze_il_siralama()
     analyze_yillik_siralama_ve_egim()
@@ -133,6 +154,7 @@ def main():
     analyze_bolge_neden_siralama()
     analyze_yogunlasma()
     analyze_orman_kaplama_korelasyonu()
+    analyze_neden_egimi()
 
 
 if __name__ == "__main__":
