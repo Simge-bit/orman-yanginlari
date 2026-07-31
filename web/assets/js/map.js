@@ -141,12 +141,19 @@ async function canliSicakNoktalariEkle({ harita, freshnessId, ilOzetiId }) {
 
   if (freshnessYer) {
     const zaman = new Date(veri.guncelleme_zamani);
-    const zamanMetni = zaman.toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" });
+    // Mutlak saat UTC olarak saklanıyor ama "UTC" etiketi kolayca gözden
+    // kaçıyor — Türkiye saatiyle karşılaştıran biri veriyi 3 saat eski
+    // sanabilir. Bu yüzden hem yerel saat (Europe/Istanbul) hem de göreli
+    // "X dakika/saat önce" ifadesi birlikte gösteriliyor.
+    const dakikaFarki = Math.round((Date.now() - zaman.getTime()) / 60000);
+    const goreliMetni =
+      dakikaFarki < 60 ? `${dakikaFarki} dakika önce` : `${Math.round(dakikaFarki / 60)} saat önce`;
+    const zamanMetni = zaman.toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Istanbul" });
     const toplamTespit = veri.noktalar.reduce((t, n) => t + (n.tespit_sayisi || 1), 0);
     freshnessYer.textContent =
       veri.nokta_sayisi > 0
-        ? `${veri.nokta_sayisi} farklı konumda sıcak nokta (toplam ${toplamTespit} uydu tespiti) · son ${veri.gun_araligi ?? 3} gün · koyu=taze (≤12 saat), soluk=eskiyen (>36 saat) · kaynak: ${veri.kaynak} · güncelleme: ${zamanMetni} UTC`
-        : `Şu anda algılanan sıcak nokta yok · kaynak: ${veri.kaynak} · güncelleme: ${zamanMetni} UTC`;
+        ? `${veri.nokta_sayisi} farklı konumda sıcak nokta (toplam ${toplamTespit} uydu tespiti) · son ${veri.gun_araligi ?? 3} gün · koyu=taze (≤12 saat), soluk=eskiyen (>36 saat) · kaynak: ${veri.kaynak} · katman güncellemesi: ${goreliMetni} (${zamanMetni}, TR saati)`
+        : `Şu anda algılanan sıcak nokta yok · kaynak: ${veri.kaynak} · katman güncellemesi: ${goreliMetni} (${zamanMetni}, TR saati)`;
   }
 
   if (ilOzetiYer) {
