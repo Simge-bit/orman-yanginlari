@@ -83,5 +83,16 @@ Kodun içine sabit değer gömülmez.
 - Faz 2 — tamamlandı: `01_ingest.py` + `02_clean.py` çalışıyor, il adı
   eşleme ("Afyon" → "Afyonkarahisar"), tip dönüşümü, toplam tutarlılık
   kontrolleri `tests/test_clean.py` ile doğrulanıyor (6/6 geçiyor).
-- Sıradaki adım: Faz 3, `03_transform.py` ile türetilmiş metrikler
-  (hareketli ortalama, yoğunluk indeksi, mevsimsellik).
+- Faz 3 — tamamlandı: `03_transform.py` ile hareketli ortalama, ortalama
+  yangın büyüklüğü, neden oranları, il yoğunluk indeksi, ülke alan payları
+  hesaplandı. Mevsimsellik ve "mega yangın" eşiği mevcut yıllık/il bazlı
+  OGM verisiyle hesaplanamıyor (aylık/tekil kayıt yok) — not düşüldü.
+  8/8 test geçiyor.
+- Faz 4 — tamamlandı: `04_analyze.py` ile il/yıl sıralamaları ve uzun dönem
+  eğim (1988-2024 tüm dönem vs. son 10 yıl), ülkeler arası Türkiye'nin
+  konumu çıkarıldı. `05_export.py` ile `ozet.json`, `trend.json`,
+  `cografi.json`, `nedenler.json`, `karsilastirma.json`, `metodoloji.json`
+  üretildi ve `web/assets/data/` altına kopyalandı — bu şema artık sabit,
+  site bu altı dosyayı okuyacak.
+- Sıradaki adım: Faz 5, site iskeleti (sayfa şablonları, ortak header/
+  footer, loader.js) — pilot sayfa olarak trend.html baştan bitirilecek.

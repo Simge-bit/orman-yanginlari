@@ -1,13 +1,133 @@
-from utils import load_config, data_path
+"""Analiz katmanının son adımı: her site sayfası için JSON üretir ve
+web/assets/data/ altına kopyalar. Buradaki şema analiz ile sunum arasındaki
+sözleşmedir — alan adları burada dondurulur, web/ katmanı sadece bunları okur.
+"""
+import json
+import shutil
+
+import pandas as pd
+
+from utils import data_path, load_config, ROOT
+
+NEDEN_KATEGORILERI = ["kasit", "ihmal_kaza", "dogal", "bilinmeyen"]
+WEB_DATA_DIR = ROOT / "web" / "assets" / "data"
+
+
+def _yaz(ad: str, veri) -> None:
+    processed_path = data_path("processed", f"{ad}.json")
+    processed_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(processed_path, "w", encoding="utf-8") as f:
+        json.dump(veri, f, ensure_ascii=False, indent=2, allow_nan=False)
+
+    WEB_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    shutil.copy(processed_path, WEB_DATA_DIR / f"{ad}.json")
+    print(f"[export] {ad}.json yazıldı")
+
+
+def export_ozet():
+    yillik = pd.read_csv(data_path("interim", "yillik_metrikler.csv")).sort_values("yil")
+    egim = pd.read_csv(data_path("interim", "yillik_egim.csv"))
+    il_siralama = pd.read_csv(data_path("interim", "il_siralama.csv"))
+
+    son = yillik.iloc[-1]
+    onceki = yillik.iloc[-2]
+    en_buyuk_yil = yillik.loc[yillik["yanan_alan_ha"].idxmax()]
+    en_cok_etkilenen_il = il_siralama.iloc[0]
+    tum_donem_egim = egim.iloc[0]
+    son_10_yil_egim = egim.iloc[1]
+
+    veri = {
+        "son_yil": int(son["yil"]),
+        "son_yil_yangin_sayisi": int(son["yangin_sayisi"]),
+        "son_yil_yanan_alan_ha": float(son["yanan_alan_ha"]),
+        "son_yil_ortalama_buyukluk_ha": round(float(son["ortalama_buyukluk_ha"]), 2),
+        "onceki_yila_gore_sayi_degisim_yuzde": round(float(son["yangin_sayisi"] / onceki["yangin_sayisi"] * 100 - 100), 1),
+        "onceki_yila_gore_alan_degisim_yuzde": round(float(son["yanan_alan_ha"] / onceki["yanan_alan_ha"] * 100 - 100), 1),
+        "en_buyuk_yil": {"yil": int(en_buyuk_yil["yil"]), "yanan_alan_ha": float(en_buyuk_yil["yanan_alan_ha"])},
+        "en_cok_etkilenen_il_2024": {
+            "il": en_cok_etkilenen_il["il"],
+            "yanan_alan_ha": float(en_cok_etkilenen_il["yanan_alan_ha"]),
+        },
+        "bilinmeyen_neden_orani_son_yil_yuzde": round(float(son["bilinmeyen_sayi_oran"]), 1),
+        "uzun_donem_egim_ha_yil": {"kapsam": tum_donem_egim["kapsam"], "deger": round(float(tum_donem_egim["alan_egimi_ha_yil"]), 1)},
+        "son_10_yil_egim_ha_yil": {"kapsam": son_10_yil_egim["kapsam"], "deger": round(float(son_10_yil_egim["alan_egimi_ha_yil"]), 1)},
+        "kapsam_yil_araligi": [int(yillik["yil"].min()), int(yillik["yil"].max())],
+    }
+    _yaz("ozet", veri)
+
+
+def export_trend():
+    df = pd.read_csv(data_path("interim", "yillik_metrikler.csv")).sort_values("yil")
+    kolonlar = ["yil", "yangin_sayisi", "yanan_alan_ha", "ortalama_buyukluk_ha", "ma_yangin_sayisi", "ma_yanan_alan_ha"]
+    df["yil"] = df["yil"].astype(int)
+    kayitlar = json.loads(df[kolonlar].round(2).to_json(orient="records"))
+    _yaz("trend", {"yillik": kayitlar})
+
+
+def export_cografi():
+    df = pd.read_csv(data_path("interim", "il_siralama.csv"))
+    kolonlar = ["il", "yangin_sayisi", "yanan_alan_ha", "orman_alani_ha", "yogunluk_indeksi_yuzde", "sira_alan", "sira_yogunluk"]
+    kayitlar = json.loads(df[kolonlar].round(3).to_json(orient="records"))
+    _yaz("cografi", {"yil": 2024, "kapsam_notu": "il bazında sadece 2024 verisi mevcut", "iller": kayitlar})
+
+
+def export_nedenler():
+    df = pd.read_csv(data_path("interim", "yillik_metrikler.csv")).sort_values("yil")
+    df = df[df["neden_kirilimi_var"]]
+    kolonlar = ["yil"] + [f"{k}_{t}_oran" for k in NEDEN_KATEGORILERI for t in ("sayi", "alan")]
+    df["yil"] = df["yil"].astype(int)
+    kayitlar = json.loads(df[kolonlar].round(2).to_json(orient="records"))
+    _yaz("nedenler", {"kapsam_notu": "1997 öncesi neden kırılımı OGM tarafından yayınlanmamış", "yillik": kayitlar})
+
+
+def export_karsilastirma():
+    df = pd.read_csv(data_path("interim", "ulke_siralama.csv")).sort_values(["yil", "ulke"])
+    kolonlar = ["yil", "ulke", "yanan_alan_ha", "yangin_sayisi", "ortalama_buyukluk_ha", "alan_payi_yuzde", "sira_alan"]
+    df["yil"] = df["yil"].astype(int)
+    kayitlar = json.loads(df[kolonlar].where(df[kolonlar].notna(), None).to_json(orient="records"))
+    _yaz("karsilastirma", {"ulkeler": kayitlar})
+
+
+def export_metodoloji(config: dict):
+    veri = {
+        "kaynaklar": [
+            {"ad": "OGM Ormancılık İstatistikleri 2024", "kurum": config["kaynaklar"]["ogm"]},
+            {"ad": "EFFIS/Copernicus ülke karşılaştırma raporu", "kurum": config["kaynaklar"]["effis"]},
+            {"ad": "81 il sınırı (GeoJSON)", "kurum": config["kaynaklar"]["geojson"]},
+        ],
+        "metrikler": [
+            {"id": "ortalama_buyukluk_ha", "tanim": "Yanan alan (ha) / yangın sayısı", "birim": "hektar/yangın"},
+            {"id": "ma_yanan_alan_ha", "tanim": f"{config['hareketli_ort_penceresi']} yıllık hareketli ortalama, yanan alan", "birim": "hektar"},
+            {"id": "yogunluk_indeksi_yuzde", "tanim": "İl bazında yanan alan / toplam orman alanı", "birim": "%"},
+            {"id": "*_sayi_oran / *_alan_oran", "tanim": "Neden kategorisinin o yılki toplam içindeki payı (kasıt/ihmal-kaza/doğal/bilinmeyen)", "birim": "%"},
+            {"id": "alan_payi_yuzde", "tanim": "Ülkenin, o yıl karşılaştırma grubundaki (5 ülke) toplam yanan alan içindeki payı", "birim": "%"},
+        ],
+        "kapsam": {
+            "yil_araligi": config["yil_araligi"],
+            "il_bazinda_yil": 2024,
+            "karsilastirma_ulkeleri": config["karsilastirma_ulkeler"],
+        },
+        "bilinen_sinirlamalar": [
+            "Mevsimsellik hesaplanamadı: OGM'nin yıllık istatistik yayınında aylık kırılım yok.",
+            f"'Mega yangın' eşiği (config: {config['esikler']['mega_yangin_ha']} ha) uygulanamadı: mevcut veri yıllık/il toplamları düzeyinde, tekil yangın kaydı yok.",
+            "İl bazında kırılım sadece 2024 için mevcut; çok yıllı il serisi yok.",
+            "2013 yılı için OGM kaynağının kendi tablosunda ~0.5 ha'lık küçük bir yuvarlama farkı var (neden kırılımı toplamı ile yıl toplamı arasında).",
+            "GeoJSON'da 'Afyon', OGM tablolarında 'Afyonkarahisar' olarak geçiyor; eşleme pipeline'da yapılıyor (bkz. src/utils.py IL_ALIASLARI).",
+            "Sadece birincil/resmi kaynaklar kullanıldı (OGM, EFFIS); haber/blog/STK derlemesi kaynak olarak alınmadı.",
+        ],
+        "olusturulma_notu": "Bu dosya src/05_export.py tarafından otomatik üretilir, elle düzenlenmez.",
+    }
+    _yaz("metodoloji", veri)
 
 
 def main():
     config = load_config()
-    processed_dir = data_path("processed")
-    print(f"[export] JSON çıktıları: {processed_dir}")
-    # TODO Faz 4: her sayfa için ozet.json, trend.json, cografi.json,
-    # nedenler.json, karsilastirma.json, metodoloji.json üret ve
-    # web/assets/data/ altına kopyala. Şemayı burada dondur.
+    export_ozet()
+    export_trend()
+    export_cografi()
+    export_nedenler()
+    export_karsilastirma()
+    export_metodoloji(config)
 
 
 if __name__ == "__main__":
