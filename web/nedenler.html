@@ -10,7 +10,7 @@
   <div id="site-header"></div>
 
   <main>
-    <h1>Çıkış Nedenleri (1997-2024)</h1>
+    <h1>Çıkış Nedenleri (<span id="yil-araligi">1997-…</span>)</h1>
     <p class="aciklama">
       Kasıt, ihmal-kaza, doğal (yıldırım) ve nedeni bilinmeyen yangınların
       yıllara göre payı. Yangın <strong>sayısı</strong> ile yanan
@@ -36,8 +36,10 @@
     </div>
 
     <p class="kaynak-notu">
-      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.11. 1997 öncesi
-      neden kırılımı yayınlanmamıştır.
+      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.11; en güncel yıl
+      için OGM 2025 Faaliyet Raporu, Tablo 16/17 (bkz.
+      <a href="metodoloji.html">Metodoloji</a>). 1997 öncesi neden kırılımı
+      yayınlanmamıştır.
     </p>
   </main>
 
@@ -57,6 +59,7 @@
     async function nedenleriCiz() {
       const { yillik } = await veriYukle("nedenler");
       const yillar = yillik.map((s) => s.yil);
+      document.getElementById("yil-araligi").textContent = `${yillar[0]}-${yillar[yillar.length - 1]}`;
 
       yiginKartiOlustur({
         canvasId: "grafik-neden-sayi",

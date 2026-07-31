@@ -13,8 +13,9 @@
     <h1>Türkiye Orman Yangınları</h1>
     <p class="aciklama">
       OGM (Orman Genel Müdürlüğü) ve EFFIS/Copernicus'un resmi istatistiklerine
-      dayanan veri analizi. 1988-2024 arası yıllık seri, 2024 için il bazında
-      dağılım ve Akdeniz ülkeleriyle karşılaştırma.
+      dayanan veri analizi. <span id="yil-araligi-metni">…</span> arası
+      yıllık seri, 2024 için il bazında dağılım ve Akdeniz ülkeleriyle
+      karşılaştırma.
     </p>
 
     <div id="kpi-satiri" class="kpi-satiri" aria-live="polite"></div>
@@ -32,6 +33,8 @@
     async function ozetiYukleVeCiz() {
       const ozet = await veriYukle("ozet");
       const kpi = document.getElementById("kpi-satiri");
+
+      document.getElementById("yil-araligi-metni").textContent = ozet.kapsam_yil_araligi.join("-");
 
       const sayiDegisimYon = ozet.onceki_yila_gore_sayi_degisim_yuzde >= 0 ? "up" : "down";
       const alanDegisimYon = ozet.onceki_yila_gore_alan_degisim_yuzde >= 0 ? "up" : "down";
@@ -59,7 +62,7 @@
           delta: `${sayiFormatla(ozet.en_buyuk_yil.yanan_alan_ha)} ha`,
         },
         {
-          label: `En çok etkilenen il (${ozet.son_yil})`,
+          label: "En çok etkilenen il (2024, il bazında son veri)",
           value: ozet.en_cok_etkilenen_il_2024.il,
           delta: `${sayiFormatla(ozet.en_cok_etkilenen_il_2024.yanan_alan_ha)} ha`,
         },

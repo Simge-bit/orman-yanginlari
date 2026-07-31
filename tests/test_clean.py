@@ -37,9 +37,9 @@ def test_il_toplami_ulusal_toplamla_eslesiyor():
     assert il_df["yanan_alan_ha"].sum() == ulusal_2024["yanan_alan_ha"]
 
 
-def test_yillik_seri_surekli_1988_2024():
+def test_yillik_seri_surekli_1988_guncel():
     df = pd.read_csv(data_path("interim", "yillik_seri.csv"))
-    assert sorted(df["yil"]) == list(range(1988, 2025))
+    assert sorted(df["yil"]) == list(range(1988, int(df["yil"].max()) + 1))
     assert df["yangin_sayisi"].notna().all()
     assert df["yanan_alan_ha"].notna().all()
 

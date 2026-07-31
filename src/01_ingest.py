@@ -22,8 +22,15 @@ def ingest_yillik_seri():
         "bilinmeyen_sayi": rows[14],
         "bilinmeyen_alan_ha": rows[15],
     })
+
+    # 2025: "Ormancılık İstatistikleri" yıllığının henüz 2025 sürümü yok
+    # (erişim: 2026-07-31) — OGM'nin kendi 2025 Faaliyet Raporu'ndan (Tablo
+    # 16/17) resmi ama ayrı bir yayın olarak ekleniyor. Bkz. KAYNAKLAR.md.
+    ek_2025 = pd.read_csv(data_path("raw", "ogm_faaliyet_raporu_2025_yangin.csv"))
+    out = pd.concat([out, ek_2025], ignore_index=True)
+
     out.to_csv(data_path("interim", "yillik_seri_ham.csv"), index=False)
-    print(f"[ingest] yillik_seri_ham.csv: {len(out)} satır (1988-2024)")
+    print(f"[ingest] yillik_seri_ham.csv: {len(out)} satır (1988-2025)")
 
 
 def ingest_il_dagilim():

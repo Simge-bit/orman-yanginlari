@@ -98,6 +98,7 @@ def export_metodoloji(config: dict):
     veri = {
         "kaynaklar": [
             {"ad": "OGM Ormancılık İstatistikleri 2024", "kurum": config["kaynaklar"]["ogm"]},
+            {"ad": "OGM 2025 Faaliyet Raporu (sadece son yıl için)", "kurum": config["kaynaklar"].get("ogm_faaliyet_2025", "")},
             {"ad": "EFFIS/Copernicus ülke karşılaştırma raporu", "kurum": config["kaynaklar"]["effis"]},
             {"ad": "81 il sınırı (GeoJSON)", "kurum": config["kaynaklar"]["geojson"]},
         ],
@@ -116,7 +117,9 @@ def export_metodoloji(config: dict):
         "bilinen_sinirlamalar": [
             "Mevsimsellik hesaplanamadı: OGM'nin yıllık istatistik yayınında aylık kırılım yok.",
             f"'Mega yangın' eşiği (config: {config['esikler']['mega_yangin_ha']} ha) uygulanamadı: mevcut veri yıllık/il toplamları düzeyinde, tekil yangın kaydı yok.",
-            "İl bazında kırılım sadece 2024 için mevcut; çok yıllı il serisi yok.",
+            "İl bazında kırılım sadece 2024 için mevcut; çok yıllı il serisi yok. En güncel yıl için de il bazında resmi veri yok.",
+            "En güncel yıl (bkz. kapsam) 'Ormancılık İstatistikleri' yıllığından değil, OGM'nin 2025 Faaliyet Raporu'ndan (Tablo 16/17) alındı — yıllık istatistik yayınının o yılki sürümü erişim tarihinde henüz yayınlanmamıştı. Bu iki OGM yayını, aynı yıllar için neden kategorileri arasında (toplamlar aynı kalsa da) küçük dağılım farkları taşıyabiliyor.",
+            "EFFIS ülke karşılaştırması en güncel yılı içermiyor: EFFIS'in ilgili yıla ait raporu erişim tarihinde henüz yayınlanmamıştı.",
             "2013 yılı için OGM kaynağının kendi tablosunda ~0.5 ha'lık küçük bir yuvarlama farkı var (neden kırılımı toplamı ile yıl toplamı arasında).",
             "GeoJSON'da 'Afyon', OGM tablolarında 'Afyonkarahisar' olarak geçiyor; eşleme pipeline'da yapılıyor (bkz. src/utils.py IL_ALIASLARI).",
             "EFFIS ülke karşılaştırmasında bazı ülkeler erken yıllarda (1980'ler) veri bildirmemiş; grafikte ve tabloda bu yıllar boşluk olarak görünür.",

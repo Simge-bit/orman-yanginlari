@@ -23,6 +23,34 @@ başlar.
   bkz.) 27.485 ha ile bu dosyayı doğruluyor — bu yüzden 27.485 ha / 3.797
   yangın esas alınmalı, diğer rakam muhtemelen ön/geçici veri.
 
+### `ogm_faaliyet_raporu_2025_yangin.csv` + `ogm_faaliyet_raporu_2025.pdf`
+- **Kaynak:** T.C. Tarım ve Orman Bakanlığı, OGM, "2025 Yılı Faaliyet
+  Raporu", Tablo 16 (çıkış sebebine göre sayısal dağılım, 2021-2025) ve
+  Tablo 17 (alansal dağılım, 2021-2025).
+- **URL:** https://www.ogm.gov.tr/tr/e-kutuphane-sitesi/FaaliyetRaporu/2025%20-%20Orman%20Genel%20M%C3%BCd%C3%BCrl%C3%BC%C4%9F%C3%BC%20Faaliyet%20Raporu.pdf
+- **Neden bu kaynak:** Erişim tarihinde (2026-07-31) OGM'nin "Ormancılık
+  İstatistikleri" yıllığının 2025 sürümü henüz yayınlanmamıştı (portal hâlâ
+  2024.zip'te duruyor) ve OGM'nin Haziran 2026 haber bülteni de yangın
+  konusunu içermiyordu (ağaçlandırma/sertifika konularıydı). Faaliyet
+  Raporu, 2025 yangın rakamlarını içeren tek resmi OGM yayını olarak
+  bulundu.
+- **İçerik:** 2025: 3.224 yangın, 81.473 ha; kasıt/ihmal-kaza/doğal/
+  bilinmeyen kırılımı (sayı+alan). `ogm_faaliyet_raporu_2025_yangin.csv`
+  içinde sadece 2025 satırı tutuluyor (2021-2024 zaten
+  `ogm_yillik_yangin_1988_2024.xls`'te var).
+- **Bilinen sorun:** Bu rapor 2021-2024 için de aynı tabloları veriyor,
+  ama kategori dağılımı `ogm_yillik_yangin_1988_2024.xls`'teki değerlerden
+  hafifçe farklı (ör. 2024 "Sebebi Belirlenemeyen": bu raporda 1.111,
+  yıllıkta 1.084 — toplam her ikisinde de 3.797, sadece kategoriler arası
+  dağılım farklı). Bu yüzden 2021-2024 için yine yıllık istatistik dosyası
+  esas alınıyor, sadece 2025 bu rapordan ekleniyor — iki farklı OGM
+  yayınının kategori sınırları arasında küçük bir tutarsızlık olduğu
+  metodoloji sayfasında belirtiliyor.
+- **Eksik:** Bu rapor il (81 il) bazında kırılım vermiyor, sadece "Ek 6"da
+  Orman Bölge Müdürlüğü bazında yangın sayısı (alan yok) var. Bu yüzden
+  `cografi.json` / harita 2024'te kalmaya devam ediyor — 2025 il bazında
+  veri hiçbir resmi kaynakta yok.
+
 ### `ogm_il_yangin_dagilimi_2024.xlsx`
 - **Kaynak:** OGM, Ormancılık İstatistikleri 2024, Tablo 2.14 "İllere göre
   orman yangınlarının dağılımı, 2024"
@@ -86,6 +114,14 @@ doğrulamasıyla çözüldü; ikincil kaynaklara ihtiyaç kalmadı.
 
 ## Eksikler / Faz 1 devamı için notlar
 
+- **EFFIS/Copernicus 2025 raporu henüz yok** (erişim: 2026-07-31) — ülke
+  karşılaştırması (`karsilastirma.json`) 2024'te kalıyor. EFFIS 2025
+  raporu yayınlanınca `effis_ulke_karsilastirma_1980_2024.xlsx` yerine
+  yeni sürüm indirilip pipeline yeniden çalıştırılmalı.
+- **İl bazında 2025 verisi hiçbir resmi kaynakta yok** — ne yıllık
+  istatistik (henüz yayınlanmadı) ne de Faaliyet Raporu (sadece bölge
+  müdürlüğü bazında, alan olmadan) bunu veriyor. `cografi.json` 2024'te
+  kalmaya devam ediyor.
 - **Çok yıllı il bazında seri yok:** `ogm_il_yangin_dagilimi_2024.xlsx`
   sadece 2024'ü kapsıyor. Geçmiş yıllar için il kırılımı istenirse, aynı
   "Ormancılık İstatistikleri" zip'lerinin 2020-2023 sürümleri de

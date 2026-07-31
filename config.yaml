@@ -1,4 +1,3 @@
-yil_araligi: [1988, 2024]  # Faz 1'de toplanan OGM yıllık serisinin gerçek kapsamı
 hareketli_ort_penceresi: 5
 
 karsilastirma_ulkeler:
@@ -13,6 +12,7 @@ esikler:
 
 kaynaklar:
   ogm: "OGM Ormancılık İstatistikleri 2024 (https://www.ogm.gov.tr/tr/e-kutuphane/resmi-istatistikler), erişim: 2026-07-31"
+  ogm_faaliyet_2025: "OGM 2025 Faaliyet Raporu, Tablo 16/17 (https://www.ogm.gov.tr/tr/e-kutuphane-sitesi/FaaliyetRaporu/2025 - Orman Genel Müdürlüğü Faaliyet Raporu.pdf), erişim: 2026-07-31 — 'Ormancılık İstatistikleri 2025' yıllığı henüz yayınlanmadığı için son yıl bu ayrı resmi yayından alındı"
   effis: "EFFIS/Copernicus, Forest Fires in Europe report_2024.xlsx (https://forest-fire.emergency.copernicus.eu/applications/data-and-services), erişim: 2026-07-31"
   geojson: "cihadturhan/tr-geojson, ODbL (https://github.com/cihadturhan/tr-geojson), erişim: 2026-07-31"
   iklim: "henüz eklenmedi — bkz. data/raw/KAYNAKLAR.md 'Eksikler' bölümü"

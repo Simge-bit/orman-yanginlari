@@ -10,7 +10,7 @@
   <div id="site-header"></div>
 
   <main>
-    <h1>Zaman Trendi (1988-2024)</h1>
+    <h1>Zaman Trendi (<span id="yil-araligi">1988-…</span>)</h1>
     <p class="aciklama">
       Gri çizgi o yılın ham değeri, mavi çizgi 5 yıllık hareketli ortalamadır —
       yıldan yıla dalgalanmanın altındaki asıl eğilimi gösterir.
@@ -45,8 +45,10 @@
     </div>
 
     <p class="kaynak-notu">
-      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.11 (1988-2024).
-      Mevsimsel/aylık kırılım bu yayında yok.
+      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.11 (1988-2024); en
+      güncel yıl (<span id="son-yil-notu"></span>) için OGM 2025 Faaliyet
+      Raporu, Tablo 16/17 — bkz. <a href="metodoloji.html">Metodoloji</a>.
+      Mevsimsel/aylık kırılım bu yayınlarda yok.
     </p>
   </main>
 
@@ -59,6 +61,9 @@
     async function trendiCiz() {
       const { yillik } = await veriYukle("trend");
       const yillar = yillik.map((s) => s.yil);
+
+      document.getElementById("yil-araligi").textContent = `${yillar[0]}-${yillar[yillar.length - 1]}`;
+      document.getElementById("son-yil-notu").textContent = yillar[yillar.length - 1];
 
       cizgiKartiOlustur({
         canvasId: "grafik-sayi",
