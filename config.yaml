@@ -12,10 +12,10 @@ esikler:
   mega_yangin_ha: 1000
 
 kaynaklar:
-  ogm: "OGM Yıllık İstatistikleri, erişim: "
-  effis: "EFFIS (European Forest Fire Information System), erişim: "
-  tuik: "TÜİK Çevre İstatistikleri, erişim: "
-  iklim: "opsiyonel iklim veri kaynağı, erişim: "
+  ogm: "OGM Ormancılık İstatistikleri 2024 (https://www.ogm.gov.tr/tr/e-kutuphane/resmi-istatistikler), erişim: 2026-07-31"
+  effis: "EFFIS/Copernicus, Forest Fires in Europe report_2024.xlsx (https://forest-fire.emergency.copernicus.eu/applications/data-and-services), erişim: 2026-07-31"
+  geojson: "cihadturhan/tr-geojson, ODbL (https://github.com/cihadturhan/tr-geojson), erişim: 2026-07-31"
+  iklim: "henüz eklenmedi — bkz. data/raw/KAYNAKLAR.md 'Eksikler' bölümü"
 
 yollar:
   raw: data/raw

@@ -1,0 +1,120 @@
+# Kaynaklar ve Erişim Notları
+
+Tüm dosyalar 2026-07-31 tarihinde indirilmiştir. Bu dosya her kaynağın
+sağlığı, kapsamı ve bilinen sorunlarını belgeler — Faz 2 (temizlik) burada
+başlar.
+
+## Birincil kaynaklar
+
+### `ogm_yillik_yangin_1988_2024.xls`
+- **Kaynak:** T.C. Tarım ve Orman Bakanlığı, Orman Genel Müdürlüğü (OGM),
+  "Ormancılık İstatistikleri 2024", Tablo 2.11 "Orman yangınları, 1988-2024"
+- **URL:** https://www.ogm.gov.tr/tr/e-kutuphane-sitesi/Istatistikler/Ormancılık%20İstatistikleri/Ormancılık%20İstatistikleri%202024.zip
+  (bkz. `ogm_ormancilik_istatistikleri_2024_kaynak.zip` — orijinal zip, tam
+  provenance için saklanıyor)
+- **İçerik:** Yıl, yanan alan (ha), yangın sayısı, ve 1997'den itibaren neden
+  kategorisine göre (Kasıt / İhmal-Kaza / Doğal / Sebebi Bilinmeyen) sayı ve
+  alan kırılımı.
+- **En yetkili kaynak bu dosyadır** — diğer ikincil kaynaklarla (haber,
+  blog) çelişki olursa buna güvenilir.
+- **Bilinen sorun:** 2024 için bu dosya 3.797 yangın / 27.485 ha veriyor;
+  bazı ikincil kaynaklar (Greenpeace blog, çevresel göstergeler metni)
+  3.408 / 26.101 rakamını veriyor. EFFIS'in bağımsız 2024 verisi (aşağıya
+  bkz.) 27.485 ha ile bu dosyayı doğruluyor — bu yüzden 27.485 ha / 3.797
+  yangın esas alınmalı, diğer rakam muhtemelen ön/geçici veri.
+
+### `ogm_il_yangin_dagilimi_2024.xlsx`
+- **Kaynak:** OGM, Ormancılık İstatistikleri 2024, Tablo 2.14 "İllere göre
+  orman yangınlarının dağılımı, 2024"
+- **İçerik:** 81 il için İBBS kodu, il adı, yangın sayısı, yanan alan (ha).
+  Sadece 2024 yılı — çok yıllı il bazında seri bu yayında yok, geçmiş
+  yıllar için ayrı yılların zip'leri indirilmeli (bkz. aşağıdaki not).
+
+### `ogm_bolge_alansal_2004_2024.xlsx`, `ogm_bolge_sayisal_2004_2024.xlsx`
+- **Kaynak:** OGM, Tablo 2.12 / 2.13 — Orman Bölge Müdürlüğü bazında
+  2004-2024 alansal/sayısal dağılım.
+- **Dikkat:** "Bölge Müdürlüğü" idari birimi il (81 il) ile birebir örtüşmez
+  — bazı bölge müdürlükleri birden fazla ili kapsar. İl bazlı harita için
+  `ogm_il_yangin_dagilimi_2024.xlsx` kullanılmalı, bu dosyalar zaman
+  serisi/bölge kesitleri için tamamlayıcıdır.
+
+### `ogm_neden_bolge_alansal_2024.xlsx`, `ogm_neden_bolge_sayisal_2024.xlsx`
+- **Kaynak:** OGM, Tablo 2.15 / 2.16 — çıkış nedeni × bölge müdürlüğü, 2024.
+
+### `ogm_vasif_dagilimi_2024.xlsx`
+- **Kaynak:** OGM, Tablo 2.17 — yangınların orman vasfına göre dağılımı, 2024.
+
+### `ogm_silvikultur_degerlendirme_2024.xlsx`
+- **Kaynak:** OGM, Tablo 2.18 — yanan alanların silvikültürel değerlendirmesi, 2024.
+
+### `ref_orman_alani_il_2024.xlsx` / `ref_orman_alani_il_2024_alt.xlsx`
+- **Kaynak:** OGM, Tablo 1.6 / 1.3 — orman alanı, serveti ve cari artımının
+  il düzeyinde dağılımı, 2024. Yangın yoğunluk indeksi (yanan alan / toplam
+  orman alanı) hesaplamak için referans.
+
+### `effis_ulke_karsilastirma_1980_2024.xlsx`
+- **Kaynak:** EFFIS / Copernicus Emergency Management Service, "Forest
+  Fires in Europe, Middle East and North Africa" yıllık raporu, ülke
+  karşılaştırma tablosu.
+- **URL:** https://forest-fire.emergency.copernicus.eu/effis/applications/data-and-services/report_2024.xlsx
+- **İçerik:** 1980-2024, iki sayfa (yanan alan ha, yangın sayısı), ~30 ülke
+  dahil TUR, GRC, ESP, ITA, PRT, FRA (config.yaml'daki karşılaştırma
+  ülkeleri burada mevcut).
+- **Çapraz doğrulama:** 2024 Türkiye satırı (27.485 ha) OGM'nin kendi
+  tablosuyla (`ogm_yillik_yangin_1988_2024.xls`) birebir eşleşiyor —
+  yukarıdaki 2024 rakamı tartışmasını bu dosya çözüyor.
+
+### `tr_iller.geojson`
+- **Kaynak:** cihadturhan/tr-geojson (GitHub, OpenStreetMap türevi, ODbL
+  lisans), `tr-cities-utf8.json` dosyası.
+- **URL:** https://raw.githubusercontent.com/cihadturhan/tr-geojson/master/geo/tr-cities-utf8.json
+- **İçerik:** 81 il sınırı, her feature'da sadece `name` property'si var.
+- **Bilinen sorun (Faz 2'de çözülecek):** GeoJSON'da il adı "Afyon" olarak
+  geçiyor, OGM tablolarında "Afyonkarahisar" — il eşleme tablosunda bu ve
+  benzeri farklar (örn. bazı kaynaklarda "Şanlıurfa" vs "Sanliurfa" ascii
+  yazımı) elle kontrol edilmeli.
+
+## İkincil / destekleyici kaynaklar (`destek/`)
+
+Bunlar birincil kaynaklarla çelişki olursa referans olarak kullanılmaz,
+sadece çapraz doğrulama ve görsel bağlam için tutulur:
+
+- `ormancilardernegi_yangin_istatistikleri.html` — Ormancılar Derneği,
+  ogm.gov.tr/tr/e-kutuphane/kitaplik/Ormancilik-istatistikleri (OGM
+  verilerinden derlenmiş), 88 yıllık toplam/ortalama, en büyük 10 yangın,
+  büyük yangın yılları, son 10 yılın bölge müdürlüğü sıralaması, neden
+  yüzdeleri (son 10 yıl ortalaması). Kaynak: https://www.ormancilardernegi.org/Yangin
+- `csb_orman_yanginlari_gostergesi.html` — Çevre, Şehircilik ve İklim
+  Değişikliği Bakanlığı, Çevresel Göstergeler, "16.1 Orman Yangınları".
+  Kaynak: https://cevreselgostergeler.csb.gov.tr/orman-yanginlari-i-85850
+  **Dikkat:** Bu sayfanın ham HTML'inde yüzde işaretleri ve bazı sayılar
+  bozuk karakterlerle geliyor (ör. "$.3", "@,53") — büyük ihtimalle
+  kazıma-karşıtı bir karakter değişimi. Bu sayfadaki yüzdelik/artış
+  oranlarına güvenmeden önce tarayıcıda elle doğrulanmalı.
+- `grafik171_orman_yanginlari_1990_2024.png`,
+  `grafik172_nedenlere_gore_1997_2024.png` — aynı CSB sayfasından, OGM
+  kaynaklı grafik görselleri (1990-2024 yangın sayısı/alan, 1997-2024 neden
+  dağılımı). Sadece görsel referans; kesin sayılar için Excel dosyalarını
+  kullan.
+- `verikaynagi_chart49_yangin_sayisi_1990_2021.json` — verikaynagi.com'un
+  Next.js sayfasından çıkarılan ham grafik verisi, 1990-2021 yıllık yangın
+  sayısı. `ogm_yillik_yangin_1988_2024.xls` ile karşılaştırıldığında tüm
+  yıllar birebir eşleşiyor (ör. 2021: 2.793) — güvenilir ama 2021'de kesiliyor.
+
+## Eksikler / Faz 1 devamı için notlar
+
+- **Çok yıllı il bazında seri yok:** `ogm_il_yangin_dagilimi_2024.xlsx`
+  sadece 2024'ü kapsıyor. Geçmiş yıllar için il kırılımı istenirse, aynı
+  "Ormancılık İstatistikleri" zip'lerinin 2020-2023 sürümleri de
+  `https://www.ogm.gov.tr/tr/e-kutuphane-sitesi/Istatistikler/Ormancılık%20İstatistikleri/Ormancılık%20İstatistikleri%20<YIL>.zip`
+  kalıbıyla indirilip aynı Tablo 2.14 çıkarılabilir (2020 için `.rar`
+  uzantılı, diğerleri `.zip`).
+- **İklim verisi henüz eklenmedi** (yol haritasında opsiyonel olarak
+  belirtilmişti) — MGM (Meteoroloji Genel Müdürlüğü) sıcaklık/kuraklık
+  istatistikleri sonraki bir adımda eklenebilir.
+- **Zip dosya adlarındaki Türkçe karakterler eski bir DOS/Windows kod
+  sayfasıyla (cp437/cp857 karışımı) kodlanmış** — macOS'un `unzip` komutu
+  bunları UTF-8 locale'de açamıyor ("Illegal byte sequence" hatası).
+  Orijinal zip (`ogm_ormancilik_istatistikleri_2024_kaynak.zip`) yine de
+  saklandı; içindeki dosyalara Python `zipfile` + `cp437`/`cp857` decode ile
+  erişilebilir (bu oturumda kullanılan yöntem).
