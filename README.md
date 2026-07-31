@@ -75,5 +75,13 @@ Kodun içine sabit değer gömülmez.
 
 ## Durum
 
-Faz 0 — iskelet kuruldu. Sıradaki adım: Faz 1, veri toplama
-(`data/raw/` içine OGM/EFFIS/TÜİK kaynaklarının indirilmesi).
+- Faz 0 — iskelet kuruldu.
+- Faz 1 — tamamlandı: `data/raw/` altında OGM (Ormancılık İstatistikleri
+  2024) ve EFFIS/Copernicus resmi tabloları + 81 il GeoJSON. Kaynak ve
+  bilinen sorunlar `data/raw/KAYNAKLAR.md`'de. Sadece birincil/resmi
+  kaynaklar kullanılıyor, ikincil (haber/blog/STK) kaynak yok.
+- Faz 2 — tamamlandı: `01_ingest.py` + `02_clean.py` çalışıyor, il adı
+  eşleme ("Afyon" → "Afyonkarahisar"), tip dönüşümü, toplam tutarlılık
+  kontrolleri `tests/test_clean.py` ile doğrulanıyor (6/6 geçiyor).
+- Sıradaki adım: Faz 3, `03_transform.py` ile türetilmiş metrikler
+  (hareketli ortalama, yoğunluk indeksi, mevsimsellik).

@@ -74,32 +74,15 @@ başlar.
   benzeri farklar (örn. bazı kaynaklarda "Şanlıurfa" vs "Sanliurfa" ascii
   yazımı) elle kontrol edilmeli.
 
-## İkincil / destekleyici kaynaklar (`destek/`)
+## İkincil kaynaklar kullanılmıyor
 
-Bunlar birincil kaynaklarla çelişki olursa referans olarak kullanılmaz,
-sadece çapraz doğrulama ve görsel bağlam için tutulur:
-
-- `ormancilardernegi_yangin_istatistikleri.html` — Ormancılar Derneği,
-  ogm.gov.tr/tr/e-kutuphane/kitaplik/Ormancilik-istatistikleri (OGM
-  verilerinden derlenmiş), 88 yıllık toplam/ortalama, en büyük 10 yangın,
-  büyük yangın yılları, son 10 yılın bölge müdürlüğü sıralaması, neden
-  yüzdeleri (son 10 yıl ortalaması). Kaynak: https://www.ormancilardernegi.org/Yangin
-- `csb_orman_yanginlari_gostergesi.html` — Çevre, Şehircilik ve İklim
-  Değişikliği Bakanlığı, Çevresel Göstergeler, "16.1 Orman Yangınları".
-  Kaynak: https://cevreselgostergeler.csb.gov.tr/orman-yanginlari-i-85850
-  **Dikkat:** Bu sayfanın ham HTML'inde yüzde işaretleri ve bazı sayılar
-  bozuk karakterlerle geliyor (ör. "$.3", "@,53") — büyük ihtimalle
-  kazıma-karşıtı bir karakter değişimi. Bu sayfadaki yüzdelik/artış
-  oranlarına güvenmeden önce tarayıcıda elle doğrulanmalı.
-- `grafik171_orman_yanginlari_1990_2024.png`,
-  `grafik172_nedenlere_gore_1997_2024.png` — aynı CSB sayfasından, OGM
-  kaynaklı grafik görselleri (1990-2024 yangın sayısı/alan, 1997-2024 neden
-  dağılımı). Sadece görsel referans; kesin sayılar için Excel dosyalarını
-  kullan.
-- `verikaynagi_chart49_yangin_sayisi_1990_2021.json` — verikaynagi.com'un
-  Next.js sayfasından çıkarılan ham grafik verisi, 1990-2021 yıllık yangın
-  sayısı. `ogm_yillik_yangin_1988_2024.xls` ile karşılaştırıldığında tüm
-  yıllar birebir eşleşiyor (ör. 2021: 2.793) — güvenilir ama 2021'de kesiliyor.
+Bilinçli karar: haber sitesi, blog ve dernek/STK derlemesi gibi ikincil
+kaynaklar (daha önce `destek/` altında tutulan Ormancılar Derneği sayfası,
+Çevresel Göstergeler sayfası, verikaynagi.com grafiği ve grafik görselleri)
+projeden çıkarıldı. Bu proje sadece birincil/resmi istatistik yayınlarına
+(OGM, EFFIS/Copernicus) dayanır. Yukarıdaki 2024 rakamı çelişkisi zaten
+iki bağımsız resmi kaynağın (OGM tablosu + EFFIS raporu) birbirini
+doğrulamasıyla çözüldü; ikincil kaynaklara ihtiyaç kalmadı.
 
 ## Eksikler / Faz 1 devamı için notlar
 
