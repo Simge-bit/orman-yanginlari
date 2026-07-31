@@ -44,8 +44,11 @@ def clean_yillik_seri():
 def clean_il_dagilim():
     df = pd.read_csv(data_path("interim", "il_dagilim_2024_ham.csv"))
     df["il"] = df["il"].apply(standardize_il)
-    df["yangin_sayisi"] = _sayiya_cevir(df["yangin_sayisi"])
-    df["yanan_alan_ha"] = _sayiya_cevir(df["yanan_alan_ha"])
+    # Bu tabloda "-" (yillik_seri'deki neden kırılımının aksine) "veri yok"
+    # değil "o il için 2024'te sıfır yangın/alan" anlamına geliyor — OGM
+    # yayınladığı 81 ilin tamamı için bir satır veriyor, eksik il yok.
+    df["yangin_sayisi"] = _sayiya_cevir(df["yangin_sayisi"]).fillna(0)
+    df["yanan_alan_ha"] = _sayiya_cevir(df["yanan_alan_ha"]).fillna(0)
 
     if df["il"].duplicated().any():
         raise ValueError(f"Tekrarlanan il: {df.loc[df['il'].duplicated(), 'il'].tolist()}")
