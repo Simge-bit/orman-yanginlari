@@ -8,6 +8,27 @@ function cssDegisken(ad) {
   return getComputedStyle(document.documentElement).getPropertyValue(ad).trim();
 }
 
+// Chart.js'in autoSkip'i eşit aralıklı tikler seçerken veri setinin son
+// yılını (ör. 2025) atlayabiliyor — son nokta grafikte çizilse de eksende
+// hiç etiketlenmiyor ve "veri bir önceki yılda bitiyor" izlenimi veriyor.
+// Tik listesini kendimiz kuruyoruz (~12 hedef tik, eşit aralık) ve son
+// yılı her zaman dahil ediyoruz; ilgili scale'de autoSkip kapatılmalı.
+function sonEtiketiZorla(eksen) {
+  const toplam = eksen.chart.data.labels.length;
+  const hedefAdet = 12;
+  const adim = Math.max(1, Math.ceil((toplam - 1) / (hedefAdet - 1)));
+  const indeksler = [];
+  for (let i = 0; i < toplam - 1; i += adim) indeksler.push(i);
+  const sonIndex = toplam - 1;
+  // Son düzenli tik, zorla eklenen son yıla çok yakınsa ikisi üst üste
+  // biner (ör. "2024" ve "2025") — bu durumda önceki tik atlanır.
+  if (indeksler.length && sonIndex - indeksler[indeksler.length - 1] < adim / 2) {
+    indeksler.pop();
+  }
+  indeksler.push(sonIndex);
+  eksen.ticks = indeksler.map((i) => ({ value: i }));
+}
+
 // Hareketli ortalama serisinin son noktasına değeri yazan basit bir eklenti.
 const sonDegerEtiketiEklentisi = {
   id: "sonDegerEtiketi",
@@ -94,7 +115,8 @@ function cizgiKartiOlustur({ canvasId, yillar, hamDeger, maDeger, hamEtiket, maE
       scales: {
         x: {
           grid: { display: false },
-          ticks: { color: cssDegisken("--metin-soluk"), maxTicksLimit: 12 },
+          ticks: { color: cssDegisken("--metin-soluk"), autoSkip: false },
+          afterBuildTicks: sonEtiketiZorla,
         },
         y: {
           grid: { color: cssDegisken("--izgara") },
@@ -161,7 +183,11 @@ function yiginKartiOlustur({ canvasId, yillar, seriler }) {
         },
       },
       scales: {
-        x: { grid: { display: false }, ticks: { color: cssDegisken("--metin-soluk"), maxTicksLimit: 12 } },
+        x: {
+          grid: { display: false },
+          ticks: { color: cssDegisken("--metin-soluk"), autoSkip: false },
+          afterBuildTicks: sonEtiketiZorla,
+        },
         y: {
           stacked: true,
           min: 0,
@@ -222,7 +248,11 @@ function ulkeKartiOlustur({ canvasId, yillar, seriler }) {
         },
       },
       scales: {
-        x: { grid: { display: false }, ticks: { color: cssDegisken("--metin-soluk"), maxTicksLimit: 12 } },
+        x: {
+          grid: { display: false },
+          ticks: { color: cssDegisken("--metin-soluk"), autoSkip: false },
+          afterBuildTicks: sonEtiketiZorla,
+        },
         y: {
           grid: { color: cssDegisken("--izgara") },
           ticks: { color: cssDegisken("--metin-soluk"), callback: (v) => new Intl.NumberFormat("tr-TR").format(v) },
