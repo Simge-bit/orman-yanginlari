@@ -64,8 +64,14 @@
           delta: `${sayiFormatla(ozet.en_cok_etkilenen_il_2024.yanan_alan_ha)} ha`,
         },
         {
-          label: "Nedeni bilinmeyen yangın payı",
+          label: "Nedeni bilinmeyen yangın payı (sayı bazında)",
           value: `%${sayiFormatla(ozet.bilinmeyen_neden_orani_son_yil_yuzde, 1)}`,
+        },
+        {
+          label: `Son 10 yıl eğilimi (${ozet.son_10_yil_egim_ha_yil.kapsam})`,
+          value: `${ozet.son_10_yil_egim_ha_yil.deger > 0 ? "+" : ""}${sayiFormatla(ozet.son_10_yil_egim_ha_yil.deger, 0)} ha/yıl`,
+          delta: `${ozet.kapsam_yil_araligi[0]}-${ozet.kapsam_yil_araligi[1]} geneli: ${ozet.uzun_donem_egim_ha_yil.deger > 0 ? "+" : ""}${sayiFormatla(ozet.uzun_donem_egim_ha_yil.deger, 0)} ha/yıl`,
+          yon: ozet.son_10_yil_egim_ha_yil.deger >= 0 ? "up" : "down",
         },
       ];
 

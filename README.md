@@ -110,5 +110,12 @@ Kodun içine sabit değer gömülmez.
   "vurgu" desenli çok serili grafik: Türkiye vurgu renginde, 4 ülke
   bağlam grisinde. Üçü de Playwright ile masaüstü+koyu tema test edildi,
   konsol hatası yok.
-- Sıradaki adım: Faz 7, metodoloji/kalite gözden geçirme ve Faz 8,
-  dağıtım (GitHub Pages/Netlify/Vercel).
+- Faz 7 — tamamlandı: tüm sayfalar sayı-kaynak tutarlılığı için gözden
+  geçirildi. İki sorun bulunup düzeltildi: (1) hesaplanan uzun dönem/son
+  10 yıl eğilimi (`ozet.json`) hiçbir sayfada gösterilmiyordu — index.html'e
+  KPI kartı eklendi; (2) "nedeni bilinmeyen" KPI'sı sayı mı alan mı
+  bazında olduğunu belirtmiyordu — etiket netleştirildi. metodoloji.json'a
+  EFFIS'in erken yıl veri boşluğu ve `ma_*` metrik ailesinin tam tanımı
+  eklendi. HTML'de hardcoded istatistik olmadığı doğrulandı (tüm sayılar
+  JSON'dan geliyor).
+- Sıradaki adım: Faz 8, dağıtım (GitHub Pages/Netlify/Vercel).

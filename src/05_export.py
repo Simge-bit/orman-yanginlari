@@ -103,7 +103,7 @@ def export_metodoloji(config: dict):
         ],
         "metrikler": [
             {"id": "ortalama_buyukluk_ha", "tanim": "Yanan alan (ha) / yangın sayısı", "birim": "hektar/yangın"},
-            {"id": "ma_yanan_alan_ha", "tanim": f"{config['hareketli_ort_penceresi']} yıllık hareketli ortalama, yanan alan", "birim": "hektar"},
+            {"id": "ma_yangin_sayisi / ma_yanan_alan_ha / ma_ortalama_buyukluk_ha", "tanim": f"İlgili metriğin {config['hareketli_ort_penceresi']} yıllık hareketli ortalaması", "birim": "metriğin kendi birimi"},
             {"id": "yogunluk_indeksi_yuzde", "tanim": "İl bazında yanan alan / toplam orman alanı", "birim": "%"},
             {"id": "*_sayi_oran / *_alan_oran", "tanim": "Neden kategorisinin o yılki toplam içindeki payı (kasıt/ihmal-kaza/doğal/bilinmeyen)", "birim": "%"},
             {"id": "alan_payi_yuzde", "tanim": "Ülkenin, o yıl karşılaştırma grubundaki (5 ülke) toplam yanan alan içindeki payı", "birim": "%"},
@@ -119,6 +119,7 @@ def export_metodoloji(config: dict):
             "İl bazında kırılım sadece 2024 için mevcut; çok yıllı il serisi yok.",
             "2013 yılı için OGM kaynağının kendi tablosunda ~0.5 ha'lık küçük bir yuvarlama farkı var (neden kırılımı toplamı ile yıl toplamı arasında).",
             "GeoJSON'da 'Afyon', OGM tablolarında 'Afyonkarahisar' olarak geçiyor; eşleme pipeline'da yapılıyor (bkz. src/utils.py IL_ALIASLARI).",
+            "EFFIS ülke karşılaştırmasında bazı ülkeler erken yıllarda (1980'ler) veri bildirmemiş; grafikte ve tabloda bu yıllar boşluk olarak görünür.",
             "Sadece birincil/resmi kaynaklar kullanıldı (OGM, EFFIS); haber/blog/STK derlemesi kaynak olarak alınmadı.",
         ],
         "olusturulma_notu": "Bu dosya src/05_export.py tarafından otomatik üretilir, elle düzenlenmez.",
