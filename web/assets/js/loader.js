@@ -35,4 +35,12 @@ function sayiFormatla(deger, ondalik = 0) {
   }).format(deger);
 }
 
+// Dış kaynaklı metni (ör. Nominatim yer adları) HTML string'lerine
+// enjekte etmeden önce kaçışlamak için — tooltip'ler innerHTML kullanıyor.
+function htmlKacisla(metin) {
+  const div = document.createElement("div");
+  div.textContent = metin ?? "";
+  return div.innerHTML;
+}
+
 document.addEventListener("DOMContentLoaded", ortakParcalariYukle);

@@ -10,7 +10,6 @@
   --metin-ikincil: #52514e;
   --metin-soluk: #898781;
   --izgara: #e1e0d9;
-  --taban-cizgi: #c3c2b7;
   --kenar: rgba(11, 11, 11, 0.1);
   --iyi: #006300;
   --kotu: #d03b3b;
@@ -37,7 +36,6 @@
     --metin-ikincil: #c3c2b7;
     --metin-soluk: #898781;
     --izgara: #2c2c2a;
-    --taban-cizgi: #383835;
     --kenar: rgba(255, 255, 255, 0.1);
     --iyi: #0ca30c;
     --kotu: #e66767;
@@ -236,15 +234,6 @@ table.veri-tablosu td:first-child { text-align: left; }
 }
 @media (prefers-reduced-motion: reduce) {
   .sicak-nokta-nabiz { animation: none; }
-}
-
-.yakinda-kutusu {
-  border: 1px dashed var(--kenar);
-  border-radius: 10px;
-  padding: 2rem;
-  text-align: center;
-  color: var(--metin-ikincil);
-  margin: 1.5rem 0;
 }
 
 .metodoloji-liste { padding-left: 1.1rem; }

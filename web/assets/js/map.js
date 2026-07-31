@@ -56,7 +56,7 @@ async function haritayiCiz({ containerId, legendId }) {
       const il = ilVerisi.get(ilAdiGetir(feature));
       if (!il) return;
       layer.bindTooltip(
-        `<strong>${il.il}</strong><br>` +
+        `<strong>${htmlKacisla(il.il)}</strong><br>` +
           `Yangın: ${sayiFormatla(il.yangin_sayisi)} · Yanan alan: ${sayiFormatla(il.yanan_alan_ha)} ha<br>` +
           `Yoğunluk indeksi: %${sayiFormatla(il.yogunluk_indeksi_yuzde, 2)}`,
         { sticky: true }
@@ -130,7 +130,7 @@ async function canliSicakNoktalariEkle({ harita, freshnessId, ilOzetiId }) {
       className: stil.nabiz ? "sicak-nokta-nabiz" : "",
     })
       .bindTooltip(
-        `<strong>${nokta.yer ? `${nokta.yer}, ${nokta.il}` : nokta.il || "Konum belirlenemedi"}</strong><br>` +
+        `<strong>${nokta.yer ? `${htmlKacisla(nokta.yer)}, ${htmlKacisla(nokta.il)}` : htmlKacisla(nokta.il) || "Konum belirlenemedi"}</strong><br>` +
           `Son görülme: ${saatMetni}<br>` +
           `Son ${veri.gun_araligi ?? 3} günde tespit: ${nokta.tespit_sayisi}` +
           (nokta.maks_frp != null ? `<br>En yüksek radyatif güç: ${nokta.maks_frp} MW` : "")

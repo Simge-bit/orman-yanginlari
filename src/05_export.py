@@ -119,6 +119,8 @@ def export_metodoloji(config: dict):
             {"ad": "OGM 2025 Faaliyet Raporu (sadece son yıl için)", "kurum": config["kaynaklar"].get("ogm_faaliyet_2025", "")},
             {"ad": "EFFIS/Copernicus ülke karşılaştırma raporu", "kurum": config["kaynaklar"]["effis"]},
             {"ad": "81 il sınırı (GeoJSON)", "kurum": config["kaynaklar"]["geojson"]},
+            {"ad": "Canlı sıcak nokta katmanı (cografi.html)", "kurum": "NASA FIRMS (VIIRS uydu verisi), https://firms.modaps.eosdis.nasa.gov/ — istatistik değil, ham gözlem verisi"},
+            {"ad": "Sıcak noktaların ilçe/köy adı (cografi.html)", "kurum": "OpenStreetMap Nominatim, https://nominatim.openstreetmap.org — resmi bir istatistik kaynağı değil, topluluk kaynaklı yer-adı sorgu servisi; sadece konum etiketlemek için kullanılıyor, hiçbir sayı bu kaynaktan gelmiyor"},
         ],
         "metrikler": [
             {"id": "ortalama_buyukluk_ha", "tanim": "Yanan alan (ha) / yangın sayısı", "birim": "hektar/yangın"},
@@ -141,7 +143,7 @@ def export_metodoloji(config: dict):
             "2013 yılı için OGM kaynağının kendi tablosunda ~0.5 ha'lık küçük bir yuvarlama farkı var (neden kırılımı toplamı ile yıl toplamı arasında).",
             "GeoJSON'da 'Afyon', OGM tablolarında 'Afyonkarahisar' olarak geçiyor; eşleme pipeline'da yapılıyor (bkz. src/utils.py IL_ALIASLARI).",
             "EFFIS ülke karşılaştırmasında bazı ülkeler erken yıllarda (1980'ler) veri bildirmemiş; grafikte ve tabloda bu yıllar boşluk olarak görünür.",
-            "Sadece birincil/resmi kaynaklar kullanıldı (OGM, EFFIS); haber/blog/STK derlemesi kaynak olarak alınmadı.",
+            "Tüm istatistiksel rakamlar (yangın sayısı, alan, oran) birincil/resmi kaynaklardan (OGM, EFFIS) gelir; haber/blog/STK derlemesi istatistik kaynağı olarak alınmadı. Canlı harita katmanı (NASA FIRMS) ve yer adı etiketleme (OpenStreetMap Nominatim) bu kuralın istisnası değil ama farklı bir kategoridir: ilki ham gözlem verisi, ikincisi sadece görüntüleme amaçlı yer-adı sorgusu — hiçbiri istatistiksel bir iddia taşımıyor.",
         ],
         "olusturulma_notu": "Bu dosya src/05_export.py tarafından otomatik üretilir, elle düzenlenmez.",
     }
