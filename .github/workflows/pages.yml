@@ -46,6 +46,13 @@ jobs:
       - name: Testleri çalıştır
         run: pytest tests/ -q
       - name: Canlı sıcak nokta katmanını çek (NASA FIRMS)
+        # continue-on-error: NASA FIRMS ya da ağ geçici olarak erişilemez
+        # olabiliyor (görüldü: "Network is unreachable"). Bu ikincil canlı
+        # katman; başarısız olması, asıl istatistik sitesinin yayınlanmasını
+        # engellememeli. hotspots.json hiç üretilmezse map.js bunu zaten
+        # nazikçe karşılıyor ("Canlı katman şu an yüklenemedi." mesajı,
+        # sayfa çökmüyor) — bir sonraki (3 saatlik) çalışmada düzelir.
+        continue-on-error: true
         env:
           FIRMS_MAP_KEY: ${{ secrets.FIRMS_MAP_KEY }}
         run: python src/fetch_hotspots.py
