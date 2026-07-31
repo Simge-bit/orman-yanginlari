@@ -18,9 +18,12 @@
       bakmak büyük ama ormanı az olan illeri yanıltıcı şekilde öne
       çıkarabilir — oranlama bunu düzeltir. Kırmızı noktalar ise 2024 ile
       ilgisi olmayan, <strong>şu anki</strong> uydu tabanlı sıcak nokta
-      tespitleridir (NASA FIRMS/VIIRS, son 24 saat) — bir tespit yangın
-      olabilir ama olmayabilir de (duman, endüstriyel ısı kaynağı vb.
-      karışabilir), kesin teyit için resmi kaynaklara bakılmalı.
+      kümeleridir (NASA FIRMS/VIIRS, son 3 gün) — bir tespit yangın olabilir
+      ama olmayabilir de (duman, endüstriyel ısı kaynağı, anız yakma vb.
+      karışabilir). Uydu verisi "söndürüldü" bilgisi vermez, sadece "ısı
+      algılandı mı" der — bu yüzden yeniden tespit edilen (hâlâ sıcak olan)
+      kümeler koyu/parlak, son birkaç gündür tekrar görülmeyenler soluk
+      gösteriliyor. Kesin teyit için resmi kaynaklara (AFAD, OGM) bakılmalı.
     </p>
 
     <div class="chart-karti">
@@ -29,7 +32,15 @@
       <div class="harita-legend" style="margin-top: 0.3rem">
         <span class="legend-satiri">
           <span class="legend-kutusu" style="background: #d03b3b; border-radius: 50%"></span>
-          Canlı sıcak nokta (uydu, son 24 saat)
+          Taze (≤12 saat önce görüldü)
+        </span>
+        <span class="legend-satiri">
+          <span class="legend-kutusu" style="background: #e37b5a; border-radius: 50%"></span>
+          Yakın zamanda (≤36 saat)
+        </span>
+        <span class="legend-satiri">
+          <span class="legend-kutusu" style="background: #e3a58a; border-radius: 50%; opacity: 0.6"></span>
+          Eskiyor (36-72 saat, tekrar görülmedi)
         </span>
       </div>
       <p id="canli-tazelik" class="kaynak-notu">Canlı katman yükleniyor…</p>

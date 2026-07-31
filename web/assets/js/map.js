@@ -92,7 +92,17 @@ async function haritayiCiz({ containerId, legendId }) {
 // Canlı sıcak nokta katmanı (NASA FIRMS/VIIRS, CI'da periyodik çekilir —
 // bkz. src/fetch_hotspots.py). 2024 yoğunluk haritasından tamamen farklı
 // bir zaman dilimini gösterdiği için ayrı bir katman + ayrı efsane olarak,
-// açıkça "canlı/son 24 saat" etiketiyle sunuluyor.
+// açıkça "canlı/son birkaç gün" etiketiyle sunuluyor. Yakın tespitler
+// konum kümesi olarak geliyor (tespit_sayisi, en_yeni_saat_once) — "hâlâ
+// aktif mi" garantisi veremeyiz ama taze/tekrarlı kümeleri koyu, eskiyenleri
+// soluk göstererek kesinlik iddia etmeden bir sinyal veriyoruz.
+function _kumeStili(nokta) {
+  const saat = nokta.en_yeni_saat_once;
+  if (saat == null || saat <= 12) return { renk: "#d03b3b", opaklik: 0.9, agirlik: 1 };
+  if (saat <= 36) return { renk: "#e37b5a", opaklik: 0.6, agirlik: 1 };
+  return { renk: "#e3a58a", opaklik: 0.35, agirlik: 0.75 };
+}
+
 async function canliSicakNoktalariEkle({ harita, freshnessId, ilOzetiId }) {
   const veri = await fetch("assets/data/hotspots.json").then((r) => (r.ok ? r.json() : null));
   const freshnessYer = document.getElementById(freshnessId);
@@ -105,19 +115,22 @@ async function canliSicakNoktalariEkle({ harita, freshnessId, ilOzetiId }) {
 
   const katman = L.layerGroup();
   veri.noktalar.forEach((nokta) => {
-    const yaricap = Math.min(4 + (nokta.frp || 1) / 5, 12);
+    const stil = _kumeStili(nokta);
+    const yaricap = Math.min(4 + (nokta.maks_frp || 1) / 5 + Math.min(nokta.tespit_sayisi || 1, 8) / 2, 14);
+    const saatMetni = nokta.en_yeni_saat_once != null ? `${sayiFormatla(nokta.en_yeni_saat_once, 1)} saat önce` : "bilinmiyor";
+
     L.circleMarker([nokta.latitude, nokta.longitude], {
       radius: yaricap,
       color: "#fff",
-      weight: 1,
-      fillColor: "#d03b3b",
-      fillOpacity: 0.85,
+      weight: stil.agirlik,
+      fillColor: stil.renk,
+      fillOpacity: stil.opaklik,
     })
       .bindTooltip(
         `<strong>${nokta.yer ? `${nokta.yer}, ${nokta.il}` : nokta.il || "Konum belirlenemedi"}</strong><br>` +
-          `Tespit: ${nokta.acq_date} ${String(nokta.acq_time).padStart(4, "0").replace(/(\d{2})(\d{2})/, "$1:$2")} UTC<br>` +
-          `Güven: ${nokta.confidence === "h" ? "yüksek" : nokta.confidence === "n" ? "nominal" : nokta.confidence}` +
-          (nokta.frp != null ? `<br>Radyatif güç: ${nokta.frp} MW` : "")
+          `Son görülme: ${saatMetni}<br>` +
+          `Son ${veri.gun_araligi ?? 3} günde tespit: ${nokta.tespit_sayisi}` +
+          (nokta.maks_frp != null ? `<br>En yüksek radyatif güç: ${nokta.maks_frp} MW` : "")
       )
       .addTo(katman);
   });
@@ -126,9 +139,10 @@ async function canliSicakNoktalariEkle({ harita, freshnessId, ilOzetiId }) {
   if (freshnessYer) {
     const zaman = new Date(veri.guncelleme_zamani);
     const zamanMetni = zaman.toLocaleString("tr-TR", { dateStyle: "medium", timeStyle: "short", timeZone: "UTC" });
+    const toplamTespit = veri.noktalar.reduce((t, n) => t + (n.tespit_sayisi || 1), 0);
     freshnessYer.textContent =
       veri.nokta_sayisi > 0
-        ? `${veri.nokta_sayisi} sıcak nokta tespit edildi · son ${veri.gun_araligi ?? 1} gün · kaynak: ${veri.kaynak} · güncelleme: ${zamanMetni} UTC`
+        ? `${veri.nokta_sayisi} farklı konumda sıcak nokta (toplam ${toplamTespit} uydu tespiti) · son ${veri.gun_araligi ?? 3} gün · koyu=taze (≤12 saat), soluk=eskiyen (>36 saat) · kaynak: ${veri.kaynak} · güncelleme: ${zamanMetni} UTC`
         : `Şu anda algılanan sıcak nokta yok · kaynak: ${veri.kaynak} · güncelleme: ${zamanMetni} UTC`;
   }
 
@@ -138,15 +152,20 @@ async function canliSicakNoktalariEkle({ harita, freshnessId, ilOzetiId }) {
       const ilSayilari = new Map();
       veri.noktalar.forEach((nokta) => {
         const ad = nokta.il || "İl belirlenemedi";
-        ilSayilari.set(ad, (ilSayilari.get(ad) || 0) + 1);
+        ilSayilari.set(ad, (ilSayilari.get(ad) || 0) + (nokta.tespit_sayisi || 1));
       });
       const siraliIller = [...ilSayilari.entries()].sort((a, b) => b[1] - a[1]);
+      const ILK_KAC_IL = 10;
+      const gosterilen = siraliIller.slice(0, ILK_KAC_IL);
+      const kalan = siraliIller.length - gosterilen.length;
 
       const baslik = document.createElement("strong");
       baslik.textContent = "İllere göre canlı tespit sayısı: ";
       ilOzetiYer.appendChild(baslik);
       ilOzetiYer.appendChild(
-        document.createTextNode(siraliIller.map(([il, adet]) => `${il} (${adet})`).join(", "))
+        document.createTextNode(
+          gosterilen.map(([il, adet]) => `${il} (${adet})`).join(", ") + (kalan > 0 ? ` ve ${kalan} il daha` : "")
+        )
       );
     }
   }

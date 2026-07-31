@@ -1,5 +1,17 @@
-"""NASA FIRMS'ten (VIIRS uydu verisi) Türkiye sınırları içindeki son 24
-saatlik sıcak nokta (aktif yangın adayı) tespitlerini çeker.
+"""NASA FIRMS'ten (VIIRS uydu verisi) Türkiye sınırları içindeki son
+birkaç günün sıcak nokta (aktif yangın adayı) tespitlerini çeker.
+
+Pencere GUN_ARALIGI kadar geniş tutuluyor (tek gün değil) ki hâlâ süren
+bir yangın, uydunun o gün tam üzerinden geçmemesi gibi bir sebeple
+haritadan aniden kaybolmasın. Ama bu, "yangın hâlâ yanıyor" garantisi
+DEĞİLDİR — uydu verisi "söndürüldü" bilgisi vermez, sadece "ısı algılandı
+mı" der. Bu yüzden ham tespitler konuma göre kümelenip (~1km hücre) her
+küme için "en son ne zaman görüldü" ve "kaç kez tespit edildi" hesaplanıyor;
+web/assets/js/map.js bunu kullanıp taze/tekrarlı kümeleri koyu/parlak,
+eskiyenleri soluk gösteriyor — kesinlik iddia etmeden bir "muhtemelen hâlâ
+aktif" sinyali. Kümeleme aynı zamanda 3 günlük pencerede binin üzerine
+çıkabilen ham nokta sayısını (yoğun yangın günlerinde) haritada
+gösterilebilir/okunabilir bir sayıya indiriyor.
 
 Bu, 01-05 arası tarihsel/istatistiksel pipeline'ın bir parçası DEĞİLDİR —
 bağımsız çalışır, GitHub Actions'ta hem push'ta hem zamanlanmış (cron)
@@ -15,9 +27,8 @@ sessizce atlanır (yerel geliştirmede bu adımı zorunlu kılmamak için).
 her zaman çalışır. İlçe/köy adı için OpenStreetMap Nominatim'in ücretsiz
 reverse-geocoding servisi kullanılıyor; bu servisin kullanım politikası
 saniyede en fazla 1 istek ve tanımlayıcı bir User-Agent gerektiriyor, bu
-yüzden yakın noktalar (aynı ~1km hücre) tek sorguda gruplanıyor ve toplam
-sorgu sayısı sabit bir tavanla sınırlanıyor — büyük bir yangında yüzlerce
-nokta gelse bile servise aşırı yüklenilmiyor.
+yüzden zaten konum kümesi başına tek sorgu yapılıyor ve toplam sorgu
+sayısı sabit bir tavanla sınırlanıyor.
 """
 import json
 import os
@@ -35,15 +46,26 @@ from utils import ROOT, data_path, standardize_il
 
 TURKIYE_BBOX = "25,35,45,43"  # west,south,east,north — Türkiye + yakın çevresi
 KAYNAK_SENSORU = "VIIRS_SNPP_NRT"
-GUN_ARALIGI = 1
+GUN_ARALIGI = 3  # FIRMS azami 5 gün destekliyor; süren yangınlar tek bir uydu geçişine bağlı kalmasın
 DUSUK_GUVEN_HARIC = True  # VIIRS confidence='l' (low) kayıtlarını çıkar
 
+KUME_HUCRE_ONDALIK = 2  # ~1.1 km — yakın tespitleri tek kümede topla (görüntüleme + Nominatim için)
 NOMINATIM_KULLANICI_ARACI = "orman-yanginlari-site/1.0 (kisisel/politik veri sitesi; iletisim: repo issue)"
-NOMINATIM_MAX_SORGU = 60  # aşırı yangın günlerinde bile Nominatim'e nazik davranmak için tavan
-NOMINATIM_HUCRE_ONDALIK = 2  # ~1.1 km — yakın noktaları tek sorguda grupla
+NOMINATIM_MAX_SORGU = 80  # aşırı yangın günlerinde bile Nominatim'e nazik davranmak için tavan
 
 KOY_ALANLARI = ["hamlet", "village", "neighbourhood", "suburb", "quarter"]
 ILCE_ALANLARI = ["town", "municipality", "city_district", "county"]
+
+
+def _saat_once_hesapla(acq_date: str, acq_time: int) -> float | None:
+    try:
+        saat, dakika = divmod(int(acq_time), 100)
+        tespit_zamani = datetime.strptime(acq_date, "%Y-%m-%d").replace(
+            hour=saat, minute=dakika, tzinfo=timezone.utc
+        )
+        return round((datetime.now(timezone.utc) - tespit_zamani).total_seconds() / 3600, 1)
+    except (ValueError, TypeError):
+        return None
 
 
 def _yaz(veri: dict) -> None:
@@ -98,22 +120,57 @@ def _ilce_koy_bul(lat: float, lon: float) -> str | None:
         return None
 
 
-def _ilce_koy_ekle(noktalar: list[dict]) -> None:
-    hucreler: dict[tuple, str | None] = {}
-    sorgu_sayaci = 0
+def _kumeleri_olustur(df: pd.DataFrame, il_poligonlari) -> list[dict]:
+    kumeler: dict[tuple, dict] = {}
 
-    for nokta in noktalar:
-        hucre = (round(nokta["latitude"], NOMINATIM_HUCRE_ONDALIK), round(nokta["longitude"], NOMINATIM_HUCRE_ONDALIK))
-        if hucre not in hucreler:
-            if sorgu_sayaci >= NOMINATIM_MAX_SORGU:
-                hucreler[hucre] = None
-                continue
-            hucreler[hucre] = _ilce_koy_bul(nokta["latitude"], nokta["longitude"])
+    for _, satir in df.iterrows():
+        lat, lon = float(satir["latitude"]), float(satir["longitude"])
+        hucre = (round(lat, KUME_HUCRE_ONDALIK), round(lon, KUME_HUCRE_ONDALIK))
+        acq_date = str(satir.get("acq_date", ""))
+        acq_time = int(satir.get("acq_time", 0))
+        saat_once = _saat_once_hesapla(acq_date, acq_time)
+        frp = float(satir["frp"]) if "frp" in satir and pd.notna(satir["frp"]) else None
+
+        kume = kumeler.get(hucre)
+        if kume is None:
+            kumeler[hucre] = {
+                "latitude": lat,
+                "longitude": lon,
+                "tespit_sayisi": 1,
+                "en_yeni_saat_once": saat_once,
+                "en_eski_saat_once": saat_once,
+                "maks_frp": frp,
+                "_nokta_ornegi": Point(lon, lat),
+            }
+            continue
+
+        kume["tespit_sayisi"] += 1
+        if saat_once is not None:
+            if kume["en_yeni_saat_once"] is None or saat_once < kume["en_yeni_saat_once"]:
+                kume["en_yeni_saat_once"] = saat_once
+            if kume["en_eski_saat_once"] is None or saat_once > kume["en_eski_saat_once"]:
+                kume["en_eski_saat_once"] = saat_once
+        if frp is not None and (kume["maks_frp"] is None or frp > kume["maks_frp"]):
+            kume["maks_frp"] = frp
+
+    sinir = unary_union([p for _, p in il_poligonlari])
+    sonuc = []
+    sorgu_sayaci = 0
+    for kume in kumeler.values():
+        nokta = kume.pop("_nokta_ornegi")
+        if not sinir.contains(nokta):
+            continue
+        kume["il"] = _il_bul(nokta, il_poligonlari)
+        if sorgu_sayaci < NOMINATIM_MAX_SORGU:
+            kume["yer"] = _ilce_koy_bul(kume["latitude"], kume["longitude"])
             sorgu_sayaci += 1
             time.sleep(1)  # Nominatim kullanım politikası: saniyede en fazla 1 istek
-        nokta["yer"] = hucreler[hucre]
+        else:
+            kume["yer"] = None
+        sonuc.append(kume)
 
-    print(f"[hotspots] {sorgu_sayaci} benzersiz konum Nominatim'e soruldu ({len(noktalar)} nokta için)")
+    print(f"[hotspots] {sorgu_sayaci} konum Nominatim'e soruldu ({len(sonuc)} küme için)")
+    return sonuc
 
 
 def main():
@@ -138,36 +195,19 @@ def main():
     if DUSUK_GUVEN_HARIC and "confidence" in df.columns:
         df = df[df["confidence"] != "l"]
 
-    noktalar = []
+    kumeler = []
     if len(df):
         il_poligonlari = _il_poligonlarini_yukle()
-        sinir = unary_union([p for _, p in il_poligonlari])
-
-        for _, satir in df.iterrows():
-            nokta = Point(float(satir["longitude"]), float(satir["latitude"]))
-            if not sinir.contains(nokta):
-                continue
-            noktalar.append({
-                "latitude": float(satir["latitude"]),
-                "longitude": float(satir["longitude"]),
-                "acq_date": str(satir.get("acq_date", "")),
-                "acq_time": int(satir.get("acq_time", 0)),
-                "confidence": str(satir.get("confidence", "")),
-                "frp": float(satir["frp"]) if "frp" in satir and pd.notna(satir["frp"]) else None,
-                "il": _il_bul(nokta, il_poligonlari),
-            })
-
-    if noktalar:
-        _ilce_koy_ekle(noktalar)
+        kumeler = _kumeleri_olustur(df, il_poligonlari)
 
     _yaz({
         "guncelleme_zamani": guncelleme_zamani,
         "kaynak": f"NASA FIRMS, {KAYNAK_SENSORU}",
         "gun_araligi": GUN_ARALIGI,
-        "nokta_sayisi": len(noktalar),
-        "noktalar": noktalar,
+        "nokta_sayisi": len(kumeler),
+        "noktalar": kumeler,
     })
-    print(f"[hotspots] {len(noktalar)} sıcak nokta (Türkiye sınırları içinde, son {GUN_ARALIGI} gün)")
+    print(f"[hotspots] {len(kumeler)} konum kümesi (Türkiye sınırları içinde, son {GUN_ARALIGI} gün)")
 
 
 if __name__ == "__main__":

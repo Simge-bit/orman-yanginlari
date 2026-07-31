@@ -10,12 +10,13 @@
   <div id="site-header"></div>
 
   <main>
-    <h1>Ülke Karşılaştırması</h1>
+    <h1>Ülke Karşılaştırması (<span id="yil-araligi">…</span>)</h1>
     <p class="aciklama">
       EFFIS/Copernicus verisiyle Türkiye ve dört Akdeniz ülkesinin yıllık
       yanan alanı (hektar). Türkiye vurgu renginde, diğer ülkeler bağlam
       olarak gri — her ülkenin kesin değeri grafiğin üzerine gelerek veya
       alttaki tablodan görülebilir.
+      <strong id="guncellik-uyarisi"></strong>
     </p>
 
     <div class="chart-karti">
@@ -28,8 +29,9 @@
 
     <p class="kaynak-notu">
       Kaynak: EFFIS/Copernicus, "Forest Fires in Europe, Middle East and
-      North Africa" yıllık raporu. Bazı ülkeler erken yıllarda EFFIS'e veri
-      bildirmemiştir (grafikte boşluk olarak görünür).
+      North Africa" yıllık raporu (<span id="yil-araligi-2"></span>). Bazı
+      ülkeler erken yıllarda EFFIS'e veri bildirmemiştir (grafikte boşluk
+      olarak görünür).
     </p>
   </main>
 
@@ -44,6 +46,14 @@
 
       const yillar = [...new Set(ulkeler.map((s) => s.yil))].sort((a, b) => a - b);
       const ulkeAdlari = [...new Set(ulkeler.map((s) => s.ulke))];
+
+      const ilkYil = yillar[0];
+      const sonYil = yillar[yillar.length - 1];
+      const yilAraligiMetni = `${ilkYil}-${sonYil}`;
+      document.getElementById("yil-araligi").textContent = yilAraligiMetni;
+      document.getElementById("yil-araligi-2").textContent = yilAraligiMetni;
+      document.getElementById("guncellik-uyarisi").textContent =
+        ` Bu sayfa sitenin geri kalanından geride: EFFIS'in ${sonYil + 1} yılı raporu erişim tarihinde henüz yayınlanmamıştı.`;
 
       const seriler = ulkeAdlari.map((ulke) => {
         const kayitlar = new Map(ulkeler.filter((s) => s.ulke === ulke).map((s) => [s.yil, s.yanan_alan_ha]));
