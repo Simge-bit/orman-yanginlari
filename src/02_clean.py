@@ -94,11 +94,31 @@ def clean_effis():
     print(f"[clean] effis_ulke_karsilastirma.csv: {len(df)} satır, ülkeler: {sorted(df['ulke'].dropna().unique())}")
 
 
+def clean_bolge_2025():
+    df = pd.read_csv(data_path("interim", "bolge_yangin_2025_ham.csv"))
+    df["yangin_sayisi"] = _sayiya_cevir(df["yangin_sayisi"])
+    df["yanan_alan_ha"] = _sayiya_cevir(df["yanan_alan_ha"])
+
+    yillik = pd.read_csv(data_path("interim", "yillik_seri.csv"))
+    ulusal_2025 = yillik[yillik["yil"] == 2025].iloc[0]
+    if df["yangin_sayisi"].sum() != ulusal_2025["yangin_sayisi"]:
+        print(f"[clean] UYARI: bölge toplamı ({df['yangin_sayisi'].sum():.0f}) "
+              f"ulusal 2025 toplamıyla ({ulusal_2025['yangin_sayisi']:.0f}) uyuşmuyor")
+    if round(df["yanan_alan_ha"].sum(), 1) != round(ulusal_2025["yanan_alan_ha"], 1):
+        print(f"[clean] UYARI: bölge alan toplamı ({df['yanan_alan_ha'].sum():.1f}) "
+              f"ulusal 2025 toplamıyla ({ulusal_2025['yanan_alan_ha']:.1f}) uyuşmuyor")
+
+    df.to_csv(data_path("interim", "bolge_yangin_2025.csv"), index=False)
+    print(f"[clean] bolge_yangin_2025.csv: {len(df)} bölge müdürlüğü, "
+          f"toplam yangın={df['yangin_sayisi'].sum():.0f}, toplam alan={df['yanan_alan_ha'].sum():.0f} ha")
+
+
 def main():
     clean_yillik_seri()
     clean_il_dagilim()
     clean_orman_alani()
     clean_effis()
+    clean_bolge_2025()
 
 
 if __name__ == "__main__":

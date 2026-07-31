@@ -55,6 +55,15 @@
       sadece 2024) ve Tablo 1.6 (il orman alanı referansı). Çok yıllı il
       serisi mevcut değil.
     </p>
+
+    <h2>2025: Bölge Müdürlüğü Bazında Yangınlar</h2>
+    <p class="aciklama" id="bolge-2025-aciklama"></p>
+    <div id="tablo-bolge-2025"></div>
+    <p class="kaynak-notu">
+      Kaynak: OGM 2025 Faaliyet Raporu, Ek 6/Tablo (Orman Bölge Müdürlükleri
+      dağılımı). Toplam (3.224 yangın / 81.473 ha), ulusal 2025 rakamıyla
+      birebir eşleşiyor — bkz. <a href="metodoloji.html">Metodoloji</a>.
+    </p>
   </main>
 
   <div id="site-footer"></div>
@@ -80,6 +89,18 @@
           sayiFormatla(il.yangin_sayisi),
           sayiFormatla(il.yanan_alan_ha),
           sayiFormatla(il.yogunluk_indeksi_yuzde, 2),
+        ]),
+      });
+
+      document.getElementById("bolge-2025-aciklama").textContent = cografi.bolge_2025.kapsam_notu;
+      tabloOlustur({
+        detailsId: "tablo-bolge-2025",
+        basliklar: ["#", "Orman Bölge Müdürlüğü", "Yangın sayısı", "Yanan alan (ha)"],
+        satirlar: cografi.bolge_2025.bolgeler.map((b) => [
+          b.sira_alan,
+          b.bolge_muduru,
+          sayiFormatla(b.yangin_sayisi),
+          sayiFormatla(b.yanan_alan_ha),
         ]),
       });
     }

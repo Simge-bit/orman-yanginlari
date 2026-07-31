@@ -50,3 +50,14 @@ def test_effis_konfigurasyondaki_ulkeleri_iceriyor():
     df = pd.read_csv(data_path("interim", "effis_ulke_karsilastirma.csv"))
     df_2024 = df[df["yil"] == 2024]
     assert set(config["karsilastirma_ulkeler"]) <= set(df_2024["ulke"].dropna())
+
+
+def test_bolge_2025_toplami_ulusal_toplamla_yakin():
+    bolge_df = pd.read_csv(data_path("interim", "bolge_yangin_2025.csv"))
+    yillik_df = pd.read_csv(data_path("interim", "yillik_seri.csv"))
+    ulusal_2025 = yillik_df[yillik_df["yil"] == 2025].iloc[0]
+
+    assert bolge_df["yangin_sayisi"].sum() == ulusal_2025["yangin_sayisi"]
+    # OGM'nin kendi Faaliyet Raporu'nda bölge tablosu (81.473,46) ile özet
+    # tablosu (81.473) arasında ~0.5 ha'lık bilinen bir yuvarlama farkı var.
+    assert abs(bolge_df["yanan_alan_ha"].sum() - ulusal_2025["yanan_alan_ha"]) < 1.0

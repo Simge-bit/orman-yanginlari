@@ -73,11 +73,22 @@ def ingest_effis():
     print(f"[ingest] effis_ulke_ham.csv: {len(out)} satır")
 
 
+def ingest_bolge_2025():
+    # İl bazında 2025 verisi hiçbir resmi kaynakta yok (bkz. KAYNAKLAR.md) —
+    # bu, aynı Faaliyet Raporu'nun "Orman Bölge Müdürlükleri" (~30 bölge,
+    # il değil) düzeyindeki tek 2025 coğrafi kırılımı. Zaten temiz bir CSV,
+    # sadece geçiyor.
+    df = pd.read_csv(data_path("raw", "ogm_faaliyet_raporu_2025_bolge_yangin.csv"))
+    df.to_csv(data_path("interim", "bolge_yangin_2025_ham.csv"), index=False)
+    print(f"[ingest] bolge_yangin_2025_ham.csv: {len(df)} bölge müdürlüğü")
+
+
 def main():
     ingest_yillik_seri()
     ingest_il_dagilim()
     ingest_orman_alani()
     ingest_effis()
+    ingest_bolge_2025()
 
 
 if __name__ == "__main__":

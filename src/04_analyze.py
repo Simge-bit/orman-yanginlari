@@ -60,10 +60,20 @@ def analyze_ulke_konumu():
     print(f"[analyze] ulke_siralama.csv: Türkiye'nin 5 ülke arasında ortalama sırası (alan)={ortalama_sira:.1f}")
 
 
+def analyze_bolge_2025():
+    df = pd.read_csv(data_path("interim", "bolge_yangin_2025.csv"))
+    df["sira_alan"] = df["yanan_alan_ha"].rank(ascending=False, method="min").astype(int)
+    df = df.sort_values("sira_alan")
+    df.to_csv(data_path("interim", "bolge_siralama_2025.csv"), index=False)
+    print(f"[analyze] bolge_siralama_2025.csv: en çok yanan bölge müdürlüğü={df.iloc[0]['bolge_muduru']} "
+          f"({df.iloc[0]['yanan_alan_ha']:.0f} ha)")
+
+
 def main():
     analyze_il_siralama()
     analyze_yillik_siralama_ve_egim()
     analyze_ulke_konumu()
+    analyze_bolge_2025()
 
 
 if __name__ == "__main__":

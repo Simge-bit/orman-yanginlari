@@ -71,7 +71,25 @@ def export_cografi():
     df = pd.read_csv(data_path("interim", "il_siralama.csv"))
     kolonlar = ["il", "yangin_sayisi", "yanan_alan_ha", "orman_alani_ha", "yogunluk_indeksi_yuzde", "sira_alan", "sira_yogunluk"]
     kayitlar = json.loads(df[kolonlar].round(3).to_json(orient="records"))
-    _yaz("cografi", {"yil": 2024, "kapsam_notu": "il bazında sadece 2024 verisi mevcut", "iller": kayitlar})
+
+    bolge_df = pd.read_csv(data_path("interim", "bolge_siralama_2025.csv"))
+    bolge_kayitlar = json.loads(bolge_df[["bolge_muduru", "yangin_sayisi", "yanan_alan_ha", "sira_alan"]].round(2).to_json(orient="records"))
+
+    _yaz("cografi", {
+        "yil": 2024,
+        "kapsam_notu": "il bazında sadece 2024 verisi mevcut",
+        "iller": kayitlar,
+        "bolge_2025": {
+            "yil": 2025,
+            "kapsam_notu": (
+                "İl bazında 2025 verisi hiçbir resmi kaynakta yok. Bu, OGM'nin 2025 "
+                "Faaliyet Raporu'ndaki tek coğrafi kırılım — 'Orman Bölge Müdürlüğü' "
+                "il ile birebir örtüşmeyen ayrı bir idari birimdir (bazı bölgeler "
+                "birden fazla ili kapsar)."
+            ),
+            "bolgeler": bolge_kayitlar,
+        },
+    })
 
 
 def export_nedenler():
@@ -117,7 +135,7 @@ def export_metodoloji(config: dict):
         "bilinen_sinirlamalar": [
             "Mevsimsellik hesaplanamadı: OGM'nin yıllık istatistik yayınında aylık kırılım yok.",
             f"'Mega yangın' eşiği (config: {config['esikler']['mega_yangin_ha']} ha) uygulanamadı: mevcut veri yıllık/il toplamları düzeyinde, tekil yangın kaydı yok.",
-            "İl bazında kırılım sadece 2024 için mevcut; çok yıllı il serisi yok. En güncel yıl için de il bazında resmi veri yok.",
+            "İl bazında kırılım sadece 2024 için mevcut; çok yıllı il serisi yok. En güncel yıl için il bazında resmi veri yok — bunun yerine 'Orman Bölge Müdürlüğü' (il ile birebir örtüşmeyen ayrı bir idari birim) düzeyinde bir tablo eklendi (cografi.html, cografi.json bolge_2025).",
             "En güncel yıl (bkz. kapsam) 'Ormancılık İstatistikleri' yıllığından değil, OGM'nin 2025 Faaliyet Raporu'ndan (Tablo 16/17) alındı — yıllık istatistik yayınının o yılki sürümü erişim tarihinde henüz yayınlanmamıştı. Bu iki OGM yayını, aynı yıllar için neden kategorileri arasında (toplamlar aynı kalsa da) küçük dağılım farkları taşıyabiliyor.",
             "EFFIS ülke karşılaştırması en güncel yılı içermiyor: EFFIS'in ilgili yıla ait raporu erişim tarihinde henüz yayınlanmamıştı.",
             "2013 yılı için OGM kaynağının kendi tablosunda ~0.5 ha'lık küçük bir yuvarlama farkı var (neden kırılımı toplamı ile yıl toplamı arasında).",
