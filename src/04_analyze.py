@@ -69,11 +69,70 @@ def analyze_bolge_2025():
           f"({df.iloc[0]['yanan_alan_ha']:.0f} ha)")
 
 
+def analyze_bolge_neden_siralama():
+    # En çok merak edilen soru: hangi bölgede kasıt (kundaklama) payı orantısız
+    # yüksek? En az 15 yangınlık bölgeler dahil edilir — Sinop (18) gibi çok
+    # az sayıda yangınla oranın tesadüfen çarpık çıkmasını önlemek için.
+    MIN_YANGIN = 15
+    df = pd.read_csv(data_path("interim", "bolge_neden_2025.csv"))
+    yeterli = df[df["yangin_sayisi"] >= MIN_YANGIN].copy()
+    yeterli["sira_kasit_alan_oran"] = yeterli["kasit_alan_oran"].rank(ascending=False, method="min").astype(int)
+    yeterli["sira_kasit_sayi_oran"] = yeterli["kasit_sayi_oran"].rank(ascending=False, method="min").astype(int)
+    yeterli = yeterli.sort_values("sira_kasit_alan_oran")
+    yeterli.to_csv(data_path("interim", "bolge_neden_siralama_2025.csv"), index=False)
+    ilk = yeterli.iloc[0]
+    print(f"[analyze] bolge_neden_siralama_2025.csv: en yüksek kasıt (alan) oranı="
+          f"{ilk['bolge_muduru']} (%{ilk['kasit_alan_oran']:.1f}, min {MIN_YANGIN} yangın şartıyla)")
+
+
+def analyze_yogunlasma():
+    # "Kaç kötü yıl toplamın büyük kısmını oluşturuyor?" — yıldan yıla
+    # ortalamaya bakmanın gizlediği bir çarpıklık/yoğunlaşma ölçüsü.
+    EN_KOTU_YIL_SAYISI = 5
+    df = pd.read_csv(data_path("interim", "yillik_metrikler.csv")).sort_values("yil")
+    toplam_ha = df["yanan_alan_ha"].sum()
+    en_kotu = df.nlargest(EN_KOTU_YIL_SAYISI, "yanan_alan_ha")
+    en_kotu_toplam = en_kotu["yanan_alan_ha"].sum()
+    sonuc = pd.DataFrame([{
+        "toplam_yil_sayisi": len(df),
+        "en_kotu_yil_sayisi": EN_KOTU_YIL_SAYISI,
+        "en_kotu_yillar_toplam_ha": round(en_kotu_toplam, 1),
+        "genel_toplam_ha": round(toplam_ha, 1),
+        "en_kotu_yillar_orani_yuzde": round(en_kotu_toplam / toplam_ha * 100, 1),
+        "en_kotu_yillar": ", ".join(str(y) for y in sorted(en_kotu["yil"])),
+    }])
+    sonuc.to_csv(data_path("interim", "yogunlasma.csv"), index=False)
+    print(f"[analyze] yogunlasma.csv: en kötü {EN_KOTU_YIL_SAYISI} yıl ({sonuc.iloc[0]['en_kotu_yillar']}), "
+          f"{len(df)} yıllık toplamın %{sonuc.iloc[0]['en_kotu_yillar_orani_yuzde']:.1f}'ini oluşturuyor")
+
+
+def analyze_orman_kaplama_korelasyonu():
+    # Daha ormanlık iller orantılı olarak daha mı çok yanıyor? il_metrikler
+    # (yoğunluk indeksi) ile orman_alani_il (orman kaplama %) birleştirilip
+    # Pearson korelasyonu hesaplanır.
+    il_df = pd.read_csv(data_path("interim", "il_metrikler.csv"))
+    orman_df = pd.read_csv(data_path("interim", "orman_alani_il.csv"))[["il", "orman_kaplama_yuzde"]]
+    df = il_df.merge(orman_df, on="il", how="inner")
+
+    r = df["orman_kaplama_yuzde"].corr(df["yogunluk_indeksi_yuzde"])
+    sonuc = pd.DataFrame([{
+        "iliski": "orman_kaplama_yuzde vs yogunluk_indeksi_yuzde",
+        "pearson_r": round(float(r), 3),
+        "il_sayisi": len(df),
+        "kapsam_yili": 2024,
+    }])
+    sonuc.to_csv(data_path("interim", "korelasyon.csv"), index=False)
+    print(f"[analyze] korelasyon.csv: orman kaplama %% ile yoğunluk indeksi arasında r={r:.3f} (n={len(df)})")
+
+
 def main():
     analyze_il_siralama()
     analyze_yillik_siralama_ve_egim()
     analyze_ulke_konumu()
     analyze_bolge_2025()
+    analyze_bolge_neden_siralama()
+    analyze_yogunlasma()
+    analyze_orman_kaplama_korelasyonu()
 
 
 if __name__ == "__main__":

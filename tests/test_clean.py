@@ -61,3 +61,15 @@ def test_bolge_2025_toplami_ulusal_toplamla_yakin():
     # OGM'nin kendi Faaliyet Raporu'nda bölge tablosu (81.473,46) ile özet
     # tablosu (81.473) arasında ~0.5 ha'lık bilinen bir yuvarlama farkı var.
     assert abs(bolge_df["yanan_alan_ha"].sum() - ulusal_2025["yanan_alan_ha"]) < 1.0
+
+
+def test_bolge_neden_2025_bolge_toplamiyla_eslesiyor():
+    neden_df = pd.read_csv(data_path("interim", "bolge_neden_2025.csv"))
+    bolge_df = pd.read_csv(data_path("interim", "bolge_yangin_2025.csv"))
+    birlesik = neden_df.merge(bolge_df, on="bolge_muduru", suffixes=("_neden", "_toplam"))
+
+    assert (birlesik["yangin_sayisi_neden"] == birlesik["yangin_sayisi_toplam"]).all()
+    assert ((birlesik["yanan_alan_ha_neden"] - birlesik["yanan_alan_ha_toplam"]).abs() < 0.1).all()
+
+    oran_kolonlari = [c for c in neden_df.columns if c.endswith("_sayi_oran")]
+    assert (neden_df[oran_kolonlari].sum(axis=1).round(1) == 100.0).all()

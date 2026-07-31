@@ -56,6 +56,8 @@
       serisi mevcut değil.
     </p>
 
+    <p class="aciklama" id="korelasyon-notu"></p>
+
     <h2>2025: Bölge Müdürlüğü Bazında Yangınlar</h2>
     <p class="aciklama" id="bolge-2025-aciklama"></p>
     <div id="tablo-bolge-2025"></div>
@@ -63,6 +65,14 @@
       Kaynak: OGM 2025 Faaliyet Raporu, Ek 6/Tablo (Orman Bölge Müdürlükleri
       dağılımı). Toplam (3.224 yangın / 81.473 ha), ulusal 2025 rakamıyla
       birebir eşleşiyor — bkz. <a href="metodoloji.html">Metodoloji</a>.
+    </p>
+
+    <h2>2025: En Yüksek Kasıt (Kundaklama) Oranına Sahip Bölgeler</h2>
+    <p class="aciklama" id="kasit-orani-aciklama"></p>
+    <div id="tablo-kasit-orani"></div>
+    <p class="kaynak-notu">
+      Aynı Ek 6 tablosunun neden kırılımından; en az 15 yangınlık bölge
+      müdürlükleri arasında, alan bazında kasıt oranına göre sıralanmıştır.
     </p>
   </main>
 
@@ -101,6 +111,26 @@
           b.bolge_muduru,
           sayiFormatla(b.yangin_sayisi),
           sayiFormatla(b.yanan_alan_ha),
+        ]),
+      });
+
+      const kor = cografi.orman_kaplama_korelasyonu;
+      document.getElementById("korelasyon-notu").textContent =
+        `Bulgu: orman kaplama oranı ile yoğunluk indeksi arasında r=${sayiFormatla(kor.pearson_r, 2)} (${kor.il_sayisi} il, 2024). ${kor.aciklama}`;
+
+      const kasitOraniIlk10 = [...cografi.bolge_2025.kasit_orani_siralama.bolgeler]
+        .sort((a, b) => a.sira_kasit_alan_oran - b.sira_kasit_alan_oran)
+        .slice(0, 10);
+      document.getElementById("kasit-orani-aciklama").textContent = cografi.bolge_2025.kasit_orani_siralama.kapsam_notu;
+      tabloOlustur({
+        detailsId: "tablo-kasit-orani",
+        basliklar: ["#", "Orman Bölge Müdürlüğü", "Yangın sayısı", "Kasıt oranı (alan, %)", "Kasıt oranı (sayı, %)"],
+        satirlar: kasitOraniIlk10.map((b) => [
+          b.sira_kasit_alan_oran,
+          b.bolge_muduru,
+          sayiFormatla(b.yangin_sayisi),
+          sayiFormatla(b.kasit_alan_oran, 1),
+          sayiFormatla(b.kasit_sayi_oran, 1),
         ]),
       });
     }

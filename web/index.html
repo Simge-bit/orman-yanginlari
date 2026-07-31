@@ -76,6 +76,11 @@
           delta: `${ozet.kapsam_yil_araligi[0]}-${ozet.kapsam_yil_araligi[1]} geneli: ${ozet.uzun_donem_egim_ha_yil.deger > 0 ? "+" : ""}${sayiFormatla(ozet.uzun_donem_egim_ha_yil.deger, 0)} ha/yıl`,
           yon: ozet.son_10_yil_egim_ha_yil.deger >= 0 ? "up" : "down",
         },
+        {
+          label: `En kötü ${ozet.yogunlasma.en_kotu_yil_sayisi} yılın payı (${ozet.yogunlasma.toplam_yil_sayisi} yıllık toplamda)`,
+          value: `%${sayiFormatla(ozet.yogunlasma.orani_yuzde, 1)}`,
+          delta: ozet.yogunlasma.en_kotu_yillar,
+        },
       ];
 
       karolar.forEach((karo) => {

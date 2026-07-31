@@ -28,6 +28,7 @@ def export_ozet():
     yillik = pd.read_csv(data_path("interim", "yillik_metrikler.csv")).sort_values("yil")
     egim = pd.read_csv(data_path("interim", "yillik_egim.csv"))
     il_siralama = pd.read_csv(data_path("interim", "il_siralama.csv"))
+    yogunlasma = pd.read_csv(data_path("interim", "yogunlasma.csv")).iloc[0]
 
     son = yillik.iloc[-1]
     onceki = yillik.iloc[-2]
@@ -52,6 +53,12 @@ def export_ozet():
         "uzun_donem_egim_ha_yil": {"kapsam": tum_donem_egim["kapsam"], "deger": round(float(tum_donem_egim["alan_egimi_ha_yil"]), 1)},
         "son_10_yil_egim_ha_yil": {"kapsam": son_10_yil_egim["kapsam"], "deger": round(float(son_10_yil_egim["alan_egimi_ha_yil"]), 1)},
         "kapsam_yil_araligi": [int(yillik["yil"].min()), int(yillik["yil"].max())],
+        "yogunlasma": {
+            "en_kotu_yil_sayisi": int(yogunlasma["en_kotu_yil_sayisi"]),
+            "en_kotu_yillar": yogunlasma["en_kotu_yillar"],
+            "orani_yuzde": float(yogunlasma["en_kotu_yillar_orani_yuzde"]),
+            "toplam_yil_sayisi": int(yogunlasma["toplam_yil_sayisi"]),
+        },
     }
     _yaz("ozet", veri)
 
@@ -75,10 +82,29 @@ def export_cografi():
     bolge_df = pd.read_csv(data_path("interim", "bolge_siralama_2025.csv"))
     bolge_kayitlar = json.loads(bolge_df[["bolge_muduru", "yangin_sayisi", "yanan_alan_ha", "sira_alan"]].round(2).to_json(orient="records"))
 
+    bolge_neden_df = pd.read_csv(data_path("interim", "bolge_neden_siralama_2025.csv"))
+    bolge_neden_kolonlar = [
+        "bolge_muduru", "yangin_sayisi", "kasit_sayi_oran", "kasit_alan_oran",
+        "sira_kasit_alan_oran", "sira_kasit_sayi_oran",
+    ]
+    bolge_neden_kayitlar = json.loads(bolge_neden_df[bolge_neden_kolonlar].round(2).to_json(orient="records"))
+
+    korelasyon = pd.read_csv(data_path("interim", "korelasyon.csv")).iloc[0]
+
     _yaz("cografi", {
         "yil": 2024,
         "kapsam_notu": "il bazında sadece 2024 verisi mevcut",
         "iller": kayitlar,
+        "orman_kaplama_korelasyonu": {
+            "pearson_r": float(korelasyon["pearson_r"]),
+            "il_sayisi": int(korelasyon["il_sayisi"]),
+            "aciklama": (
+                "Orman kaplama oranı (%) ile yangın yoğunluk indeksi arasındaki "
+                "Pearson korelasyon katsayısı. |r| < 0,3 zayıf/anlamsız bir ilişki "
+                "olduğunu gösterir — yani daha ormanlık iller orantılı olarak daha "
+                "çok yanmıyor; konum, iklim ve insan etkeni daha belirleyici olabilir."
+            ),
+        },
         "bolge_2025": {
             "yil": 2025,
             "kapsam_notu": (
@@ -88,6 +114,10 @@ def export_cografi():
                 "birden fazla ili kapsar)."
             ),
             "bolgeler": bolge_kayitlar,
+            "kasit_orani_siralama": {
+                "kapsam_notu": "En az 15 yangını olan bölge müdürlükleri arasında, kasıt (kundaklama) payı en yüksek olanlar.",
+                "bolgeler": bolge_neden_kayitlar,
+            },
         },
     })
 
@@ -128,6 +158,9 @@ def export_metodoloji(config: dict):
             {"id": "yogunluk_indeksi_yuzde", "tanim": "İl bazında yanan alan / toplam orman alanı", "birim": "%"},
             {"id": "*_sayi_oran / *_alan_oran", "tanim": "Neden kategorisinin o yılki toplam içindeki payı (kasıt/ihmal-kaza/doğal/bilinmeyen)", "birim": "%"},
             {"id": "alan_payi_yuzde", "tanim": "Ülkenin, o yıl karşılaştırma grubundaki (5 ülke) toplam yanan alan içindeki payı", "birim": "%"},
+            {"id": "yogunlasma.orani_yuzde", "tanim": "En kötü 5 yılın, tüm dönemin toplam yanan alanı içindeki payı", "birim": "%"},
+            {"id": "orman_kaplama_korelasyonu.pearson_r", "tanim": "İl bazında orman kaplama oranı (%) ile yoğunluk indeksi arasındaki Pearson korelasyon katsayısı", "birim": "-1 ile 1 arası"},
+            {"id": "kasit_orani_siralama.kasit_alan_oran / kasit_sayi_oran", "tanim": "Bölge müdürlüğü başına kasıt (kundaklama) kaynaklı yangınların payı, en az 15 yangınlık bölgeler arasında", "birim": "%"},
         ],
         "kapsam": {
             "yil_araligi": gercek_yil_araligi,
@@ -143,6 +176,8 @@ def export_metodoloji(config: dict):
             "2013 yılı için OGM kaynağının kendi tablosunda ~0.5 ha'lık küçük bir yuvarlama farkı var (neden kırılımı toplamı ile yıl toplamı arasında).",
             "GeoJSON'da 'Afyon', OGM tablolarında 'Afyonkarahisar' olarak geçiyor; eşleme pipeline'da yapılıyor (bkz. src/utils.py IL_ALIASLARI).",
             "EFFIS ülke karşılaştırmasında bazı ülkeler erken yıllarda (1980'ler) veri bildirmemiş; grafikte ve tabloda bu yıllar boşluk olarak görünür.",
+            "Bölge müdürlüğü bazında 2025 neden kırılımı (Ek 6), ulusal tablonun 4 kategorisinden farklı olarak İhmal ve Kaza'yı ayrı sütunlarda veriyor; siteyle tutarlı olsun diye ikisi 'ihmal_kaza' olarak toplanıyor. Kasıt oranı sıralaması, tesadüfen çarpık oran çıkmasın diye en az 15 yangınlık bölgelerle sınırlı.",
+            "Orman kaplama % ile yoğunluk indeksi arasındaki korelasyon sadece 2024 kesitinde (81 il, tek yıl) hesaplandı — zaman içindeki değişimi yakalamaz, sadece o yılki iller-arası ilişkiyi gösterir.",
             "Tüm istatistiksel rakamlar (yangın sayısı, alan, oran) birincil/resmi kaynaklardan (OGM, EFFIS) gelir; haber/blog/STK derlemesi istatistik kaynağı olarak alınmadı. Canlı harita katmanı (NASA FIRMS) ve yer adı etiketleme (OpenStreetMap Nominatim) bu kuralın istisnası değil ama farklı bir kategoridir: ilki ham gözlem verisi, ikincisi sadece görüntüleme amaçlı yer-adı sorgusu — hiçbiri istatistiksel bir iddia taşımıyor.",
         ],
         "olusturulma_notu": "Bu dosya src/05_export.py tarafından otomatik üretilir, elle düzenlenmez.",

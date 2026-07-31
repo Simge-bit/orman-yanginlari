@@ -113,12 +113,61 @@ def clean_bolge_2025():
           f"toplam yangın={df['yangin_sayisi'].sum():.0f}, toplam alan={df['yanan_alan_ha'].sum():.0f} ha")
 
 
+def clean_bolge_neden_2025():
+    df = pd.read_csv(data_path("interim", "bolge_neden_2025_ham.csv"))
+    ham_kolonlar = [
+        "ihmal_sayi", "ihmal_alan_ha", "kasit_sayi", "kasit_alan_ha",
+        "kaza_sayi", "kaza_alan_ha", "bilinmeyen_sayi", "bilinmeyen_alan_ha",
+        "yildirim_sayi", "yildirim_alan_ha",
+    ]
+    for kolon in ham_kolonlar:
+        df[kolon] = _sayiya_cevir(df[kolon])
+
+    # Ulusal tabloyla (4 kategori) tutarlı olsun diye İhmal+Kaza birleştirilir,
+    # Yıldırım -> Doğal olarak yeniden adlandırılır (aynı şey, farklı isim).
+    df["ihmal_kaza_sayi"] = df["ihmal_sayi"] + df["kaza_sayi"]
+    df["ihmal_kaza_alan_ha"] = df["ihmal_alan_ha"] + df["kaza_alan_ha"]
+    df["dogal_sayi"] = df["yildirim_sayi"]
+    df["dogal_alan_ha"] = df["yildirim_alan_ha"]
+
+    df["yangin_sayisi"] = df["kasit_sayi"] + df["ihmal_kaza_sayi"] + df["dogal_sayi"] + df["bilinmeyen_sayi"]
+    df["yanan_alan_ha"] = df["kasit_alan_ha"] + df["ihmal_kaza_alan_ha"] + df["dogal_alan_ha"] + df["bilinmeyen_alan_ha"]
+
+    for kategori in ["kasit", "ihmal_kaza", "dogal", "bilinmeyen"]:
+        df[f"{kategori}_sayi_oran"] = df[f"{kategori}_sayi"] / df["yangin_sayisi"] * 100
+        df[f"{kategori}_alan_oran"] = df[f"{kategori}_alan_ha"] / df["yanan_alan_ha"] * 100
+
+    bolge_toplam = pd.read_csv(data_path("interim", "bolge_yangin_2025.csv"))
+    kontrol = df[["bolge_muduru", "yangin_sayisi", "yanan_alan_ha"]].merge(
+        bolge_toplam[["bolge_muduru", "yangin_sayisi", "yanan_alan_ha"]],
+        on="bolge_muduru", suffixes=("_neden", "_toplam"),
+    )
+    # round() yerine mutlak fark: kayan nokta toplama hatası (ör. 3257.4500000000003)
+    # yuvarlamada yanlışlıkla farklı yöne gidip yanlış alarm verebiliyor.
+    uyumsuz = kontrol[
+        (kontrol["yangin_sayisi_neden"] != kontrol["yangin_sayisi_toplam"])
+        | ((kontrol["yanan_alan_ha_neden"] - kontrol["yanan_alan_ha_toplam"]).abs() > 0.1)
+    ]
+    if len(uyumsuz):
+        print(f"[clean] UYARI: bölge neden kırılımı, bölge toplamıyla uyuşmuyor -> {uyumsuz['bolge_muduru'].tolist()}")
+
+    kategoriler = ["kasit", "ihmal_kaza", "dogal", "bilinmeyen"]
+    kolonlar = (
+        ["bolge_muduru", "yangin_sayisi", "yanan_alan_ha"]
+        + [f"{k}_{t}" for k in kategoriler for t in ("sayi", "alan_ha")]
+        + [f"{k}_{t}_oran" for k in kategoriler for t in ("sayi", "alan")]
+    )
+    df[kolonlar].to_csv(data_path("interim", "bolge_neden_2025.csv"), index=False)
+    print(f"[clean] bolge_neden_2025.csv: {len(df)} bölge müdürlüğü, neden oranları hesaplandı")
+
+
 def main():
     clean_yillik_seri()
     clean_il_dagilim()
     clean_orman_alani()
     clean_effis()
     clean_bolge_2025()
+    clean_bolge_neden_2025()
 
 
 if __name__ == "__main__":

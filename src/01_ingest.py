@@ -83,12 +83,25 @@ def ingest_bolge_2025():
     print(f"[ingest] bolge_yangin_2025_ham.csv: {len(df)} bölge müdürlüğü")
 
 
+def ingest_bolge_neden_2025():
+    # Aynı Faaliyet Raporu Ek 6 tablosunun neden kırılımı — bölge müdürlüğü
+    # başına İhmal/Kasıt/Kaza/Bilinmeyen/Yıldırım (5 kategori, ulusal
+    # tablonun 4 kategorisinden daha ince: İhmal ve Kaza burada ayrı).
+    # PDF'ten çıkarılırken her satır kendi TOPLAM'ı ve
+    # ogm_faaliyet_raporu_2025_bolge_yangin.csv ile program dışında
+    # (scratchpad/bolge_neden_dogrula.py) çapraz doğrulandı, 0 hata.
+    df = pd.read_csv(data_path("raw", "ogm_faaliyet_raporu_2025_bolge_neden.csv"))
+    df.to_csv(data_path("interim", "bolge_neden_2025_ham.csv"), index=False)
+    print(f"[ingest] bolge_neden_2025_ham.csv: {len(df)} bölge müdürlüğü")
+
+
 def main():
     ingest_yillik_seri()
     ingest_il_dagilim()
     ingest_orman_alani()
     ingest_effis()
     ingest_bolge_2025()
+    ingest_bolge_neden_2025()
 
 
 if __name__ == "__main__":

@@ -47,9 +47,28 @@ başlar.
   yayınının kategori sınırları arasında küçük bir tutarsızlık olduğu
   metodoloji sayfasında belirtiliyor.
 - **Eksik:** Bu rapor il (81 il) bazında kırılım vermiyor, sadece "Ek 6"da
-  Orman Bölge Müdürlüğü bazında yangın sayısı (alan yok) var. Bu yüzden
+  Orman Bölge Müdürlüğü (~30 bölge) bazında yangın sayısı VE alanı var
+  (bkz. `ogm_faaliyet_raporu_2025_bolge_yangin.csv` altında). Bu yüzden
   `cografi.json` / harita 2024'te kalmaya devam ediyor — 2025 il bazında
   veri hiçbir resmi kaynakta yok.
+
+### `ogm_faaliyet_raporu_2025_bolge_yangin.csv` + `ogm_faaliyet_raporu_2025_bolge_neden.csv`
+- **Kaynak:** Aynı "2025 Yılı Faaliyet Raporu", Ek 6 "Orman Yangın
+  Sayılarının Orman Bölge Müdürlükleri Dağılımı, 2025" (basılı sayfa 61,
+  PDF sayfa 73).
+- **İçerik:** 30 bölge müdürlüğü + Milli Parklar için yangın sayısı ve
+  yanan alan (`..._bolge_yangin.csv`), ve İhmal/Kasıt/Kaza/Sebebi
+  Belirlenemeyen/Yıldırım kırılımı, sayı+alan (`..._bolge_neden.csv`).
+  Ulusal 4 kategoriyle (İhmal-Kaza birleşik, Yıldırım=Doğal) tutarlı olsun
+  diye pipeline'da (02_clean.py clean_bolge_neden_2025) yeniden gruplanıyor.
+- **Doğrulama:** PDF çift sütunlu, karmaşık bir tablo olduğu için önce
+  `pdftotext -layout` ile çıkarılıp PDF sayfasının kendisiyle (Read aracı,
+  görsel) satır satır karşılaştırıldı; ardından her satırın 5 alt
+  kategorisi kendi TOPLAM'ıyla ve `..._bolge_yangin.csv`'nin önceden
+  doğrulanmış değerleriyle programatik olarak (scratchpad/
+  bolge_neden_dogrula.py) çapraz kontrol edildi — 0 hata, tam eşleşme.
+- **Bölge müdürlüğü il değildir:** Bazı bölgeler birden fazla ili kapsar;
+  bu tablo il haritasının yerine değil yanına eklendi.
 
 ### `ogm_il_yangin_dagilimi_2024.xlsx`
 - **Kaynak:** OGM, Ormancılık İstatistikleri 2024, Tablo 2.14 "İllere göre
