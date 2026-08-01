@@ -25,6 +25,11 @@
       karşılaştırma.
     </p>
 
+    <div class="vurgu-kutusu" id="vurgu-kutusu">
+      <div class="vurgu-deger" id="vurgu-deger">Yükleniyor…</div>
+      <div class="vurgu-metin" id="vurgu-metin"></div>
+    </div>
+
     <div id="kpi-satiri" class="kpi-satiri" aria-live="polite"></div>
 
     <p class="kaynak-notu">
@@ -42,6 +47,17 @@
       const kpi = document.getElementById("kpi-satiri");
 
       document.getElementById("yil-araligi-metni").textContent = ozet.kapsam_yil_araligi.join("-");
+
+      const sd = ozet.son_donem_karsilastirmasi;
+      document.getElementById("vurgu-deger").textContent =
+        `Son ${sd.son_donem_yil_sayisi} yılda, önceki ${sd.onceki_donem_yil_sayisi} yılın toplamına yakın orman yandı`;
+      document.getElementById("vurgu-metin").textContent =
+        `${sd.son_donem_kapsam} arası yanan ${sayiFormatla(sd.son_donem_toplam_alan_ha)} hektar, ` +
+        `${ozet.kapsam_yil_araligi[0]}-${sd.son_donem_kapsam.split("-")[0] - 1} arasının ${sayiFormatla(sd.onceki_donem_toplam_alan_ha)} ` +
+        `hektarlık toplamının %${sayiFormatla(sd.son_donem_alan_orani_yuzde, 1)}'ine denk geliyor — üstelik bu son dönemde ` +
+        `yangın sayısı daha az (${sayiFormatla(sd.son_donem_toplam_yangin_sayisi)} yangın, önceki dönemde ` +
+        `${sayiFormatla(sd.onceki_donem_toplam_yangin_sayisi)}), yani yıllık ortalama yanan alan ` +
+        `${sayiFormatla(sd.ortalama_yillik_alan_kati, 1)} kat büyüdü.`;
 
       const sayiDegisimYon = ozet.onceki_yila_gore_sayi_degisim_yuzde >= 0 ? "up" : "down";
       const alanDegisimYon = ozet.onceki_yila_gore_alan_degisim_yuzde >= 0 ? "up" : "down";

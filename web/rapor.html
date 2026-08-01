@@ -88,12 +88,17 @@
         `${ozet.kapsam_yil_araligi[0]}-${ozet.kapsam_yil_araligi[1]} arası resmi verilere (OGM, EFFIS) dayanan özet analiz.`;
 
       // --- Genel Durum ---
+      const sd = ozet.son_donem_karsilastirmasi;
       document.getElementById("rapor-genel").textContent =
-        `${ozet.son_yil} yılında Türkiye'de ${sayiFormatla(ozet.son_yil_yangin_sayisi)} orman yangını çıktı ve ` +
-        `toplam ${sayiFormatla(ozet.son_yil_yanan_alan_ha)} hektar orman alanı yandı (ortalama yangın büyüklüğü ` +
-        `${sayiFormatla(ozet.son_yil_ortalama_buyukluk_ha, 2)} ha). Bir önceki yıla göre yangın sayısı ` +
-        `${yuzdeMetni(ozet.onceki_yila_gore_sayi_degisim_yuzde)}, buna karşın yanan alan ` +
-        `${yuzdeMetni(ozet.onceki_yila_gore_alan_degisim_yuzde)} — yani daha az sayıda ama çok daha büyük yangınlar ` +
+        `Son ${sd.son_donem_yil_sayisi} yılda (${sd.son_donem_kapsam}) yanan ${sayiFormatla(sd.son_donem_toplam_alan_ha)} ` +
+        `hektar, ondan önceki ${sd.onceki_donem_yil_sayisi} yılda (${sd.onceki_donem_kapsam}) yanan ` +
+        `${sayiFormatla(sd.onceki_donem_toplam_alan_ha)} hektara yakın — daha az yangınla (${sayiFormatla(sd.son_donem_toplam_yangin_sayisi)} ` +
+        `yangın, önceki dönemde ${sayiFormatla(sd.onceki_donem_toplam_yangin_sayisi)}) yıllık ortalama yanan alan ` +
+        `${sayiFormatla(sd.ortalama_yillik_alan_kati, 1)} kata çıktı. ${ozet.son_yil} yılında Türkiye'de ` +
+        `${sayiFormatla(ozet.son_yil_yangin_sayisi)} orman yangını çıktı ve toplam ${sayiFormatla(ozet.son_yil_yanan_alan_ha)} ` +
+        `hektar orman alanı yandı (ortalama yangın büyüklüğü ${sayiFormatla(ozet.son_yil_ortalama_buyukluk_ha, 2)} ha). ` +
+        `Bir önceki yıla göre yangın sayısı ${yuzdeMetni(ozet.onceki_yila_gore_sayi_degisim_yuzde)}, buna karşın yanan ` +
+        `alan ${yuzdeMetni(ozet.onceki_yila_gore_alan_degisim_yuzde)} — yani daha az sayıda ama çok daha büyük yangınlar ` +
         `yaşandı. ${ozet.kapsam_yil_araligi[0]}'den bu yana en çok alan yanan yıl ${ozet.en_buyuk_yil.yil} ` +
         `(${sayiFormatla(ozet.en_buyuk_yil.yanan_alan_ha)} ha) oldu. En kötü ${ozet.yogunlasma.en_kotu_yil_sayisi} yıl ` +
         `(${ozet.yogunlasma.en_kotu_yillar}), ${ozet.yogunlasma.toplam_yil_sayisi} yıllık toplam yanan alanın ` +

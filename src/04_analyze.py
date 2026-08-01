@@ -107,6 +107,40 @@ def analyze_yogunlasma():
           f"{len(df)} yıllık toplamın %{sonuc.iloc[0]['en_kotu_yillar_orani_yuzde']:.1f}'ini oluşturuyor")
 
 
+def analyze_son_donem_karsilastirmasi():
+    # En çarpıcı çerçeveleme: "son 10 yıl" ile "ondan önceki tüm dönemi"
+    # karşılaştırmak. Yoğunlaşma analizi (en kötü 5 yıl) çarpıklığı
+    # gösteriyor, ama bu ikili bölünme "yakın geçmiş, geride kalan onlarca
+    # yıldan daha mı kötü" sorusuna tek bir net cevap veriyor.
+    SON_KAC_YIL = 10
+    df = pd.read_csv(data_path("interim", "yillik_metrikler.csv")).sort_values("yil")
+    son_yil = int(df["yil"].max())
+    sinir_yil = son_yil - SON_KAC_YIL + 1
+    son_donem = df[df["yil"] >= sinir_yil]
+    onceki_donem = df[df["yil"] < sinir_yil]
+    toplam_alan = df["yanan_alan_ha"].sum()
+
+    sonuc = pd.DataFrame([{
+        "son_donem_kapsam": f"{sinir_yil}-{son_yil}",
+        "son_donem_yil_sayisi": len(son_donem),
+        "son_donem_toplam_alan_ha": round(float(son_donem["yanan_alan_ha"].sum()), 1),
+        "son_donem_toplam_yangin_sayisi": int(son_donem["yangin_sayisi"].sum()),
+        "son_donem_alan_orani_yuzde": round(float(son_donem["yanan_alan_ha"].sum() / toplam_alan * 100), 1),
+        "onceki_donem_kapsam": f"{int(df['yil'].min())}-{sinir_yil - 1}",
+        "onceki_donem_yil_sayisi": len(onceki_donem),
+        "onceki_donem_toplam_alan_ha": round(float(onceki_donem["yanan_alan_ha"].sum()), 1),
+        "onceki_donem_toplam_yangin_sayisi": int(onceki_donem["yangin_sayisi"].sum()),
+        "ortalama_yillik_alan_kati": round(
+            float(son_donem["yanan_alan_ha"].mean() / onceki_donem["yanan_alan_ha"].mean()), 2
+        ),
+    }])
+    sonuc.to_csv(data_path("interim", "son_donem_karsilastirmasi.csv"), index=False)
+    r = sonuc.iloc[0]
+    print(f"[analyze] son_donem_karsilastirmasi.csv: son {SON_KAC_YIL} yıl ({r['son_donem_kapsam']}) "
+          f"%{r['son_donem_alan_orani_yuzde']:.1f}'sini oluşturuyor, yıllık ortalama "
+          f"{r['ortalama_yillik_alan_kati']:.1f} kat daha fazla")
+
+
 def analyze_orman_kaplama_korelasyonu():
     # Daha ormanlık iller orantılı olarak daha mı çok yanıyor? il_metrikler
     # (yoğunluk indeksi) ile orman_alani_il (orman kaplama %) birleştirilip
@@ -182,6 +216,7 @@ def main():
     analyze_bolge_2025()
     analyze_bolge_neden_siralama()
     analyze_yogunlasma()
+    analyze_son_donem_karsilastirmasi()
     analyze_orman_kaplama_korelasyonu()
     analyze_neden_egimi()
     analyze_ulke_egimleri()

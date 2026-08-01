@@ -165,6 +165,26 @@ footer.site-footer {
 }
 footer.site-footer a { color: var(--metin-soluk); }
 
+/* --- Vurgu kutusu: sayfanın en çarpıcı tek bulgusu için --- */
+.vurgu-kutusu {
+  background: var(--marka);
+  color: #fff;
+  border-radius: 12px;
+  padding: 1.5rem 1.75rem;
+  margin: 1.25rem 0;
+}
+.vurgu-deger {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.vurgu-metin {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  opacity: 0.95;
+  max-width: 68ch;
+}
+
 /* --- KPI / stat tile --- */
 .kpi-satiri {
   display: grid;

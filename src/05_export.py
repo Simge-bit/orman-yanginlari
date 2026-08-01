@@ -29,6 +29,7 @@ def export_ozet():
     egim = pd.read_csv(data_path("interim", "yillik_egim.csv"))
     il_siralama = pd.read_csv(data_path("interim", "il_siralama.csv"))
     yogunlasma = pd.read_csv(data_path("interim", "yogunlasma.csv")).iloc[0]
+    son_donem = pd.read_csv(data_path("interim", "son_donem_karsilastirmasi.csv")).iloc[0]
 
     son = yillik.iloc[-1]
     onceki = yillik.iloc[-2]
@@ -58,6 +59,18 @@ def export_ozet():
             "en_kotu_yillar": yogunlasma["en_kotu_yillar"],
             "orani_yuzde": float(yogunlasma["en_kotu_yillar_orani_yuzde"]),
             "toplam_yil_sayisi": int(yogunlasma["toplam_yil_sayisi"]),
+        },
+        "son_donem_karsilastirmasi": {
+            "son_donem_kapsam": son_donem["son_donem_kapsam"],
+            "son_donem_yil_sayisi": int(son_donem["son_donem_yil_sayisi"]),
+            "son_donem_toplam_alan_ha": float(son_donem["son_donem_toplam_alan_ha"]),
+            "son_donem_toplam_yangin_sayisi": int(son_donem["son_donem_toplam_yangin_sayisi"]),
+            "son_donem_alan_orani_yuzde": float(son_donem["son_donem_alan_orani_yuzde"]),
+            "onceki_donem_kapsam": son_donem["onceki_donem_kapsam"],
+            "onceki_donem_yil_sayisi": int(son_donem["onceki_donem_yil_sayisi"]),
+            "onceki_donem_toplam_alan_ha": float(son_donem["onceki_donem_toplam_alan_ha"]),
+            "onceki_donem_toplam_yangin_sayisi": int(son_donem["onceki_donem_toplam_yangin_sayisi"]),
+            "ortalama_yillik_alan_kati": float(son_donem["ortalama_yillik_alan_kati"]),
         },
     }
     _yaz("ozet", veri)
@@ -192,6 +205,7 @@ def export_metodoloji(config: dict):
             {"id": "kasit_orani_siralama.kasit_alan_oran / kasit_sayi_oran", "tanim": "Bölge müdürlüğü başına kasıt (kundaklama) kaynaklı yangınların payı, en az 15 yangınlık bölgeler arasında", "birim": "%"},
             {"id": "nedenler.egim.*_oran_egimi_puan_yil", "tanim": "Neden kategorisinin (kasıt/ihmal-kaza/doğal/bilinmeyen) yıllık payındaki doğrusal eğilim (basit doğrusal regresyon eğimi)", "birim": "yüzde puan/yıl"},
             {"id": "ulke_egimleri.egim_ha_yil", "tanim": "Ülkenin kendi yanan alan serisindeki doğrusal eğilim (basit doğrusal regresyon eğimi); pozitif değer artış, negatif değer azalış gösterir", "birim": "hektar/yıl"},
+            {"id": "son_donem_karsilastirmasi.*", "tanim": "Son 10 yıl ile ondan önceki tüm dönemin (1988'e kadar) toplam/ortalama yanan alan ve yangın sayısı karşılaştırması", "birim": "hektar, adet, %"},
         ],
         "kapsam": {
             "yil_araligi": gercek_yil_araligi,
