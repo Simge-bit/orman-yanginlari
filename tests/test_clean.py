@@ -90,3 +90,20 @@ def test_silvikultur_2024_bolge_toplami_ulusal_toplamla_eslesiyor():
     # bir yuvarlama farkı var (bkz. KAYNAKLAR.md) — tolerans buna göre.
     fark = (bolge_df[bilesen_kolonlari].sum(axis=1) - bolge_df["toplam_alan_ha"]).abs()
     assert (fark < 1.0).all()
+
+
+def test_neden_bolge_2024_alt_kategoriler_toplamla_tutarli():
+    df = pd.read_csv(data_path("interim", "neden_bolge_2024.csv"))
+    alt_kategoriler = [
+        "ihmal_aniz", "ihmal_copluk", "ihmal_avcilik_coban",
+        "ihmal_sigara", "ihmal_piknik", "ihmal_diger",
+        "kasit_teror", "kasit_kundaklama", "kasit_acma", "kasit_diger",
+        "kaza_enerji", "kaza_trafik", "kaza_diger",
+        "bilinmeyen", "dogal",
+    ]
+    # DKMPGM (Milli Parklar) satırında OGM'nin kendi tablosunda ~2.9 ha'lık
+    # bilinen bir tutarsızlık var (bkz. KAYNAKLAR.md) — tolerans buna göre.
+    fark_ha = (df[[f"{k}_ha" for k in alt_kategoriler]].sum(axis=1) - df["toplam_ha"]).abs()
+    fark_sayi = (df[[f"{k}_sayi" for k in alt_kategoriler]].sum(axis=1) - df["toplam_sayi"]).abs()
+    assert (fark_ha < 3.0).all()
+    assert (fark_sayi < 1).all()

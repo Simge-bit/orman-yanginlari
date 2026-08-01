@@ -119,6 +119,40 @@ def ingest_silvikultur_2024():
     print(f"[ingest] silvikultur_2024_ham.csv: {len(df)} satır (ulusal toplam dahil)")
 
 
+# Tablo 2.15 (alan) ve 2.16 (sayı) aynı 14 alt-neden sütununu paylaşır;
+# aralarındaki boş "ayraç" sütunlar None ile işaretlenip aşağıda atılıyor.
+NEDEN_ALT_KOLONLARI = [
+    "bolge_muduru",
+    "ihmal_aniz", "ihmal_copluk", "ihmal_avcilik_coban", None,
+    "ihmal_sigara", "ihmal_piknik", "ihmal_diger", None,
+    "kasit_teror", "kasit_kundaklama", "kasit_acma", "kasit_diger", None,
+    "kaza_enerji", "kaza_trafik", "kaza_diger", None,
+    "bilinmeyen", "dogal", "toplam",
+]
+
+
+def _neden_bolge_tablosunu_oku(dosya_adi: str, sheet: str, skip: int) -> pd.DataFrame:
+    df = pd.read_excel(data_path("raw", dosya_adi), sheet_name=sheet, header=None, skiprows=skip, usecols=range(21))
+    df.columns = [f"_bosluk{i}" if kolon is None else kolon for i, kolon in enumerate(NEDEN_ALT_KOLONLARI)]
+    df = df.drop(columns=[k for k in df.columns if k.startswith("_bosluk")])
+    df = df.dropna(subset=["bolge_muduru"])
+    return df[~df["bolge_muduru"].astype(str).str.startswith("Not")]
+
+
+def ingest_neden_bolge_2024():
+    # OGM Tablo 2.15/2.16: 2024'te yangınların çıkış nedenini, ulusal
+    # tablonun 4 kategorisinden (kasıt/ihmal-kaza/doğal/bilinmeyen) çok daha
+    # ince ayrıştırıyor — anız, çöplük, avcılık/çoban ateşi, sigara, piknik
+    # (ihmal); terör, kundaklama, açma/arazi genişletme (kasıt); enerji
+    # hattı, trafik kazası (kaza) — bölge müdürlüğü bazında, alan VE sayı
+    # olarak ayrı tablolarda.
+    alansal = _neden_bolge_tablosunu_oku("ogm_neden_bolge_alansal_2024.xlsx", "2.15", 5)
+    sayisal = _neden_bolge_tablosunu_oku("ogm_neden_bolge_sayisal_2024.xlsx", "2.16", 4)
+    alansal.to_csv(data_path("interim", "neden_bolge_alansal_2024_ham.csv"), index=False)
+    sayisal.to_csv(data_path("interim", "neden_bolge_sayisal_2024_ham.csv"), index=False)
+    print(f"[ingest] neden_bolge_alansal/sayisal_2024_ham.csv: {len(alansal)} satır (ulusal toplam dahil)")
+
+
 def main():
     ingest_yillik_seri()
     ingest_il_dagilim()
@@ -127,6 +161,7 @@ def main():
     ingest_bolge_2025()
     ingest_bolge_neden_2025()
     ingest_silvikultur_2024()
+    ingest_neden_bolge_2024()
 
 
 if __name__ == "__main__":

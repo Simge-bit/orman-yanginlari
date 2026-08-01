@@ -185,12 +185,27 @@ def export_nedenler():
         egim_df[["kategori", "sayi_oran_egimi_puan_yil", "alan_oran_egimi_puan_yil"]].round(3).to_json(orient="records")
     )
 
+    alt_kategori_df = pd.read_csv(data_path("interim", "neden_alt_kategori_siralama_2024.csv"))
+    alt_kategori_kayitlar = json.loads(alt_kategori_df.round(1).to_json(orient="records"))
+    ulusal_2024 = pd.read_csv(data_path("interim", "neden_bolge_2024_ulusal.csv")).iloc[0]
+
     _yaz("nedenler", {
         "kapsam_notu": "1997 öncesi neden kırılımı OGM tarafından yayınlanmamış",
         "yillik": kayitlar,
         "egim": {
             "kapsam": egim_df.iloc[0]["kapsam"],
             "kategoriler": egim_kayitlar,
+        },
+        "alt_kategori_2024": {
+            "kapsam_notu": (
+                "OGM Tablo 2.15/2.16: 2024'te yangınların çıkış nedeni, ulusal 4 kategoriden "
+                "(kasıt/ihmal-kaza/doğal/bilinmeyen) çok daha ince ayrıştırılmış. Bu kırılımın "
+                "2025 sürümü henüz yayınlanmadı (yıllık istatistik kitabının bir tablosu, "
+                "2025 Faaliyet Raporu'nda bu düzeyde ayrıntı yok)."
+            ),
+            "toplam_alan_ha": float(ulusal_2024["toplam_ha"]),
+            "toplam_sayi": float(ulusal_2024["toplam_sayi"]),
+            "kategoriler": alt_kategori_kayitlar,
         },
     })
 
@@ -220,6 +235,7 @@ def export_metodoloji(config: dict):
             {"ad": "EFFIS/Copernicus ülke karşılaştırma raporu", "kurum": config["kaynaklar"]["effis"]},
             {"ad": "81 il sınırı (GeoJSON)", "kurum": config["kaynaklar"]["geojson"]},
             {"ad": "OGM Tablo 2.18: Yanan alanların silvikültürel değerlendirmesi, 2024", "kurum": config["kaynaklar"]["ogm"]},
+            {"ad": "OGM Tablo 2.15/2.16: Çıkış nedenlerinin ince kırılımı, 2024", "kurum": config["kaynaklar"]["ogm"]},
             {"ad": "Canlı sıcak nokta katmanı (cografi.html)", "kurum": "NASA FIRMS (VIIRS uydu verisi), https://firms.modaps.eosdis.nasa.gov/ — istatistik değil, ham gözlem verisi"},
             {"ad": "Sıcak noktaların ilçe/köy adı (cografi.html)", "kurum": "OpenStreetMap Nominatim, https://nominatim.openstreetmap.org — resmi bir istatistik kaynağı değil, topluluk kaynaklı yer-adı sorgu servisi; sadece konum etiketlemek için kullanılıyor, hiçbir sayı bu kaynaktan gelmiyor"},
         ],
@@ -237,6 +253,7 @@ def export_metodoloji(config: dict):
             {"id": "ulke_egimleri.egim_ha_yil", "tanim": "Ülkenin kendi yanan alan serisindeki doğrusal eğilim (basit doğrusal regresyon eğimi); pozitif değer artış, negatif değer azalış gösterir", "birim": "hektar/yıl"},
             {"id": "son_donem_karsilastirmasi.*", "tanim": "Son 10 yıl ile ondan önceki tüm dönemin (1988'e kadar) toplam/ortalama yanan alan ve yangın sayısı karşılaştırması", "birim": "hektar, adet, %"},
             {"id": "silvikultur_2024.*_oran", "tanim": "Yanan alanın, verilen işlem kategorisine (ağaçlandırma, gençleştirme, rehabilitasyon, gelecek yıllara bırakılan vb.) ayrılan payı", "birim": "%"},
+            {"id": "nedenler.alt_kategori_2024", "tanim": "Çıkış nedeninin 14 alt-kategoriye (anız, sigara, piknik, kundaklama, terör, açma, enerji hattı, trafik kazası vb.) ayrıştırılmış hali, 2024", "birim": "hektar, adet"},
         ],
         "kapsam": {
             "yil_araligi": gercek_yil_araligi,
@@ -257,6 +274,7 @@ def export_metodoloji(config: dict):
             "Ülke eğimleri (ulke_egimleri), her ülkenin kendi veri bulunan yıllarına göre hesaplandı; bazı ülkeler erken yıllarda EFFIS'e veri bildirmediği için ülkeler arasında kapsanan yıl sayısı farklı olabilir (en az 5 yıllık veri şartı arandı). Bu yüzden eğimler doğrudan aynı yıl aralığına göre birebir kıyaslanabilir değildir.",
             "Neden payı eğilimi (nedenler.egim) tek bir doğrusal eğim özetidir; yıldan yıla dalgalanmayı veya eğilimin yön değiştirdiği dönemleri yakalamaz. Sadece neden kırılımı yayınlanan yıllar (1997+) dahil edildi.",
             "Silvikültürel değerlendirme (Tablo 2.18) sadece 2024 için mevcut, çok yıllı seri yok; Milli Parklar bu tabloda ayrı sınıflandırıldığı için 30 bölge müdürlüğünü kapsıyor (bölge yangın tablosundaki 31'den farklı). OGM'nin kendi tablosunda Balıkesir satırının bileşen toplamı (261,41 ha) ile beyan edilen toplam alanı (260,86 ha) arasında ~0,55 ha'lık küçük bir yuvarlama farkı var. 'Gelecek yıllara bırakılan' kategorisi, o alanda hiçbir işlem yapılmayacağı anlamına gelmez — rapor tarihi itibarıyla henüz bir karara/uygulamaya geçilmediğini gösterir.",
+            "Neden alt kategorisi kırılımı (Tablo 2.15/2.16) sadece 2024 için mevcut; 2025 Faaliyet Raporu bu düzeyde ayrıntı içermiyor. OGM'nin aynı yıllığındaki bu tablo ile ulusal 4-kategori tablosu arasında (aynı yıl için) birkaç yüzdelik küçük, bilinen bir tutarsızlık var — örn. kasıt toplamı bu tabloda 218,4 ha, ulusal tabloda 223 ha.",
             "Tüm istatistiksel rakamlar (yangın sayısı, alan, oran) birincil/resmi kaynaklardan (OGM, EFFIS) gelir; haber/blog/STK derlemesi istatistik kaynağı olarak alınmadı. Canlı harita katmanı (NASA FIRMS) ve yer adı etiketleme (OpenStreetMap Nominatim) bu kuralın istisnası değil ama farklı bir kategoridir: ilki ham gözlem verisi, ikincisi sadece görüntüleme amaçlı yer-adı sorgusu — hiçbiri istatistiksel bir iddia taşımıyor.",
         ],
         "olusturulma_notu": "Bu dosya src/05_export.py tarafından otomatik üretilir, elle düzenlenmez.",

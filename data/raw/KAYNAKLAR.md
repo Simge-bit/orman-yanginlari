@@ -116,6 +116,33 @@ başlar.
   ağaçlandırma/gençleştirme işlemine alındı mı, yoksa bekliyor mu" sorusuna
   resmi bir cevap verir.
 
+### `ogm_neden_bolge_alansal_2024.xlsx` / `ogm_neden_bolge_sayisal_2024.xlsx`
+- **Kaynak:** OGM, Tablo 2.15 (alan) / 2.16 (sayı) — yangınların çıkış
+  sebeplerine göre bölge müdürlüklerine dağılımı, 2024.
+- **İçerik:** Ulusal 4 kategorinin (kasıt/ihmal-kaza/doğal/bilinmeyen)
+  çok daha ince kırılımı, bölge müdürlüğü bazında: İhmal (anız, çöplük,
+  avcılık/çoban ateşi, sigara, piknik, diğer), Kasıt (terör, kundaklama,
+  açma/arazi genişletme, diğer), Kaza (enerji hattı, trafik, diğer),
+  Bilinmeyen, Doğal (yıldırım). "Toplam-Total" satırı ulusal toplamı
+  veriyor.
+- **Doğrulama:** Her satırda 14 alt-kategorinin toplamı, tablonun kendi
+  "Toplam" sütunuyla eşleşiyor (02_clean.py'de kontrol ediliyor) — tek
+  istisna "DKMPGM" (Milli Parklar) satırı, ~2,9 ha'lık küçük bir OGM
+  kaynaklı tutarsızlıkla (bileşenler 1.286,4 ha, beyan edilen toplam
+  1.289,4 ha). Bu iki tablonun "Toplam-Total" satırı, aynı yılın ulusal
+  4-kategori tablosuyla (Tablo 2.11) birebir eşleşmiyor — OGM'nin aynı
+  yıllığındaki farklı tablolar arasında birkaç yüzdelik bilinen bir
+  tutarsızlık var (örn. kasıt toplamı bu tabloda 218,4 ha, ulusal
+  tabloda 223 ha). Yangın sayısı toplamı (3.797) ise ulusal tabloyla
+  birebir eşleşiyor.
+- **Bu tablo, silvikültür tablosundan (2.18) farklı olarak "DKMPGM"
+  (Doğa Koruma ve Milli Parklar Genel Müdürlüğü) satırını içeriyor** —
+  yani 30 bölge müdürlüğü + DKMPGM = 31 satır (silvikültür tablosunda
+  DKMPGM hiç yok, 30 satır).
+- **Bilinen sınırlama:** 2025 için bu düzeyde bir kırılım hiçbir resmi
+  kaynakta yok (2025 Faaliyet Raporu sadece kaba 5 kategori veriyor) —
+  bu yüzden 2024'te kalıyor.
+
 ### `ref_orman_alani_il_2024.xlsx` / `ref_orman_alani_il_2024_alt.xlsx`
 - **Kaynak:** OGM, Tablo 1.6 / 1.3 — orman alanı, serveti ve cari artımının
   il düzeyinde dağılımı, 2024. Yangın yoğunluk indeksi (yanan alan / toplam

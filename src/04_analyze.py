@@ -225,6 +225,32 @@ def analyze_silvikultur_siralama():
           f"{ilk['bolge_muduru']} (%{ilk['gelecek_yillara_ha_oran']:.1f}, min {MIN_ALAN_HA} ha şartıyla)")
 
 
+NEDEN_ALT_KATEGORILERI = [
+    "ihmal_aniz", "ihmal_copluk", "ihmal_avcilik_coban",
+    "ihmal_sigara", "ihmal_piknik", "ihmal_diger",
+    "kasit_teror", "kasit_kundaklama", "kasit_acma", "kasit_diger",
+    "kaza_enerji", "kaza_trafik", "kaza_diger",
+    "bilinmeyen", "dogal",
+]
+
+
+def analyze_neden_alt_kategori_siralama():
+    # Ulusal 4 kategorinin (kasıt/ihmal-kaza/doğal/bilinmeyen) altında,
+    # gerçekte hangi TEK davranış en çok alanı yakıyor? 14 alt-nedeni alan
+    # bazında sıralar.
+    ulusal = pd.read_csv(data_path("interim", "neden_bolge_2024_ulusal.csv")).iloc[0]
+    satirlar = [{
+        "kategori": kategori,
+        "alan_ha": float(ulusal[f"{kategori}_ha"]),
+        "sayi": float(ulusal[f"{kategori}_sayi"]),
+    } for kategori in NEDEN_ALT_KATEGORILERI]
+    sonuc = pd.DataFrame(satirlar).sort_values("alan_ha", ascending=False)
+    sonuc.to_csv(data_path("interim", "neden_alt_kategori_siralama_2024.csv"), index=False)
+    ilk = sonuc.iloc[0]
+    print(f"[analyze] neden_alt_kategori_siralama_2024.csv: en büyük tek alt-neden="
+          f"{ilk['kategori']} ({ilk['alan_ha']:.0f} ha)")
+
+
 def main():
     analyze_il_siralama()
     analyze_yillik_siralama_ve_egim()
@@ -237,6 +263,7 @@ def main():
     analyze_neden_egimi()
     analyze_ulke_egimleri()
     analyze_silvikultur_siralama()
+    analyze_neden_alt_kategori_siralama()
 
 
 if __name__ == "__main__":

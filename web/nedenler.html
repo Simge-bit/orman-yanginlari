@@ -52,6 +52,22 @@
       <a href="metodoloji.html">Metodoloji</a>). 1997 öncesi neden kırılımı
       yayınlanmamıştır.
     </p>
+
+    <h2>2024: Yangınların Daha İnce Nedenleri</h2>
+    <p class="aciklama" id="alt-kategori-aciklama-1"></p>
+    <p class="aciklama" id="alt-kategori-aciklama-2"></p>
+    <div class="chart-karti">
+      <canvas id="grafik-alt-kategori"></canvas>
+      <details class="tablo-goster" id="tablo-alt-kategori">
+        <summary>Tabloyu göster</summary>
+      </details>
+    </div>
+    <p class="kaynak-notu">
+      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.15/2.16 —
+      ulusal 4 kategoriden (kasıt/ihmal-kaza/doğal/bilinmeyen) çok daha
+      ince bir kırılım. Bu düzeyde ayrıntının 2025 sürümü henüz
+      yayınlanmadı; bkz. <a href="metodoloji.html">Metodoloji</a>.
+    </p>
   </main>
 
   <div id="site-footer"></div>
@@ -75,8 +91,17 @@
       return `${deger > 0 ? "+" : ""}${sayiFormatla(deger, ondalik)}`;
     }
 
+    const ALT_KATEGORI_ETIKET = {
+      ihmal_aniz: "Anız yakma", ihmal_copluk: "Çöplük/atık yakma", ihmal_avcilik_coban: "Avcılık/çoban ateşi",
+      ihmal_sigara: "Sigara", ihmal_piknik: "Piknik ateşi", ihmal_diger: "İhmal — diğer",
+      kasit_teror: "Terör", kasit_kundaklama: "Kundaklama", kasit_acma: "Açma (arazi genişletme)", kasit_diger: "Kasıt — diğer",
+      kaza_enerji: "Enerji hattı", kaza_trafik: "Trafik kazası", kaza_diger: "Kaza — diğer",
+      bilinmeyen: "Bilinmeyen", dogal: "Doğal (yıldırım)",
+    };
+    const BELIRSIZ_KATEGORILER = ["ihmal_diger", "kasit_diger", "kaza_diger", "bilinmeyen"];
+
     async function nedenleriCiz() {
-      const { yillik, egim } = await veriYukle("nedenler");
+      const { yillik, egim, alt_kategori_2024: altKategori } = await veriYukle("nedenler");
       const yillar = yillik.map((s) => s.yil);
       document.getElementById("yil-araligi").textContent = `${yillar[0]}-${yillar[yillar.length - 1]}`;
 
@@ -126,6 +151,42 @@
           isaretliFormatla(k.sayi_oran_egimi_puan_yil, 2),
           isaretliFormatla(k.alan_oran_egimi_puan_yil, 2),
         ]),
+      });
+
+      // --- 2024: ince neden kırılımı ---
+      const belirsizToplam = altKategori.kategoriler
+        .filter((k) => BELIRSIZ_KATEGORILER.includes(k.kategori))
+        .reduce((t, k) => t + k.alan_ha, 0);
+      const belirsizOran = (belirsizToplam / altKategori.toplam_alan_ha) * 100;
+
+      const isimliEnBuyuk = [...altKategori.kategoriler]
+        .filter((k) => !BELIRSIZ_KATEGORILER.includes(k.kategori) && k.kategori !== "dogal")
+        .sort((a, b) => b.alan_ha - a.alan_ha)[0];
+      const kundaklama = altKategori.kategoriler.find((k) => k.kategori === "kasit_kundaklama");
+      const teror = altKategori.kategoriler.find((k) => k.kategori === "kasit_teror");
+      const acma = altKategori.kategoriler.find((k) => k.kategori === "kasit_acma");
+
+      document.getElementById("alt-kategori-aciklama-1").textContent =
+        `2024'te yanan ${sayiFormatla(altKategori.toplam_alan_ha)} hektarın %${sayiFormatla(belirsizOran, 1)}'sı ` +
+        `("diğer" alt kategorileri + tamamen bilinmeyen nedenler toplamı) spesifik olarak adlandırılamayan bir ` +
+        `nedene bağlanıyor — en büyük tek kalem bile "İhmal — diğer" (${sayiFormatla(altKategori.kategoriler.find(k=>k.kategori==="ihmal_diger").alan_ha)} ha).`;
+      document.getElementById("alt-kategori-aciklama-2").textContent =
+        `Adı belirtilen davranışlar arasında en çok alanı yakan tek neden ${ALT_KATEGORI_ETIKET[isimliEnBuyuk.kategori].toLowerCase()} ` +
+        `(${sayiFormatla(isimliEnBuyuk.alan_ha)} ha, ${sayiFormatla(isimliEnBuyuk.sayi)} yangın) — kundaklamadan ` +
+        `(${sayiFormatla(kundaklama.alan_ha)} ha) daha fazla. Buna karşın terör (${sayiFormatla(teror.alan_ha)} ha) ve ` +
+        `kasıtlı arazi açma (${sayiFormatla(acma.alan_ha)} ha) ulusal düzeyde neredeyse sıfır.`;
+
+      const siraliAltKategori = [...altKategori.kategoriler].sort((a, b) => b.alan_ha - a.alan_ha);
+      cubukKartiOlustur({
+        canvasId: "grafik-alt-kategori",
+        etiketler: siraliAltKategori.map((k) => ALT_KATEGORI_ETIKET[k.kategori]),
+        degerler: siraliAltKategori.map((k) => k.alan_ha),
+        birim: "ha",
+      });
+      tabloOlustur({
+        detailsId: "tablo-alt-kategori",
+        basliklar: ["Neden", "Alan (ha)", "Yangın sayısı"],
+        satirlar: siraliAltKategori.map((k) => [ALT_KATEGORI_ETIKET[k.kategori], sayiFormatla(k.alan_ha), sayiFormatla(k.sayi)]),
       });
     }
 
