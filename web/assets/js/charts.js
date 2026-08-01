@@ -262,9 +262,11 @@ function ulkeKartiOlustur({ canvasId, yillar, seriler }) {
   });
 }
 
-// Yatay çubuk grafik — sıralama/magnitude verisi için (tek seri, tek hue).
-// "En çok etkilenen il" gibi kategorik sıralamalarda tablodan çok daha
-// okunaklı; renk kimlik değil büyüklük taşıdığı için tek vurgu rengi yeter.
+// Yatay "lollipop" grafik — sıralama/magnitude verisi için (tek seri, tek
+// hue). İnce bir çizgi (sap) + ucunda gradyanlı/gölgeli dolu bir nokta,
+// değeri doğrudan noktanın yanında yazan bir etiketle. Düz çubuktan daha
+// "tasarlanmış" hisseden, editoryal (NYT/Bloomberg tarzı) bir sunum —
+// "En çok etkilenen il" gibi sıralamalarda tablodan çok daha okunaklı.
 function cubukKartiOlustur({ canvasId, etiketler, degerler, birim, iyiKotuRenklendir }) {
   const ctx = document.getElementById(canvasId);
   if (!ctx) return;
@@ -274,9 +276,61 @@ function cubukKartiOlustur({ canvasId, etiketler, degerler, birim, iyiKotuRenkle
   // yerine durum rengi kullanılır — artış=kötü/kırmızı, azalış=iyi/yeşil
   // (sitedeki KPI karolarıyla aynı kural, bkz. .delta.up/.down).
   const renk = (deger) =>
-    iyiKotuRenklendir
-      ? hexOpaklikEkle(cssDegisken(deger >= 0 ? "--kotu" : "--iyi"), 0.85)
-      : hexOpaklikEkle(cssDegisken("--seri-vurgu"), 0.85);
+    iyiKotuRenklendir ? cssDegisken(deger >= 0 ? "--kotu" : "--iyi") : cssDegisken("--seri-vurgu");
+
+  const degerFormatla = (deger) => {
+    const metin = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 1 }).format(deger);
+    return birim ? `${metin} ${birim}` : metin;
+  };
+
+  const lollipopNoktasiEklentisi = {
+    id: "lollipopNoktasi",
+    afterDatasetsDraw(chart) {
+      const meta = chart.getDatasetMeta(0);
+      const taban = chart.scales.x.getPixelForValue(0);
+      const { ctx: c } = chart;
+
+      meta.data.forEach((bar, i) => {
+        const deger = degerler[i];
+        const renkDegeri = renk(deger);
+        const ucX = bar.x;
+        const merkezY = bar.y;
+        const sagaDogru = ucX >= taban;
+
+        c.save();
+        c.shadowColor = hexOpaklikEkle(renkDegeri, 0.45);
+        c.shadowBlur = 7;
+        c.shadowOffsetY = 2;
+        const grad = c.createRadialGradient(ucX - 2, merkezY - 2, 0.5, ucX, merkezY, 7);
+        grad.addColorStop(0, hexOpaklikEkle(renkDegeri, 0.55));
+        grad.addColorStop(1, renkDegeri);
+        c.fillStyle = grad;
+        c.beginPath();
+        c.arc(ucX, merkezY, 6, 0, Math.PI * 2);
+        c.fill();
+        c.restore();
+
+        // Etiket doğal olarak "dışarı" (eksenden uzağa) yazılır, ama uzun bir
+        // çubukta nokta kenara çok yakınsa (ör. en büyük negatif değer) bu,
+        // y ekseni kategori yazısıyla çakışır — o durumda etiket, boş yer
+        // olan çubuğun kendi üzerine (merkeze doğru) çevrilir.
+        const kenaraMesafe = sagaDogru ? chart.chartArea.right - ucX : ucX - chart.chartArea.left;
+        const disariYaz = kenaraMesafe > 60;
+        const saga = disariYaz ? sagaDogru : !sagaDogru;
+
+        c.save();
+        c.font = "600 12px system-ui, -apple-system, sans-serif";
+        c.fillStyle = cssDegisken("--metin-birincil");
+        c.textBaseline = "middle";
+        const etiket = degerFormatla(deger);
+        c.textAlign = saga ? "left" : "right";
+        c.fillText(etiket, ucX + (saga ? 11 : -11), merkezY);
+        c.restore();
+      });
+    },
+  };
+
+  const negatifVar = degerler.some((d) => d < 0);
 
   new Chart(ctx, {
     type: "bar",
@@ -285,15 +339,17 @@ function cubukKartiOlustur({ canvasId, etiketler, degerler, birim, iyiKotuRenkle
       datasets: [
         {
           data: degerler,
-          backgroundColor: degerler.map(renk),
-          borderRadius: 4,
-          barThickness: 16,
+          backgroundColor: degerler.map((d) => hexOpaklikEkle(renk(d), 0.4)),
+          borderRadius: 2,
+          barThickness: 3,
         },
       ],
     },
+    plugins: [lollipopNoktasiEklentisi],
     options: {
       indexAxis: "y",
       responsive: true,
+      layout: { padding: { right: 56, left: negatifVar ? 56 : 8 } },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -303,12 +359,7 @@ function cubukKartiOlustur({ canvasId, etiketler, degerler, birim, iyiKotuRenkle
           borderColor: cssDegisken("--kenar"),
           borderWidth: 1,
           padding: 10,
-          callbacks: {
-            label(context) {
-              const deger = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 1 }).format(context.parsed.x);
-              return birim ? `${deger} ${birim}` : deger;
-            },
-          },
+          callbacks: { label: (context) => degerFormatla(context.parsed.x) },
         },
       },
       scales: {
