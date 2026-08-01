@@ -51,7 +51,7 @@ DUSUK_GUVEN_HARIC = True  # VIIRS confidence='l' (low) kayıtlarını çıkar
 
 KUME_HUCRE_ONDALIK = 2  # ~1.1 km — yakın tespitleri tek kümede topla (görüntüleme + Nominatim için)
 NOMINATIM_KULLANICI_ARACI = "orman-yanginlari-site/1.0 (kisisel/politik veri sitesi; iletisim: repo issue)"
-NOMINATIM_MAX_SORGU = 80  # aşırı yangın günlerinde bile Nominatim'e nazik davranmak için tavan
+NOMINATIM_MAX_SORGU = 100  # aşırı yangın günlerinde bile Nominatim'e nazik davranmak için tavan
 
 KOY_ALANLARI = ["hamlet", "village", "neighbourhood", "suburb", "quarter"]
 ILCE_ALANLARI = ["town", "municipality", "city_district", "county"]
@@ -159,21 +159,32 @@ def _kumeleri_olustur(df: pd.DataFrame, il_poligonlari) -> list[dict]:
 
     sinir = unary_union([p for _, p in il_poligonlari])
     sonuc = []
-    sorgu_sayaci = 0
     for kume in kumeler.values():
         nokta = kume.pop("_nokta_ornegi")
         if not sinir.contains(nokta):
             continue
         kume["il"] = _il_bul(nokta, il_poligonlari)
+        sonuc.append(kume)
+
+    # Nominatim sorgu bütçesi sınırlı (Türkiye'de yoğun bir yangın gününde
+    # kümeler kolayca 300-400'ü bulabiliyor) — bütçe, kümelerin ham veriden
+    # geldiği (aslında rastgele) sırayla değil, en taze ve en çok tekrar
+    # tespit edilen (muhtemelen hâlâ aktif) kümelere öncelik verilerek
+    # harcanıyor. Kullanıcı "bu yangın tam olarak nerede" sorusunu en çok
+    # bu noktalar için soruyor; harita da zaten sadece taze kümelere kalıcı
+    # konum etiketi gösteriyor (bkz. web/assets/js/map.js).
+    sonuc.sort(key=lambda k: (k["en_yeni_saat_once"] if k["en_yeni_saat_once"] is not None else 9999, -k["tespit_sayisi"]))
+
+    sorgu_sayaci = 0
+    for kume in sonuc:
         if sorgu_sayaci < NOMINATIM_MAX_SORGU:
             kume["yer"] = _ilce_koy_bul(kume["latitude"], kume["longitude"])
             sorgu_sayaci += 1
             time.sleep(1)  # Nominatim kullanım politikası: saniyede en fazla 1 istek
         else:
             kume["yer"] = None
-        sonuc.append(kume)
 
-    print(f"[hotspots] {sorgu_sayaci} konum Nominatim'e soruldu ({len(sonuc)} küme için)")
+    print(f"[hotspots] {sorgu_sayaci} konum Nominatim'e soruldu ({len(sonuc)} küme için, en taze öncelikli)")
     return sonuc
 
 
