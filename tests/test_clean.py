@@ -107,3 +107,26 @@ def test_neden_bolge_2024_alt_kategoriler_toplamla_tutarli():
     fark_sayi = (df[[f"{k}_sayi" for k in alt_kategoriler]].sum(axis=1) - df["toplam_sayi"]).abs()
     assert (fark_ha < 3.0).all()
     assert (fark_sayi < 1).all()
+
+
+def test_bolge_cok_yillik_her_yil_ulusal_toplamla_tutarli():
+    df = pd.read_csv(data_path("interim", "bolge_cok_yillik.csv"))
+    yillik_df = pd.read_csv(data_path("interim", "yillik_seri.csv"))
+
+    assert df["bolge_muduru"].nunique() == 31
+    assert set(df["yil"]) == set(range(2004, 2025))
+
+    bolge_yillik_toplam = df.groupby("yil")["alan_ha"].sum()
+    for yil, toplam in bolge_yillik_toplam.items():
+        ulusal = yillik_df[yillik_df["yil"] == yil].iloc[0]["yanan_alan_ha"]
+        assert abs(toplam - ulusal) < 2.0, f"{yil}: bölge toplamı {toplam:.1f} != ulusal {ulusal:.1f}"
+
+
+def test_vasif_dagilimi_2024_bilesenleri_toplamla_tutarli():
+    df = pd.read_csv(data_path("interim", "vasif_dagilimi_2024.csv"))
+    kategoriler = [
+        "normal_koru_ha", "bosluklu_koru_ha", "normal_baltalik_ha",
+        "bosluklu_baltalik_ha", "makilik_ha", "agaclandirma_sahasi_ha",
+    ]
+    fark = (df[kategoriler].sum(axis=1) - df["toplam_ha"]).abs()
+    assert (fark < 1.0).all()

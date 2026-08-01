@@ -131,6 +131,34 @@
       itibarıyla henüz bir karara/uygulamaya geçilmediğini gösterir. Bkz.
       <a href="metodoloji.html">Metodoloji</a>.
     </p>
+
+    <h2>2004-2024: Hangi Bölgeler Kötüleşti, Hangileri İyileşti?</h2>
+    <p class="aciklama" id="bolge-egim-aciklama"></p>
+    <div class="chart-karti">
+      <canvas id="grafik-bolge-egim"></canvas>
+      <details class="tablo-goster" id="tablo-bolge-egim">
+        <summary>Tabloyu göster</summary>
+      </details>
+    </div>
+    <p class="kaynak-notu">
+      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.12/2.13 (bölge
+      müdürlüklerine göre yangın dağılımı, 2004-2024). Her bölgenin kendi
+      21 yıllık serisindeki doğrusal eğilim; kırmızı=artıyor, yeşil=azalıyor.
+      Bkz. <a href="metodoloji.html">Metodoloji</a>.
+    </p>
+
+    <h2>2024: Yanan Ormanın Türü</h2>
+    <p class="aciklama" id="vasif-aciklama"></p>
+    <div class="chart-karti">
+      <canvas id="grafik-vasif"></canvas>
+      <details class="tablo-goster" id="tablo-vasif">
+        <summary>Tabloyu göster</summary>
+      </details>
+    </div>
+    <p class="kaynak-notu">
+      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.17 (yangınların
+      orman vasfına göre dağılımı). Bkz. <a href="metodoloji.html">Metodoloji</a>.
+    </p>
   </main>
 
   <div id="site-footer"></div>
@@ -272,6 +300,58 @@
           sayiFormatla(b.gelecek_yillara_ha_oran, 1),
         ]),
       });
+
+      // --- 2004-2024: bölge eğilimi ---
+      const tumBolgeEgim = cografi.bolge_egim_2004_2024.bolgeler;
+      const enKotu8 = tumBolgeEgim.slice(0, 8);
+      const enIyi4 = tumBolgeEgim.slice(-4);
+      const gosterilecekEgim = [...enKotu8, ...enIyi4];
+      document.getElementById("bolge-egim-aciklama").textContent =
+        `${cografi.bolge_egim_2004_2024.kapsam_notu} En hızlı kötüleşen: ${enKotu8[0].bolge_muduru} ` +
+        `(yılda ${sayiFormatla(enKotu8[0].egim_ha_yil, 0)} ha artış). En hızlı iyileşen: ` +
+        `${enIyi4[enIyi4.length - 1].bolge_muduru} (yılda ${sayiFormatla(Math.abs(enIyi4[enIyi4.length - 1].egim_ha_yil), 0)} ha azalış).`;
+      cubukKartiOlustur({
+        canvasId: "grafik-bolge-egim",
+        etiketler: gosterilecekEgim.map((b) => b.bolge_muduru),
+        degerler: gosterilecekEgim.map((b) => b.egim_ha_yil),
+        birim: "ha/yıl",
+        iyiKotuRenklendir: true,
+      });
+      tabloOlustur({
+        detailsId: "tablo-bolge-egim",
+        basliklar: ["Orman Bölge Müdürlüğü", "Kapsam", "Eğim (ha/yıl)", "21 yıllık toplam (ha)"],
+        satirlar: tumBolgeEgim.map((b) => [b.bolge_muduru, b.kapsam, egimIsaretliHa(b.egim_ha_yil), sayiFormatla(b.toplam_ha)]),
+      });
+
+      // --- 2024: orman vasfı ---
+      const vasif = cografi.vasif_dagilimi_2024;
+      const VASIF_ETIKET = {
+        normal_koru_ha: "Normal Koru (sağlıklı/verimli)",
+        bosluklu_koru_ha: "Boşluklu Kapalı Koru (bozuk)",
+        normal_baltalik_ha: "Normal Baltalık",
+        bosluklu_baltalik_ha: "Boşluklu Kapalı Baltalık (bozuk)",
+        makilik_ha: "Makilik",
+        agaclandirma_sahasi_ha: "Ağaçlandırma Sahası",
+      };
+      const enBuyukVasif = vasif.kategoriler[0];
+      document.getElementById("vasif-aciklama").textContent =
+        `2024'te yanan ${sayiFormatla(vasif.toplam_alan_ha)} hektarın %${sayiFormatla(enBuyukVasif.oran_yuzde, 1)}'si ` +
+        `${VASIF_ETIKET[enBuyukVasif.kategori].toLowerCase()} — yani bozuk/bakımsız değil, sağlıklı ve verimli orman.`;
+      cubukKartiOlustur({
+        canvasId: "grafik-vasif",
+        etiketler: vasif.kategoriler.map((k) => VASIF_ETIKET[k.kategori]),
+        degerler: vasif.kategoriler.map((k) => k.alan_ha),
+        birim: "ha",
+      });
+      tabloOlustur({
+        detailsId: "tablo-vasif",
+        basliklar: ["Orman Türü", "Alan (ha)", "Pay (%)"],
+        satirlar: vasif.kategoriler.map((k) => [VASIF_ETIKET[k.kategori], sayiFormatla(k.alan_ha), sayiFormatla(k.oran_yuzde, 1)]),
+      });
+    }
+
+    function egimIsaretliHa(deger) {
+      return `${deger > 0 ? "+" : ""}${sayiFormatla(deger, 1)} ha/yıl`;
     }
 
     document.addEventListener("DOMContentLoaded", ciz);

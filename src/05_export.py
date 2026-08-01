@@ -120,6 +120,16 @@ def export_cografi():
         silvikultur_siralama_df[silvikultur_kolonlar].round(2).to_json(orient="records")
     )
 
+    bolge_egim_df = pd.read_csv(data_path("interim", "bolge_cok_yillik_egim.csv")).sort_values("egim_ha_yil", ascending=False)
+    bolge_egim_kayitlar = json.loads(
+        bolge_egim_df[["bolge_muduru", "kapsam", "veri_yil_sayisi", "egim_ha_yil", "toplam_ha", "ortalama_yillik_ha"]]
+        .round(1).to_json(orient="records")
+    )
+
+    vasif_ulusal = pd.read_csv(data_path("interim", "vasif_dagilimi_2024_ulusal.csv")).iloc[0]
+    vasif_siralama_df = pd.read_csv(data_path("interim", "vasif_siralama_2024.csv"))
+    vasif_kayitlar = json.loads(vasif_siralama_df.round(1).to_json(orient="records"))
+
     _yaz("cografi", {
         "yil": 2024,
         "kapsam_notu": "il bazında sadece 2024 verisi mevcut",
@@ -169,6 +179,20 @@ def export_cografi():
                 "kapsam_notu": "En az 50 hektarlık bölge müdürlükleri arasında, 'gelecek yıllara bırakılan' alan payı en yüksek olanlar.",
                 "bolgeler": silvikultur_bolge_kayitlar,
             },
+        },
+        "bolge_egim_2004_2024": {
+            "kapsam_notu": (
+                "OGM Tablo 2.12/2.13: her bölge müdürlüğünün (DKMPGM dahil) 2004-2024 arası kendi "
+                "yanan alan serisindeki doğrusal eğilimi (basit doğrusal regresyon eğimi). En az "
+                "10 yıllık veri şartı arandı."
+            ),
+            "bolgeler": bolge_egim_kayitlar,
+        },
+        "vasif_dagilimi_2024": {
+            "yil": 2024,
+            "kapsam_notu": "OGM Tablo 2.17: 2024'te yanan alanın orman türüne (vasfına) göre dağılımı.",
+            "toplam_alan_ha": float(vasif_ulusal["toplam_ha"]),
+            "kategoriler": vasif_kayitlar,
         },
     })
 
@@ -236,6 +260,8 @@ def export_metodoloji(config: dict):
             {"ad": "81 il sınırı (GeoJSON)", "kurum": config["kaynaklar"]["geojson"]},
             {"ad": "OGM Tablo 2.18: Yanan alanların silvikültürel değerlendirmesi, 2024", "kurum": config["kaynaklar"]["ogm"]},
             {"ad": "OGM Tablo 2.15/2.16: Çıkış nedenlerinin ince kırılımı, 2024", "kurum": config["kaynaklar"]["ogm"]},
+            {"ad": "OGM Tablo 2.12/2.13: Bölge müdürlüklerine göre yangın dağılımı, 2004-2024", "kurum": config["kaynaklar"]["ogm"]},
+            {"ad": "OGM Tablo 2.17: Yangınların orman vasfına göre dağılımı, 2024", "kurum": config["kaynaklar"]["ogm"]},
             {"ad": "Canlı sıcak nokta katmanı (cografi.html)", "kurum": "NASA FIRMS (VIIRS uydu verisi), https://firms.modaps.eosdis.nasa.gov/ — istatistik değil, ham gözlem verisi"},
             {"ad": "Sıcak noktaların ilçe/köy adı (cografi.html)", "kurum": "OpenStreetMap Nominatim, https://nominatim.openstreetmap.org — resmi bir istatistik kaynağı değil, topluluk kaynaklı yer-adı sorgu servisi; sadece konum etiketlemek için kullanılıyor, hiçbir sayı bu kaynaktan gelmiyor"},
         ],
@@ -254,6 +280,8 @@ def export_metodoloji(config: dict):
             {"id": "son_donem_karsilastirmasi.*", "tanim": "Son 10 yıl ile ondan önceki tüm dönemin (1988'e kadar) toplam/ortalama yanan alan ve yangın sayısı karşılaştırması", "birim": "hektar, adet, %"},
             {"id": "silvikultur_2024.*_oran", "tanim": "Yanan alanın, verilen işlem kategorisine (ağaçlandırma, gençleştirme, rehabilitasyon, gelecek yıllara bırakılan vb.) ayrılan payı", "birim": "%"},
             {"id": "nedenler.alt_kategori_2024", "tanim": "Çıkış nedeninin 14 alt-kategoriye (anız, sigara, piknik, kundaklama, terör, açma, enerji hattı, trafik kazası vb.) ayrıştırılmış hali, 2024", "birim": "hektar, adet"},
+            {"id": "bolge_egim_2004_2024.egim_ha_yil", "tanim": "Bölge müdürlüğünün kendi yanan alan serisindeki (2004-2024) doğrusal eğilimi; pozitif değer artış, negatif değer azalış gösterir", "birim": "hektar/yıl"},
+            {"id": "vasif_dagilimi_2024.*", "tanim": "Yanan alanın orman türüne (sağlıklı/verimli 'Normal Koru', bozuk 'Boşluklu Kapalı' olanlar, baltalık, makilik, ağaçlandırma sahası) göre dağılımı, 2024", "birim": "hektar, %"},
         ],
         "kapsam": {
             "yil_araligi": gercek_yil_araligi,
@@ -275,6 +303,8 @@ def export_metodoloji(config: dict):
             "Neden payı eğilimi (nedenler.egim) tek bir doğrusal eğim özetidir; yıldan yıla dalgalanmayı veya eğilimin yön değiştirdiği dönemleri yakalamaz. Sadece neden kırılımı yayınlanan yıllar (1997+) dahil edildi.",
             "Silvikültürel değerlendirme (Tablo 2.18) sadece 2024 için mevcut, çok yıllı seri yok; Milli Parklar bu tabloda ayrı sınıflandırıldığı için 30 bölge müdürlüğünü kapsıyor (bölge yangın tablosundaki 31'den farklı). OGM'nin kendi tablosunda Balıkesir satırının bileşen toplamı (261,41 ha) ile beyan edilen toplam alanı (260,86 ha) arasında ~0,55 ha'lık küçük bir yuvarlama farkı var. 'Gelecek yıllara bırakılan' kategorisi, o alanda hiçbir işlem yapılmayacağı anlamına gelmez — rapor tarihi itibarıyla henüz bir karara/uygulamaya geçilmediğini gösterir.",
             "Neden alt kategorisi kırılımı (Tablo 2.15/2.16) sadece 2024 için mevcut; 2025 Faaliyet Raporu bu düzeyde ayrıntı içermiyor. OGM'nin aynı yıllığındaki bu tablo ile ulusal 4-kategori tablosu arasında (aynı yıl için) birkaç yüzdelik küçük, bilinen bir tutarsızlık var — örn. kasıt toplamı bu tabloda 218,4 ha, ulusal tabloda 223 ha.",
+            "Bölge müdürlüğü eğilimi (bolge_egim_2004_2024) 2004-2024 arası mevcut olan tek çok yıllı bölge serisidir; 2025 için bölge bazında sadece tek yıllık veri var (bolge_2025), bu yüzden 2025 bu eğilime dahil değil. En az 10 yıllık veri şartı arandı; tüm bölgeler zaten 21 yılın tamamını kapsıyor.",
+            "Orman vasfına göre dağılım (Tablo 2.17) sadece 2024 için mevcut, çok yıllı seri yok.",
             "Tüm istatistiksel rakamlar (yangın sayısı, alan, oran) birincil/resmi kaynaklardan (OGM, EFFIS) gelir; haber/blog/STK derlemesi istatistik kaynağı olarak alınmadı. Canlı harita katmanı (NASA FIRMS) ve yer adı etiketleme (OpenStreetMap Nominatim) bu kuralın istisnası değil ama farklı bir kategoridir: ilki ham gözlem verisi, ikincisi sadece görüntüleme amaçlı yer-adı sorgusu — hiçbiri istatistiksel bir iddia taşımıyor.",
         ],
         "olusturulma_notu": "Bu dosya src/05_export.py tarafından otomatik üretilir, elle düzenlenmez.",

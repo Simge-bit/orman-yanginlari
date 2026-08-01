@@ -153,6 +153,49 @@ def ingest_neden_bolge_2024():
     print(f"[ingest] neden_bolge_alansal/sayisal_2024_ham.csv: {len(alansal)} satır (ulusal toplam dahil)")
 
 
+def ingest_bolge_cok_yillik():
+    # OGM Tablo 2.12 (alan) / 2.13 (sayı): bölge müdürlüğü bazında ama
+    # 2004-2024 arası 21 yıllık seri — daha önce "bölge verisi sadece
+    # 2025'te tek yıl var" sanılıyordu, bu iki tablo aslında çok yıllı bir
+    # bölge trendi hesaplamayı mümkün kılıyor. Geniş (yıl=sütun) formatta
+    # geliyor, uzun (bolge, yil, deger) formata çevriliyor.
+    yillar = list(range(2004, 2025))
+
+    def genisten_uzuna(dosya_adi, sheet, deger_adi):
+        df = pd.read_excel(data_path("raw", dosya_adi), sheet_name=sheet, header=None, skiprows=5)
+        df.columns = ["bolge_muduru"] + yillar
+        df = df.dropna(subset=["bolge_muduru"])
+        df = df[~df["bolge_muduru"].astype(str).str.startswith("Not")]
+        return df.melt(id_vars="bolge_muduru", var_name="yil", value_name=deger_adi)
+
+    alansal = genisten_uzuna("ogm_bolge_alansal_2004_2024.xlsx", "2.12", "alan_ha")
+    sayisal = genisten_uzuna("ogm_bolge_sayisal_2004_2024.xlsx", "2.13", "sayi")
+    df = alansal.merge(sayisal, on=["bolge_muduru", "yil"], how="inner")
+    df.to_csv(data_path("interim", "bolge_cok_yillik_ham.csv"), index=False)
+    print(f"[ingest] bolge_cok_yillik_ham.csv: {df['bolge_muduru'].nunique()} bölge, "
+          f"{df['yil'].nunique()} yıl ({yillar[0]}-{yillar[-1]})")
+
+
+def ingest_vasif_dagilimi_2024():
+    # OGM Tablo 2.17: 2024'te yanan alan hangi orman türündeydi — sağlıklı/
+    # verimli "Normal Koru" mu, yoksa bozuk/bakımsız (boşluklu kapalı koru/
+    # baltalık) mı, makilik mi, yoksa zaten ağaçlandırma sahası mı.
+    df = pd.read_excel(
+        data_path("raw", "ogm_vasif_dagilimi_2024.xlsx"),
+        sheet_name="2.17",
+        header=None,
+        skiprows=4,
+        names=[
+            "bolge_muduru", "toplam_ha", "normal_koru_ha", "bosluklu_koru_ha",
+            "normal_baltalik_ha", "bosluklu_baltalik_ha", "makilik_ha", "agaclandirma_sahasi_ha",
+        ],
+    )
+    df = df.dropna(subset=["bolge_muduru"])
+    df = df[~df["bolge_muduru"].astype(str).str.startswith("Not")]
+    df.to_csv(data_path("interim", "vasif_dagilimi_2024_ham.csv"), index=False)
+    print(f"[ingest] vasif_dagilimi_2024_ham.csv: {len(df)} satır (ulusal toplam dahil)")
+
+
 def main():
     ingest_yillik_seri()
     ingest_il_dagilim()
@@ -162,6 +205,8 @@ def main():
     ingest_bolge_neden_2025()
     ingest_silvikultur_2024()
     ingest_neden_bolge_2024()
+    ingest_bolge_cok_yillik()
+    ingest_vasif_dagilimi_2024()
 
 
 if __name__ == "__main__":

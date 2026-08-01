@@ -80,16 +80,30 @@ başlar.
 ### `ogm_bolge_alansal_2004_2024.xlsx`, `ogm_bolge_sayisal_2004_2024.xlsx`
 - **Kaynak:** OGM, Tablo 2.12 / 2.13 — Orman Bölge Müdürlüğü bazında
   2004-2024 alansal/sayısal dağılım.
+- **İçerik:** Bölge müdürlüğü verisinin başlangıçta sadece 2025'te (tek
+  yıl) olduğu düşünülüyordu — bu iki tablo aslında 21 yıllık (2004-2024)
+  bir seri, her bölgenin kendi zaman içindeki eğilimini hesaplamayı
+  mümkün kılıyor (bkz. cografi.json bolge_egim_2004_2024). Geniş
+  (yıl=sütun) formatta geliyor, pipeline'da uzun (bölge, yıl, değer)
+  formata çevriliyor (01_ingest.py).
+- **Doğrulama:** Her yıl için 31 bölgenin (DKMPGM dahil) toplamı, tablonun
+  kendi "Toplam-Total" satırıyla ve örtüşen yıllarda (2004-2024) ulusal
+  `yillik_seri.csv` ile karşılaştırıldı — hiçbir yılda 2 ha'yı aşan bir
+  fark yok (02_clean.py'de programatik kontrol).
 - **Dikkat:** "Bölge Müdürlüğü" idari birimi il (81 il) ile birebir örtüşmez
   — bazı bölge müdürlükleri birden fazla ili kapsar. İl bazlı harita için
   `ogm_il_yangin_dagilimi_2024.xlsx` kullanılmalı, bu dosyalar zaman
   serisi/bölge kesitleri için tamamlayıcıdır.
 
-### `ogm_neden_bolge_alansal_2024.xlsx`, `ogm_neden_bolge_sayisal_2024.xlsx`
-- **Kaynak:** OGM, Tablo 2.15 / 2.16 — çıkış nedeni × bölge müdürlüğü, 2024.
-
 ### `ogm_vasif_dagilimi_2024.xlsx`
 - **Kaynak:** OGM, Tablo 2.17 — yangınların orman vasfına göre dağılımı, 2024.
+- **İçerik:** Yanan alanın orman türüne göre dağılımı: Normal Koru
+  (sağlıklı/verimli), Boşluklu Kapalı Koru (bozuk), Normal/Boşluklu Kapalı
+  Baltalık, Makilik, Ağaçlandırma Sahası. Bölge müdürlüğü bazında (DKMPGM
+  dahil, 31 satır) + "Toplam-Total".
+- **Doğrulama:** Bileşenlerin toplamı satır bazında beyan edilen toplam
+  alanla, "Toplam-Total" satırı ise 2024 ulusal yangın toplamıyla
+  (~0,4 ha farkla) eşleşiyor.
 
 ### `ogm_silvikultur_degerlendirme_2024.xlsx`
 - **Kaynak:** OGM, Tablo 2.18 — yanan alanların silvikültürel değerlendirmesi, 2024.

@@ -251,6 +251,56 @@ def analyze_neden_alt_kategori_siralama():
           f"{ilk['kategori']} ({ilk['alan_ha']:.0f} ha)")
 
 
+def analyze_bolge_cok_yillik_egim():
+    # Bölge verisinin sadece 2025'te tek yıl var sanılıyordu — bu tablo
+    # (2004-2024) aslında 21 yıllık bir seri, yani ülke karşılaştırmasında
+    # yaptığımız "kendi eğilimi" analizinin bölge müdürlüğü versiyonu
+    # mümkün: hangi bölge gerçekten kötüleşti, hangisi iyileşti?
+    MIN_VERI_YILI = 10
+    df = pd.read_csv(data_path("interim", "bolge_cok_yillik.csv"))
+    satirlar = []
+    for bolge, grup in df.groupby("bolge_muduru"):
+        grup = grup.sort_values("yil")
+        if len(grup) < MIN_VERI_YILI:
+            continue
+        satirlar.append({
+            "bolge_muduru": bolge,
+            "kapsam": f"{int(grup['yil'].min())}-{int(grup['yil'].max())}",
+            "veri_yil_sayisi": len(grup),
+            "egim_ha_yil": _egim(grup["yil"], grup["alan_ha"]),
+            "toplam_ha": float(grup["alan_ha"].sum()),
+            "ortalama_yillik_ha": float(grup["alan_ha"].mean()),
+        })
+    sonuc = pd.DataFrame(satirlar).sort_values("egim_ha_yil", ascending=False)
+    sonuc.to_csv(data_path("interim", "bolge_cok_yillik_egim.csv"), index=False)
+    en_kotu = sonuc.iloc[0]
+    en_iyi = sonuc.iloc[-1]
+    print(f"[analyze] bolge_cok_yillik_egim.csv: en hızlı kötüleşen={en_kotu['bolge_muduru']} "
+          f"({en_kotu['egim_ha_yil']:+.1f} ha/yıl), en hızlı iyileşen={en_iyi['bolge_muduru']} "
+          f"({en_iyi['egim_ha_yil']:+.1f} ha/yıl)")
+
+
+def analyze_vasif_siralama():
+    # Yanan alan sağlıklı/verimli orman mı ("Normal Koru"), yoksa bozuk/
+    # bakımsız mı ("Boşluklu Kapalı" olanlar)? Ulusal düzeyde kategori
+    # payları hesaplanır.
+    ulusal = pd.read_csv(data_path("interim", "vasif_dagilimi_2024_ulusal.csv")).iloc[0]
+    kategoriler = [
+        "normal_koru_ha", "bosluklu_koru_ha", "normal_baltalik_ha",
+        "bosluklu_baltalik_ha", "makilik_ha", "agaclandirma_sahasi_ha",
+    ]
+    satirlar = [{
+        "kategori": kategori,
+        "alan_ha": float(ulusal[kategori]),
+        "oran_yuzde": float(ulusal[f"{kategori}_oran"]),
+    } for kategori in kategoriler]
+    sonuc = pd.DataFrame(satirlar).sort_values("alan_ha", ascending=False)
+    sonuc.to_csv(data_path("interim", "vasif_siralama_2024.csv"), index=False)
+    ilk = sonuc.iloc[0]
+    print(f"[analyze] vasif_siralama_2024.csv: en büyük kategori={ilk['kategori']} "
+          f"(%{ilk['oran_yuzde']:.1f})")
+
+
 def main():
     analyze_il_siralama()
     analyze_yillik_siralama_ve_egim()
@@ -264,6 +314,8 @@ def main():
     analyze_ulke_egimleri()
     analyze_silvikultur_siralama()
     analyze_neden_alt_kategori_siralama()
+    analyze_bolge_cok_yillik_egim()
+    analyze_vasif_siralama()
 
 
 if __name__ == "__main__":
