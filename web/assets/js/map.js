@@ -136,7 +136,10 @@ async function canliSicakNoktalariEkle({ harita, freshnessId, ilOzetiId }) {
 
     // Leaflet bir katmana tek tooltip bağlayabiliyor — taze noktalarda
     // kalıcı (kısa) etiket, diğerlerinde hover'da açılan tam detay.
-    const kalici = kaliciEtiketGoster && stil.nabiz;
+    // Sadece il adı bilindiğinde (köy/ilçe yok) kalıcı etiket gösterilmiyor
+    // — tek başına il adı yeterince bilgi vermiyor ve haritada bağlamsız,
+    // kafa karıştırıcı bir yazı gibi duruyor; bu noktalar hover'da kalıyor.
+    const kalici = kaliciEtiketGoster && stil.nabiz && Boolean(nokta.yer);
     const tamDetay =
       `<strong>${konumMetni}</strong><br>` +
       `Son görülme: ${saatMetni}<br>` +
