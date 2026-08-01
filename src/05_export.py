@@ -130,6 +130,12 @@ def export_cografi():
     vasif_siralama_df = pd.read_csv(data_path("interim", "vasif_siralama_2024.csv"))
     vasif_kayitlar = json.loads(vasif_siralama_df.round(1).to_json(orient="records"))
 
+    egim_kasit_ozet = pd.read_csv(data_path("interim", "bolge_egim_kasit_korelasyonu.csv")).iloc[0]
+    egim_kasit_veri = pd.read_csv(data_path("interim", "bolge_egim_kasit_veri.csv"))
+    egim_kasit_noktalar = json.loads(
+        egim_kasit_veri[["bolge_muduru", "egim_ha_yil", "kasit_alan_oran"]].round(2).to_json(orient="records")
+    )
+
     _yaz("cografi", {
         "yil": 2024,
         "kapsam_notu": "il bazında sadece 2024 verisi mevcut",
@@ -193,6 +199,27 @@ def export_cografi():
             "kapsam_notu": "OGM Tablo 2.17: 2024'te yanan alanın orman türüne (vasfına) göre dağılımı.",
             "toplam_alan_ha": float(vasif_ulusal["toplam_ha"]),
             "kategoriler": vasif_kayitlar,
+        },
+        "bolge_egim_kasit_korelasyonu": {
+            "kapsam_notu": (
+                "Bölgenin 2004-2024 arası yanan alan eğilimi (egim_ha_yil) ile 2025 kasıt "
+                "(kundaklama) oranı arasındaki ilişki, en az 15 yangınlık bölgeler arasında."
+            ),
+            "n_tum": int(egim_kasit_ozet["n_tum"]),
+            "r_tum": round(float(egim_kasit_ozet["r_tum"]), 3),
+            "p_tum": round(float(egim_kasit_ozet["p_tum"]), 4),
+            "uc_noktalar": egim_kasit_ozet["uc_noktalar"],
+            "n_haric": int(egim_kasit_ozet["n_haric"]),
+            "r_haric": round(float(egim_kasit_ozet["r_haric"]), 3),
+            "p_haric": round(float(egim_kasit_ozet["p_haric"]), 4),
+            "aciklama": (
+                "Tüm bölgelerde ilişki güçlü ve anlamlı görünüyor, ama bu neredeyse tamamen "
+                "Muğla ve Antalya'dan (hem en hızlı kötüleşen hem en yüksek kasıt oranına "
+                "sahip iki bölge) kaynaklanıyor — bu ikisi çıkarıldığında ilişki kayboluyor. "
+                "Yani bu, kasıtın ulusal düzeyde kötüleşmeyi açıkladığı anlamına gelmez; "
+                "sadece bu iki bölgeye özgü çarpıcı bir örtüşmedir."
+            ),
+            "noktalar": egim_kasit_noktalar,
         },
     })
 
@@ -282,6 +309,7 @@ def export_metodoloji(config: dict):
             {"id": "nedenler.alt_kategori_2024", "tanim": "Çıkış nedeninin 14 alt-kategoriye (anız, sigara, piknik, kundaklama, terör, açma, enerji hattı, trafik kazası vb.) ayrıştırılmış hali, 2024", "birim": "hektar, adet"},
             {"id": "bolge_egim_2004_2024.egim_ha_yil", "tanim": "Bölge müdürlüğünün kendi yanan alan serisindeki (2004-2024) doğrusal eğilimi; pozitif değer artış, negatif değer azalış gösterir", "birim": "hektar/yıl"},
             {"id": "vasif_dagilimi_2024.*", "tanim": "Yanan alanın orman türüne (sağlıklı/verimli 'Normal Koru', bozuk 'Boşluklu Kapalı' olanlar, baltalık, makilik, ağaçlandırma sahası) göre dağılımı, 2024", "birim": "hektar, %"},
+            {"id": "bolge_egim_kasit_korelasyonu.r_tum / r_haric", "tanim": "Bölgenin 2004-2024 yanan alan eğilimi ile 2025 kasıt oranı arasındaki Pearson korelasyonu; sırasıyla tüm veriyle ve iki uç nokta (Muğla, Antalya) çıkarılarak hesaplanmış", "birim": "-1 ile 1 arası"},
         ],
         "kapsam": {
             "yil_araligi": gercek_yil_araligi,
@@ -305,6 +333,7 @@ def export_metodoloji(config: dict):
             "Neden alt kategorisi kırılımı (Tablo 2.15/2.16) sadece 2024 için mevcut; 2025 Faaliyet Raporu bu düzeyde ayrıntı içermiyor. OGM'nin aynı yıllığındaki bu tablo ile ulusal 4-kategori tablosu arasında (aynı yıl için) birkaç yüzdelik küçük, bilinen bir tutarsızlık var — örn. kasıt toplamı bu tabloda 218,4 ha, ulusal tabloda 223 ha.",
             "Bölge müdürlüğü eğilimi (bolge_egim_2004_2024) 2004-2024 arası mevcut olan tek çok yıllı bölge serisidir; 2025 için bölge bazında sadece tek yıllık veri var (bolge_2025), bu yüzden 2025 bu eğilime dahil değil. En az 10 yıllık veri şartı arandı; tüm bölgeler zaten 21 yılın tamamını kapsıyor.",
             "Orman vasfına göre dağılım (Tablo 2.17) sadece 2024 için mevcut, çok yıllı seri yok.",
+            "Bölge eğilimi ile kasıt oranı arasındaki korelasyon (bolge_egim_kasit_korelasyonu) örnek bir 'uç nokta etkisi' vakası: tüm veriyle r=0,83 (güçlü, anlamlı) ama Muğla ve Antalya çıkarıldığında r=-0,18'e (anlamsız) düşüyor — yani bu iki bölgeye özgü bir örtüşme, kasıtın kötüleşmeyi ulusal düzeyde açıkladığı iddia edilemez. İki farklı yıl (eğilim 2004-2024, kasıt oranı 2025) karşılaştırıldığı için nedensellik yönü de belirsizdir.",
             "Tüm istatistiksel rakamlar (yangın sayısı, alan, oran) birincil/resmi kaynaklardan (OGM, EFFIS) gelir; haber/blog/STK derlemesi istatistik kaynağı olarak alınmadı. Canlı harita katmanı (NASA FIRMS) ve yer adı etiketleme (OpenStreetMap Nominatim) bu kuralın istisnası değil ama farklı bir kategoridir: ilki ham gözlem verisi, ikincisi sadece görüntüleme amaçlı yer-adı sorgusu — hiçbiri istatistiksel bir iddia taşımıyor.",
         ],
         "olusturulma_notu": "Bu dosya src/05_export.py tarafından otomatik üretilir, elle düzenlenmez.",

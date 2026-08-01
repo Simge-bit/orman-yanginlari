@@ -301,6 +301,37 @@ def analyze_vasif_siralama():
           f"(%{ilk['oran_yuzde']:.1f})")
 
 
+def analyze_bolge_egim_kasit_korelasyonu():
+    # En güçlü tekil korelasyon bulgusu burada çıktı (r≈0.83) ama dikkatli
+    # sunulmalı: bu kadar yüksek bir katsayı, aslında sadece iki uç
+    # noktadan (Muğla, Antalya — hem en hızlı kötüleşen hem en yüksek
+    # kasıt oranına sahip bölgeler) kaynaklanıyor olabilir. Bu iki bölge
+    # çıkarıldığında ilişkinin tamamen kaybolup kaybolmadığını da
+    # hesaplayıp birlikte raporluyoruz — yoksa "kasıt, kötüleşmeyi ulusal
+    # düzeyde açıklıyor" gibi yanıltıcı bir genelleme çıkarılabilir.
+    UC_NOKTALAR = ["Muğla", "Antalya"]
+    egim = pd.read_csv(data_path("interim", "bolge_cok_yillik_egim.csv"))
+    # kasıt oranı sıralaması zaten en az 15 yangınlık bölgelerle sınırlı
+    # (bkz. analyze_bolge_neden_siralama) — küçük örneklemde oranın
+    # tesadüfen çarpık çıkmasını önlemek için aynı eşik burada da kullanılıyor.
+    kasit = pd.read_csv(data_path("interim", "bolge_neden_siralama_2025.csv"))
+    df = egim.merge(kasit[["bolge_muduru", "kasit_alan_oran", "yangin_sayisi"]], on="bolge_muduru", how="inner")
+
+    r_tum, p_tum = stats.pearsonr(df["egim_ha_yil"], df["kasit_alan_oran"])
+    haric = df[~df["bolge_muduru"].isin(UC_NOKTALAR)]
+    r_haric, p_haric = stats.pearsonr(haric["egim_ha_yil"], haric["kasit_alan_oran"])
+
+    ozet = pd.DataFrame([{
+        "n_tum": len(df), "r_tum": r_tum, "p_tum": p_tum,
+        "n_haric": len(haric), "r_haric": r_haric, "p_haric": p_haric,
+        "uc_noktalar": ", ".join(UC_NOKTALAR),
+    }])
+    ozet.to_csv(data_path("interim", "bolge_egim_kasit_korelasyonu.csv"), index=False)
+    df.to_csv(data_path("interim", "bolge_egim_kasit_veri.csv"), index=False)
+    print(f"[analyze] bolge_egim_kasit_korelasyonu.csv: tüm veri r={r_tum:.3f} (p={p_tum:.4f}, n={len(df)}), "
+          f"{'/'.join(UC_NOKTALAR)} hariç r={r_haric:.3f} (p={p_haric:.4f}, n={len(haric)})")
+
+
 def main():
     analyze_il_siralama()
     analyze_yillik_siralama_ve_egim()
@@ -315,6 +346,7 @@ def main():
     analyze_silvikultur_siralama()
     analyze_neden_alt_kategori_siralama()
     analyze_bolge_cok_yillik_egim()
+    analyze_bolge_egim_kasit_korelasyonu()
     analyze_vasif_siralama()
 
 

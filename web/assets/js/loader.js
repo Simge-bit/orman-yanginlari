@@ -44,6 +44,12 @@ function sayiFormatla(deger, ondalik = 0) {
   }).format(deger);
 }
 
+// p-değeri çok küçükse (ör. 0,0000038) sabit ondalıkla yuvarlayınca "p=0,0000"
+// gibi yanıltıcı görünür — eşik altında kalanlar "p<0,0001" olarak gösterilir.
+function pDegeriFormatla(p) {
+  return p < 0.0001 ? "p<0,0001" : `p=${sayiFormatla(p, 4)}`;
+}
+
 // Dış kaynaklı metni (ör. Nominatim yer adları) HTML string'lerine
 // enjekte etmeden önce kaçışlamak için — tooltip'ler innerHTML kullanıyor.
 function htmlKacisla(metin) {

@@ -159,6 +159,18 @@
       Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.17 (yangınların
       orman vasfına göre dağılımı). Bkz. <a href="metodoloji.html">Metodoloji</a>.
     </p>
+
+    <h2>Kötüleşme Eğilimi ile Kasıt Oranı İlişkisi</h2>
+    <p class="aciklama" id="egim-kasit-aciklama-1"></p>
+    <p class="aciklama" id="egim-kasit-aciklama-2"></p>
+    <div class="chart-karti">
+      <canvas id="grafik-egim-kasit"></canvas>
+    </div>
+    <p class="kaynak-notu">
+      X ekseni: bölgenin 2004-2024 yanan alan eğilimi (ha/yıl). Y ekseni:
+      2025 kasıt (kundaklama) oranı (%, alan bazında). Bkz.
+      <a href="metodoloji.html">Metodoloji</a>.
+    </p>
   </main>
 
   <div id="site-footer"></div>
@@ -347,6 +359,23 @@
         detailsId: "tablo-vasif",
         basliklar: ["Orman Türü", "Alan (ha)", "Pay (%)"],
         satirlar: vasif.kategoriler.map((k) => [VASIF_ETIKET[k.kategori], sayiFormatla(k.alan_ha), sayiFormatla(k.oran_yuzde, 1)]),
+      });
+
+      // --- Kötüleşme eğilimi ile kasıt oranı ilişkisi ---
+      const ek = cografi.bolge_egim_kasit_korelasyonu;
+      document.getElementById("egim-kasit-aciklama-1").textContent =
+        `Tüm bölgelerle hesaplanınca güçlü ve anlamlı bir ilişki çıkıyor: r=${sayiFormatla(ek.r_tum, 2)}, ` +
+        `${pDegeriFormatla(ek.p_tum)} (${ek.n_tum} bölge). Ama bu neredeyse tamamen ${ek.uc_noktalar} bölgelerinden ` +
+        `kaynaklanıyor — bu ikisi hem en hızlı kötüleşen hem en yüksek kasıt oranına sahip bölgeler.`;
+      document.getElementById("egim-kasit-aciklama-2").textContent =
+        `${ek.uc_noktalar} çıkarıldığında ilişki tamamen kayboluyor: r=${sayiFormatla(ek.r_haric, 2)}, ` +
+        `p=${sayiFormatla(ek.p_haric, 2)} (${ek.n_haric} bölge, istatistiksel olarak anlamsız). ${ek.aciklama}`;
+      saciliminOlustur({
+        canvasId: "grafik-egim-kasit",
+        noktalar: ek.noktalar.map((n) => ({ x: n.egim_ha_yil, y: n.kasit_alan_oran, il: n.bolge_muduru })),
+        xEtiket: "Yanan alan eğilimi",
+        xBirim: "ha/yıl",
+        yEtiket: "Kasıt oranı",
       });
     }
 

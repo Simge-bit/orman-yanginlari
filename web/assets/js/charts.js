@@ -379,7 +379,7 @@ function cubukKartiOlustur({ canvasId, etiketler, degerler, birim, iyiKotuRenkle
 // Saçılım grafiği — iki sürekli değişken arasındaki ilişkiyi (korelasyonu)
 // göstermek için doğru grafik türü; metinde geçen bir Pearson r'nin görsel
 // karşılığı. Tek seri olduğu için tek vurgu rengiyle, il adı tooltip başlığında.
-function saciliminOlustur({ canvasId, noktalar, xEtiket, yEtiket }) {
+function saciliminOlustur({ canvasId, noktalar, xEtiket, yEtiket, xBirim = "%", yBirim = "%" }) {
   const ctx = document.getElementById(canvasId);
   if (!ctx) return;
 
@@ -412,27 +412,30 @@ function saciliminOlustur({ canvasId, noktalar, xEtiket, yEtiket }) {
             title: (context) => context[0]?.raw?.il ?? "",
             label(context) {
               const { x, y } = context.raw;
-              const xMetni = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 1 }).format(x);
-              const yMetni = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 2 }).format(y);
-              return `${xEtiket}: %${xMetni} · ${yEtiket}: %${yMetni}`;
+              return `${xEtiket}: ${birimliDegerFormatla(x, xBirim, 1)} · ${yEtiket}: ${birimliDegerFormatla(y, yBirim, 2)}`;
             },
           },
         },
       },
       scales: {
         x: {
-          title: { display: true, text: `${xEtiket} (%)`, color: cssDegisken("--metin-soluk") },
+          title: { display: true, text: `${xEtiket} (${xBirim})`, color: cssDegisken("--metin-soluk") },
           grid: { color: cssDegisken("--izgara") },
           ticks: { color: cssDegisken("--metin-soluk") },
         },
         y: {
-          title: { display: true, text: `${yEtiket} (%)`, color: cssDegisken("--metin-soluk") },
+          title: { display: true, text: `${yEtiket} (${yBirim})`, color: cssDegisken("--metin-soluk") },
           grid: { color: cssDegisken("--izgara") },
           ticks: { color: cssDegisken("--metin-soluk") },
         },
       },
     },
   });
+}
+
+function birimliDegerFormatla(deger, birim, ondalik) {
+  const metin = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: ondalik }).format(deger);
+  return birim === "%" ? `%${metin}` : `${metin} ${birim}`;
 }
 
 // Bir <details class="tablo-goster"> içine basit bir veri tablosu basar —

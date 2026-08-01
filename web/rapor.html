@@ -44,6 +44,7 @@
       <p class="aciklama" id="rapor-cografi-il"></p>
       <p class="aciklama" id="rapor-cografi-bolge"></p>
       <p class="aciklama" id="rapor-silvikultur"></p>
+      <p class="aciklama" id="rapor-egim-kasit"></p>
     </section>
 
     <section class="rapor-bolum">
@@ -158,6 +159,13 @@
         `(%${sayiFormatla(sv.ulusal.gelecek_yillara_ha_oran, 1)}) "gelecek yıllara bırakılan" — yani rapor tarihi ` +
         `itibarıyla henüz bir işleme alınmamış; aktif ağaçlandırma programına alınan pay ise sadece ` +
         `%${sayiFormatla(sv.ulusal.agaclandirma_ha_oran, 1)} (OGM Tablo 2.18).`;
+
+      const ek = cografi.bolge_egim_kasit_korelasyonu;
+      document.getElementById("rapor-egim-kasit").textContent =
+        `Bölgenin 2004-2024 kötüleşme eğilimi ile 2025 kasıt oranı arasında tüm bölgelerle r=${sayiFormatla(ek.r_tum, 2)} ` +
+        `(${pDegeriFormatla(ek.p_tum)}) gibi güçlü bir ilişki çıkıyor, ama bu neredeyse tamamen ${ek.uc_noktalar} ` +
+        `bölgelerinden kaynaklanıyor; bu ikisi çıkarıldığında ilişki kayboluyor (r=${sayiFormatla(ek.r_haric, 2)}, ` +
+        `anlamsız) — yani ulusal düzeyde değil, sadece bu iki bölgeye özgü bir örtüşme.`;
 
       // --- Ülke Karşılaştırması ---
       const turkiyeSatirlari = karsilastirma.ulkeler.filter((u) => u.ulke === "Türkiye" && u.sira_alan != null);
