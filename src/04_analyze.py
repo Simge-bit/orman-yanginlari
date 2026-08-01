@@ -209,6 +209,22 @@ def analyze_neden_egimi():
           f"{kasit['alan_oran_egimi_puan_yil']:+.2f} puan değişiyor")
 
 
+def analyze_silvikultur_siralama():
+    # Yanan alanın en büyük tek kalemi ulusal düzeyde "gelecek yıllara
+    # bırakılan" (henüz hiçbir işlem yapılmamış) — hangi bölgelerde bu payın
+    # orantısız yüksek olduğu, en az 50 ha'lık bölgeler arasında sıralanır
+    # (çok küçük alanlı bir bölgede tek bir karar tüm oranı çarpıtmasın diye).
+    MIN_ALAN_HA = 50
+    df = pd.read_csv(data_path("interim", "silvikultur_2024.csv"))
+    yeterli = df[df["toplam_alan_ha"] >= MIN_ALAN_HA].copy()
+    yeterli["sira_gelecek_yillara_oran"] = yeterli["gelecek_yillara_ha_oran"].rank(ascending=False, method="min").astype(int)
+    yeterli = yeterli.sort_values("sira_gelecek_yillara_oran")
+    yeterli.to_csv(data_path("interim", "silvikultur_siralama_2024.csv"), index=False)
+    ilk = yeterli.iloc[0]
+    print(f"[analyze] silvikultur_siralama_2024.csv: en yüksek 'gelecek yıllara bırakılan' oranı="
+          f"{ilk['bolge_muduru']} (%{ilk['gelecek_yillara_ha_oran']:.1f}, min {MIN_ALAN_HA} ha şartıyla)")
+
+
 def main():
     analyze_il_siralama()
     analyze_yillik_siralama_ve_egim()
@@ -220,6 +236,7 @@ def main():
     analyze_orman_kaplama_korelasyonu()
     analyze_neden_egimi()
     analyze_ulke_egimleri()
+    analyze_silvikultur_siralama()
 
 
 if __name__ == "__main__":

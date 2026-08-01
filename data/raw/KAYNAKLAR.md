@@ -93,6 +93,28 @@ başlar.
 
 ### `ogm_silvikultur_degerlendirme_2024.xlsx`
 - **Kaynak:** OGM, Tablo 2.18 — yanan alanların silvikültürel değerlendirmesi, 2024.
+- **İçerik:** 2024'te yanan alanın (Orman Bölge Müdürlüğü bazında, 30 bölge +
+  "Toplam-Total" satırı) hangi işleme alındığı: zarar görmeyen (örtü
+  yangını), doğal/suni gençleştirme, rehabilitasyon, ağaçlandırma programı,
+  teknik işlem gerekmediği için korumaya alınan, ve "gelecek yıllara
+  bırakılan" (henüz işleme alınmamış). Milli Parklar bu tabloda ayrı
+  sınıflandırılmış, dahil değil (not olarak tabloda belirtiliyor).
+- **Doğrulama:** "Toplam-Total" satırı (27.485 ha) hem 30 bölgenin kendi
+  toplamıyla (27.485,17 ha) hem de 2024 ulusal yangın toplamıyla
+  (`yillik_seri.csv`) birebir eşleşiyor — pipeline'da (02_clean.py) her iki
+  yönde de programatik kontrol var.
+- **Bilinen sorun:** Balıkesir satırında bileşenlerin toplamı (261,41 ha)
+  ile beyan edilen toplam alan (260,86 ha) arasında ~0,55 ha'lık küçük bir
+  yuvarlama farkı var (OGM'nin kendi tablosunda) — düzeltilmedi, olduğu
+  gibi bırakıldı.
+- **Yorum notu:** "Gelecek yıllara bırakılan" kategorisi, o alanın
+  ağaçlandırılmayacağı ya da başka bir amaçla kullanılacağı anlamına
+  gelmez — sadece rapor tarihi itibarıyla henüz somut bir işleme/karara
+  bağlanmadığını gösterir. Bu tablo "yanan alan imara mı açıldı" sorusuna
+  cevap vermez (OGM böyle bir istatistik yayınlamaz, zaten Anayasa m.169
+  gereği yanan orman arazisinin amacı değiştirilemez) — sadece "aktif
+  ağaçlandırma/gençleştirme işlemine alındı mı, yoksa bekliyor mu" sorusuna
+  resmi bir cevap verir.
 
 ### `ref_orman_alani_il_2024.xlsx` / `ref_orman_alani_il_2024_alt.xlsx`
 - **Kaynak:** OGM, Tablo 1.6 / 1.3 — orman alanı, serveti ve cari artımının

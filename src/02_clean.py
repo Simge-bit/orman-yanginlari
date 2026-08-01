@@ -161,6 +161,49 @@ def clean_bolge_neden_2025():
     print(f"[clean] bolge_neden_2025.csv: {len(df)} bölge müdürlüğü, neden oranları hesaplandı")
 
 
+def clean_silvikultur_2024():
+    df = pd.read_csv(data_path("interim", "silvikultur_2024_ham.csv"))
+    bilesen_kolonlari = [
+        "zarar_gormeyen_ha", "dogal_genclestirme_ha", "suni_genclestirme_ha",
+        "rehabilitasyon_ha", "agaclandirma_ha", "koruma_ha", "gelecek_yillara_ha",
+    ]
+    # Bu tabloda "-" bir bölgede o kategoriye hiç alan düşmediği anlamına
+    # gelir (il_dagilim'deki "sıfır yangın" kuralıyla aynı mantık) — 1997
+    # öncesi ulusal seri gibi "henüz yayınlanmadı" değil, bu yüzden 0'a
+    # çevriliyor (NaN olarak bırakılan yillik_seri'den farklı).
+    for kolon in ["toplam_alan_ha"] + bilesen_kolonlari:
+        df[kolon] = _sayiya_cevir(df[kolon]).fillna(0)
+
+    bilesen_toplami = df[bilesen_kolonlari].sum(axis=1)
+    uyumsuz = (bilesen_toplami - df["toplam_alan_ha"]).abs() > 0.5
+    if uyumsuz.any():
+        print(f"[clean] UYARI: silvikültür bileşenleri toplam alanla uyuşmuyor -> "
+              f"{df.loc[uyumsuz, 'bolge_muduru'].tolist()}")
+
+    ulusal = df[df["bolge_muduru"] == "Toplam-Total"].copy()
+    bolge_df = df[df["bolge_muduru"] != "Toplam-Total"].copy()
+
+    bolge_toplami = bolge_df["toplam_alan_ha"].sum()
+    ulusal_alan = ulusal.iloc[0]["toplam_alan_ha"]
+    if abs(bolge_toplami - ulusal_alan) > 1.0:
+        print(f"[clean] UYARI: silvikültür bölge toplamı ({bolge_toplami:.1f}) "
+              f"'Toplam-Total' satırıyla ({ulusal_alan:.1f}) uyuşmuyor")
+
+    yillik = pd.read_csv(data_path("interim", "yillik_seri.csv"))
+    ulusal_2024 = yillik[yillik["yil"] == 2024].iloc[0]
+    if abs(ulusal_alan - ulusal_2024["yanan_alan_ha"]) > 1.0:
+        print(f"[clean] UYARI: silvikültür ulusal toplamı ({ulusal_alan:.1f}) "
+              f"2024 ulusal yangın toplamıyla ({ulusal_2024['yanan_alan_ha']:.1f}) uyuşmuyor")
+
+    for kolon in bilesen_kolonlari:
+        bolge_df[f"{kolon}_oran"] = bolge_df[kolon] / bolge_df["toplam_alan_ha"] * 100
+        ulusal[f"{kolon}_oran"] = ulusal[kolon] / ulusal["toplam_alan_ha"] * 100
+
+    bolge_df.to_csv(data_path("interim", "silvikultur_2024.csv"), index=False)
+    ulusal.to_csv(data_path("interim", "silvikultur_2024_ulusal.csv"), index=False)
+    print(f"[clean] silvikultur_2024.csv: {len(bolge_df)} bölge müdürlüğü, ulusal toplam {ulusal_alan:.0f} ha")
+
+
 def main():
     clean_yillik_seri()
     clean_il_dagilim()
@@ -168,6 +211,7 @@ def main():
     clean_effis()
     clean_bolge_2025()
     clean_bolge_neden_2025()
+    clean_silvikultur_2024()
 
 
 if __name__ == "__main__":

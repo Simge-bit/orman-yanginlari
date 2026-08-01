@@ -109,6 +109,17 @@ def export_cografi():
 
     korelasyon = pd.read_csv(data_path("interim", "korelasyon.csv")).iloc[0]
 
+    silvikultur_bilesenleri = [
+        "zarar_gormeyen_ha", "dogal_genclestirme_ha", "suni_genclestirme_ha",
+        "rehabilitasyon_ha", "agaclandirma_ha", "koruma_ha", "gelecek_yillara_ha",
+    ]
+    silvikultur_ulusal = pd.read_csv(data_path("interim", "silvikultur_2024_ulusal.csv")).iloc[0]
+    silvikultur_siralama_df = pd.read_csv(data_path("interim", "silvikultur_siralama_2024.csv"))
+    silvikultur_kolonlar = ["bolge_muduru", "toplam_alan_ha"] + silvikultur_bilesenleri + ["gelecek_yillara_ha_oran", "sira_gelecek_yillara_oran"]
+    silvikultur_bolge_kayitlar = json.loads(
+        silvikultur_siralama_df[silvikultur_kolonlar].round(2).to_json(orient="records")
+    )
+
     _yaz("cografi", {
         "yil": 2024,
         "kapsam_notu": "il bazında sadece 2024 verisi mevcut",
@@ -139,6 +150,24 @@ def export_cografi():
             "kasit_orani_siralama": {
                 "kapsam_notu": "En az 15 yangını olan bölge müdürlükleri arasında, kasıt (kundaklama) payı en yüksek olanlar.",
                 "bolgeler": bolge_neden_kayitlar,
+            },
+        },
+        "silvikultur_2024": {
+            "yil": 2024,
+            "kapsam_notu": (
+                "OGM Tablo 2.18: 2024'te yanan alanın (Orman Bölge Müdürlüğü bazında, "
+                "Milli Parklar hariç) hangi işleme alındığı. 'Ağaçlandırma programına alınan' "
+                "ve 'gençleştirme' aktif müdahaleyi, 'gelecek yıllara bırakılan' ise henüz "
+                "hiçbir işlem yapılmadığını gösterir."
+            ),
+            "ulusal": {
+                "toplam_alan_ha": float(silvikultur_ulusal["toplam_alan_ha"]),
+                **{k: float(silvikultur_ulusal[k]) for k in silvikultur_bilesenleri},
+                **{f"{k}_oran": round(float(silvikultur_ulusal[f"{k}_oran"]), 1) for k in silvikultur_bilesenleri},
+            },
+            "bolgeler_siralama": {
+                "kapsam_notu": "En az 50 hektarlık bölge müdürlükleri arasında, 'gelecek yıllara bırakılan' alan payı en yüksek olanlar.",
+                "bolgeler": silvikultur_bolge_kayitlar,
             },
         },
     })
@@ -190,6 +219,7 @@ def export_metodoloji(config: dict):
             {"ad": "OGM 2025 Faaliyet Raporu (sadece son yıl için)", "kurum": config["kaynaklar"].get("ogm_faaliyet_2025", "")},
             {"ad": "EFFIS/Copernicus ülke karşılaştırma raporu", "kurum": config["kaynaklar"]["effis"]},
             {"ad": "81 il sınırı (GeoJSON)", "kurum": config["kaynaklar"]["geojson"]},
+            {"ad": "OGM Tablo 2.18: Yanan alanların silvikültürel değerlendirmesi, 2024", "kurum": config["kaynaklar"]["ogm"]},
             {"ad": "Canlı sıcak nokta katmanı (cografi.html)", "kurum": "NASA FIRMS (VIIRS uydu verisi), https://firms.modaps.eosdis.nasa.gov/ — istatistik değil, ham gözlem verisi"},
             {"ad": "Sıcak noktaların ilçe/köy adı (cografi.html)", "kurum": "OpenStreetMap Nominatim, https://nominatim.openstreetmap.org — resmi bir istatistik kaynağı değil, topluluk kaynaklı yer-adı sorgu servisi; sadece konum etiketlemek için kullanılıyor, hiçbir sayı bu kaynaktan gelmiyor"},
         ],
@@ -206,6 +236,7 @@ def export_metodoloji(config: dict):
             {"id": "nedenler.egim.*_oran_egimi_puan_yil", "tanim": "Neden kategorisinin (kasıt/ihmal-kaza/doğal/bilinmeyen) yıllık payındaki doğrusal eğilim (basit doğrusal regresyon eğimi)", "birim": "yüzde puan/yıl"},
             {"id": "ulke_egimleri.egim_ha_yil", "tanim": "Ülkenin kendi yanan alan serisindeki doğrusal eğilim (basit doğrusal regresyon eğimi); pozitif değer artış, negatif değer azalış gösterir", "birim": "hektar/yıl"},
             {"id": "son_donem_karsilastirmasi.*", "tanim": "Son 10 yıl ile ondan önceki tüm dönemin (1988'e kadar) toplam/ortalama yanan alan ve yangın sayısı karşılaştırması", "birim": "hektar, adet, %"},
+            {"id": "silvikultur_2024.*_oran", "tanim": "Yanan alanın, verilen işlem kategorisine (ağaçlandırma, gençleştirme, rehabilitasyon, gelecek yıllara bırakılan vb.) ayrılan payı", "birim": "%"},
         ],
         "kapsam": {
             "yil_araligi": gercek_yil_araligi,
@@ -225,6 +256,7 @@ def export_metodoloji(config: dict):
             "Orman kaplama % ile yoğunluk indeksi arasındaki korelasyon sadece 2024 kesitinde (81 il, tek yıl) hesaplandı — zaman içindeki değişimi yakalamaz, sadece o yılki iller-arası ilişkiyi gösterir.",
             "Ülke eğimleri (ulke_egimleri), her ülkenin kendi veri bulunan yıllarına göre hesaplandı; bazı ülkeler erken yıllarda EFFIS'e veri bildirmediği için ülkeler arasında kapsanan yıl sayısı farklı olabilir (en az 5 yıllık veri şartı arandı). Bu yüzden eğimler doğrudan aynı yıl aralığına göre birebir kıyaslanabilir değildir.",
             "Neden payı eğilimi (nedenler.egim) tek bir doğrusal eğim özetidir; yıldan yıla dalgalanmayı veya eğilimin yön değiştirdiği dönemleri yakalamaz. Sadece neden kırılımı yayınlanan yıllar (1997+) dahil edildi.",
+            "Silvikültürel değerlendirme (Tablo 2.18) sadece 2024 için mevcut, çok yıllı seri yok; Milli Parklar bu tabloda ayrı sınıflandırıldığı için 30 bölge müdürlüğünü kapsıyor (bölge yangın tablosundaki 31'den farklı). OGM'nin kendi tablosunda Balıkesir satırının bileşen toplamı (261,41 ha) ile beyan edilen toplam alanı (260,86 ha) arasında ~0,55 ha'lık küçük bir yuvarlama farkı var. 'Gelecek yıllara bırakılan' kategorisi, o alanda hiçbir işlem yapılmayacağı anlamına gelmez — rapor tarihi itibarıyla henüz bir karara/uygulamaya geçilmediğini gösterir.",
             "Tüm istatistiksel rakamlar (yangın sayısı, alan, oran) birincil/resmi kaynaklardan (OGM, EFFIS) gelir; haber/blog/STK derlemesi istatistik kaynağı olarak alınmadı. Canlı harita katmanı (NASA FIRMS) ve yer adı etiketleme (OpenStreetMap Nominatim) bu kuralın istisnası değil ama farklı bir kategoridir: ilki ham gözlem verisi, ikincisi sadece görüntüleme amaçlı yer-adı sorgusu — hiçbiri istatistiksel bir iddia taşımıyor.",
         ],
         "olusturulma_notu": "Bu dosya src/05_export.py tarafından otomatik üretilir, elle düzenlenmez.",

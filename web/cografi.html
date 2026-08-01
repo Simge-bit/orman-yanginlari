@@ -106,6 +106,31 @@
       Aynı Ek 6 tablosunun neden kırılımından; en az 15 yangınlık bölge
       müdürlükleri arasında, alan bazında kasıt oranına göre sıralanmıştır.
     </p>
+
+    <h2>2024: Yanan Alanların Akıbeti</h2>
+    <p class="aciklama" id="silvikultur-aciklama"></p>
+    <div class="chart-karti">
+      <canvas id="grafik-silvikultur-ulusal"></canvas>
+      <details class="tablo-goster" id="tablo-silvikultur-ulusal">
+        <summary>Tabloyu göster</summary>
+      </details>
+    </div>
+
+    <h3>Hangi bölgelerde en büyük pay "gelecek yıllara bırakıldı"?</h3>
+    <p class="aciklama" id="silvikultur-bolge-aciklama"></p>
+    <div class="chart-karti">
+      <canvas id="grafik-silvikultur-bolge"></canvas>
+      <details class="tablo-goster" id="tablo-silvikultur-bolge">
+        <summary>Tabloyu göster</summary>
+      </details>
+    </div>
+    <p class="kaynak-notu">
+      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.18 (yanan alanların
+      silvikültürel değerlendirmesi). "Gelecek yıllara bırakılan" alanda o
+      alanda hiçbir işlem yapılmayacağı anlamına gelmez — rapor tarihi
+      itibarıyla henüz bir karara/uygulamaya geçilmediğini gösterir. Bkz.
+      <a href="metodoloji.html">Metodoloji</a>.
+    </p>
   </main>
 
   <div id="site-footer"></div>
@@ -192,6 +217,59 @@
           sayiFormatla(b.yangin_sayisi),
           sayiFormatla(b.kasit_alan_oran, 1),
           sayiFormatla(b.kasit_sayi_oran, 1),
+        ]),
+      });
+
+      const sv = cografi.silvikultur_2024;
+      const SV_ETIKET = {
+        gelecek_yillara_ha: "Gelecek yıllara bırakılan",
+        zarar_gormeyen_ha: "Zarar görmeyen (örtü yangını)",
+        koruma_ha: "Teknik işlem gerekmediği için korumaya alınan",
+        dogal_genclestirme_ha: "Doğal gençleştirme",
+        agaclandirma_ha: "Ağaçlandırma programına alınan",
+        rehabilitasyon_ha: "Rehabilitasyon",
+        suni_genclestirme_ha: "Suni gençleştirme",
+      };
+      const svKategoriler = Object.keys(SV_ETIKET)
+        .map((k) => ({ anahtar: k, ha: sv.ulusal[k], oran: sv.ulusal[`${k}_oran`] }))
+        .sort((a, b) => b.ha - a.ha);
+
+      document.getElementById("silvikultur-aciklama").textContent =
+        `2024'te yanan ${sayiFormatla(sv.ulusal.toplam_alan_ha)} hektarın en büyük tek kalemi ` +
+        `(%${sayiFormatla(sv.ulusal.gelecek_yillara_ha_oran, 1)}, ${sayiFormatla(sv.ulusal.gelecek_yillara_ha)} ha) ` +
+        `"gelecek yıllara bırakılan" — yani rapor tarihi itibarıyla henüz bir işleme alınmamış. Aktif ağaçlandırma ` +
+        `programına alınan pay ise sadece %${sayiFormatla(sv.ulusal.agaclandirma_ha_oran, 1)} ` +
+        `(${sayiFormatla(sv.ulusal.agaclandirma_ha)} ha).`;
+      cubukKartiOlustur({
+        canvasId: "grafik-silvikultur-ulusal",
+        etiketler: svKategoriler.map((k) => SV_ETIKET[k.anahtar]),
+        degerler: svKategoriler.map((k) => k.ha),
+        birim: "ha",
+      });
+      tabloOlustur({
+        detailsId: "tablo-silvikultur-ulusal",
+        basliklar: ["Kategori", "Alan (ha)", "Pay (%)"],
+        satirlar: svKategoriler.map((k) => [SV_ETIKET[k.anahtar], sayiFormatla(k.ha), sayiFormatla(k.oran, 1)]),
+      });
+
+      const svBolgeIlk10 = [...sv.bolgeler_siralama.bolgeler]
+        .sort((a, b) => a.sira_gelecek_yillara_oran - b.sira_gelecek_yillara_oran)
+        .slice(0, 10);
+      document.getElementById("silvikultur-bolge-aciklama").textContent = sv.bolgeler_siralama.kapsam_notu;
+      cubukKartiOlustur({
+        canvasId: "grafik-silvikultur-bolge",
+        etiketler: svBolgeIlk10.map((b) => b.bolge_muduru),
+        degerler: svBolgeIlk10.map((b) => b.gelecek_yillara_ha_oran),
+        birim: "%",
+      });
+      tabloOlustur({
+        detailsId: "tablo-silvikultur-bolge",
+        basliklar: ["#", "Orman Bölge Müdürlüğü", "Toplam yanan alan (ha)", "Gelecek yıllara bırakılan (%)"],
+        satirlar: svBolgeIlk10.map((b) => [
+          b.sira_gelecek_yillara_oran,
+          b.bolge_muduru,
+          sayiFormatla(b.toplam_alan_ha),
+          sayiFormatla(b.gelecek_yillara_ha_oran, 1),
         ]),
       });
     }

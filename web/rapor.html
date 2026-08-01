@@ -43,6 +43,7 @@
       <h2>Coğrafi Dağılım</h2>
       <p class="aciklama" id="rapor-cografi-il"></p>
       <p class="aciklama" id="rapor-cografi-bolge"></p>
+      <p class="aciklama" id="rapor-silvikultur"></p>
     </section>
 
     <section class="rapor-bolum">
@@ -150,6 +151,13 @@
         `Müdürlüğü kırılımına göre en çok yanan bölge ${ilkBolge.bolge_muduru} (${sayiFormatla(ilkBolge.yanan_alan_ha)} ha) ` +
         `oldu. Aynı verinin neden kırılımına göre, en az 15 yangınlık bölgeler arasında kasıt oranı en yüksek olan ` +
         `bölge ${ilkKasitBolge.bolge_muduru} (alan bazında %${sayiFormatla(ilkKasitBolge.kasit_alan_oran, 1)}).`;
+
+      const sv = cografi.silvikultur_2024;
+      document.getElementById("rapor-silvikultur").textContent =
+        `${sv.yil} yılında yanan ${sayiFormatla(sv.ulusal.toplam_alan_ha)} hektarın en büyük tek kalemi ` +
+        `(%${sayiFormatla(sv.ulusal.gelecek_yillara_ha_oran, 1)}) "gelecek yıllara bırakılan" — yani rapor tarihi ` +
+        `itibarıyla henüz bir işleme alınmamış; aktif ağaçlandırma programına alınan pay ise sadece ` +
+        `%${sayiFormatla(sv.ulusal.agaclandirma_ha_oran, 1)} (OGM Tablo 2.18).`;
 
       // --- Ülke Karşılaştırması ---
       const turkiyeSatirlari = karsilastirma.ulkeler.filter((u) => u.ulke === "Türkiye" && u.sira_alan != null);

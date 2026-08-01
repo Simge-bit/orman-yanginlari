@@ -95,6 +95,30 @@ def ingest_bolge_neden_2025():
     print(f"[ingest] bolge_neden_2025_ham.csv: {len(df)} bölge müdürlüğü")
 
 
+def ingest_silvikultur_2024():
+    # OGM Tablo 2.18: 2024'te yanan alana ne olduğu (ağaçlandırma programına
+    # mı alındı, gençleştirildi mi, yoksa "gelecek yıllara" mı bırakıldı) —
+    # bölge müdürlüğü bazında. "Toplam-Total" satırı ulusal toplamı, geri
+    # kalan 30 satır bölgeleri veriyor (Milli Parklar bu tabloda ayrı
+    # sınıflandırılmış, dahil değil — bkz. KAYNAKLAR.md).
+    df = pd.read_excel(
+        data_path("raw", "ogm_silvikultur_degerlendirme_2024.xlsx"),
+        sheet_name="2.18",
+        skiprows=3,
+        header=None,
+        usecols=range(9),
+        names=[
+            "bolge_muduru", "toplam_alan_ha", "zarar_gormeyen_ha",
+            "dogal_genclestirme_ha", "suni_genclestirme_ha", "rehabilitasyon_ha",
+            "agaclandirma_ha", "koruma_ha", "gelecek_yillara_ha",
+        ],
+    )
+    df = df.dropna(subset=["bolge_muduru"])
+    df = df[~df["bolge_muduru"].astype(str).str.startswith("Not")]
+    df.to_csv(data_path("interim", "silvikultur_2024_ham.csv"), index=False)
+    print(f"[ingest] silvikultur_2024_ham.csv: {len(df)} satır (ulusal toplam dahil)")
+
+
 def main():
     ingest_yillik_seri()
     ingest_il_dagilim()
@@ -102,6 +126,7 @@ def main():
     ingest_effis()
     ingest_bolge_2025()
     ingest_bolge_neden_2025()
+    ingest_silvikultur_2024()
 
 
 if __name__ == "__main__":

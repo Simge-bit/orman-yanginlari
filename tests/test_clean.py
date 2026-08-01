@@ -73,3 +73,20 @@ def test_bolge_neden_2025_bolge_toplamiyla_eslesiyor():
 
     oran_kolonlari = [c for c in neden_df.columns if c.endswith("_sayi_oran")]
     assert (neden_df[oran_kolonlari].sum(axis=1).round(1) == 100.0).all()
+
+
+def test_silvikultur_2024_bolge_toplami_ulusal_toplamla_eslesiyor():
+    bolge_df = pd.read_csv(data_path("interim", "silvikultur_2024.csv"))
+    yillik_df = pd.read_csv(data_path("interim", "yillik_seri.csv"))
+    ulusal_2024 = yillik_df[yillik_df["yil"] == 2024].iloc[0]
+
+    assert abs(bolge_df["toplam_alan_ha"].sum() - ulusal_2024["yanan_alan_ha"]) < 1.0
+
+    bilesen_kolonlari = [
+        "zarar_gormeyen_ha", "dogal_genclestirme_ha", "suni_genclestirme_ha",
+        "rehabilitasyon_ha", "agaclandirma_ha", "koruma_ha", "gelecek_yillara_ha",
+    ]
+    # OGM'nin kendi tablosunda bir satırda (Balıkesir) ~0.55 ha'lık bilinen
+    # bir yuvarlama farkı var (bkz. KAYNAKLAR.md) — tolerans buna göre.
+    fark = (bolge_df[bilesen_kolonlari].sum(axis=1) - bolge_df["toplam_alan_ha"]).abs()
+    assert (fark < 1.0).all()
