@@ -105,6 +105,15 @@ function _kumeStili(nokta) {
   return { renk: "#e3a58a", opaklik: 0.35, agirlik: 0.75, nabiz: false };
 }
 
+// Konum bilgisi eskiden sadece üzerine gelince (hover) görünüyordu — bir
+// bakışta haritada sadece renkli iller ve küçük noktalar seçiliyordu,
+// "yangın tam olarak nerede" sorusuna cevap için etkileşim gerekiyordu.
+// Taze (≤12 saat, zaten nabız atan) noktalara artık kalıcı bir etiket
+// ekleniyor ki konum haritaya bakar bakmaz görünsün. Nokta sayısı çok
+// fazlaysa (kötü bir yangın gününde) kalıcı etiketler haritayı okunmaz
+// hale getirir — bu durumda hover'a geri dönülür.
+const TAZE_ETIKET_MAKS = 25;
+
 async function canliSicakNoktalariEkle({ harita, freshnessId, ilOzetiId }) {
   const veri = await fetch("assets/data/hotspots.json").then((r) => (r.ok ? r.json() : null));
   const freshnessYer = document.getElementById(freshnessId);
@@ -115,27 +124,41 @@ async function canliSicakNoktalariEkle({ harita, freshnessId, ilOzetiId }) {
     return;
   }
 
+  const tazeSayisi = veri.noktalar.filter((n) => n.en_yeni_saat_once == null || n.en_yeni_saat_once <= 12).length;
+  const kaliciEtiketGoster = tazeSayisi > 0 && tazeSayisi <= TAZE_ETIKET_MAKS;
+
   const katman = L.layerGroup();
   veri.noktalar.forEach((nokta) => {
     const stil = _kumeStili(nokta);
     const yaricap = Math.min(4 + (nokta.maks_frp || 1) / 5 + Math.min(nokta.tespit_sayisi || 1, 8) / 2, 14);
     const saatMetni = nokta.en_yeni_saat_once != null ? `${sayiFormatla(nokta.en_yeni_saat_once, 1)} saat önce` : "bilinmiyor";
+    const konumMetni = nokta.yer ? `${htmlKacisla(nokta.yer)}, ${htmlKacisla(nokta.il)}` : htmlKacisla(nokta.il) || "Konum belirlenemedi";
 
-    L.circleMarker([nokta.latitude, nokta.longitude], {
+    // Leaflet bir katmana tek tooltip bağlayabiliyor — taze noktalarda
+    // kalıcı (kısa) etiket, diğerlerinde hover'da açılan tam detay.
+    const kalici = kaliciEtiketGoster && stil.nabiz;
+    const tamDetay =
+      `<strong>${konumMetni}</strong><br>` +
+      `Son görülme: ${saatMetni}<br>` +
+      `Son ${veri.gun_araligi ?? 3} günde tespit: ${nokta.tespit_sayisi}` +
+      (nokta.maks_frp != null ? `<br>En yüksek radyatif güç: ${nokta.maks_frp} MW` : "");
+
+    const marker = L.circleMarker([nokta.latitude, nokta.longitude], {
       radius: yaricap,
       color: "#fff",
       weight: stil.agirlik,
       fillColor: stil.renk,
       fillOpacity: stil.opaklik,
       className: stil.nabiz ? "sicak-nokta-nabiz" : "",
-    })
-      .bindTooltip(
-        `<strong>${nokta.yer ? `${htmlKacisla(nokta.yer)}, ${htmlKacisla(nokta.il)}` : htmlKacisla(nokta.il) || "Konum belirlenemedi"}</strong><br>` +
-          `Son görülme: ${saatMetni}<br>` +
-          `Son ${veri.gun_araligi ?? 3} günde tespit: ${nokta.tespit_sayisi}` +
-          (nokta.maks_frp != null ? `<br>En yüksek radyatif güç: ${nokta.maks_frp} MW` : "")
-      )
-      .addTo(katman);
+    }).bindTooltip(kalici ? `<strong>${konumMetni}</strong>` : tamDetay, {
+      sticky: !kalici,
+      permanent: kalici,
+      direction: kalici ? "top" : "auto",
+      offset: kalici ? [0, -yaricap] : [0, 0],
+      className: kalici ? "sicak-nokta-etiket" : "",
+    });
+
+    marker.addTo(katman);
   });
   katman.addTo(harita);
 

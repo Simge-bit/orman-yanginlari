@@ -300,6 +300,23 @@ table.veri-tablosu td:first-child { text-align: left; }
   .sicak-nokta-nabiz { animation: none; }
 }
 
+/* Taze sıcak noktaların haritada her zaman görünen (hover gerekmeyen)
+   konum etiketi — Leaflet'in varsayılan tooltip kutusunu daha küçük ve
+   tema renklerine uygun hale getirir. */
+.leaflet-tooltip.sicak-nokta-etiket {
+  background: var(--yuzey);
+  color: var(--metin-birincil);
+  border: 1px solid var(--kenar);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+.leaflet-tooltip.sicak-nokta-etiket::before {
+  border-top-color: var(--kenar);
+}
+
 .rapor-eylemler { margin: 1rem 0 1.5rem; }
 .pdf-buton {
   background: var(--marka);
