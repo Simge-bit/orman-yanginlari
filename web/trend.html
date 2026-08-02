@@ -52,10 +52,9 @@
     </div>
 
     <p class="kaynak-notu">
-      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.11 (1988-2024); en
-      güncel yıl (<span id="son-yil-notu"></span>) için OGM 2025 Faaliyet
-      Raporu, Tablo 16/17 — bkz. <a href="metodoloji.html">Metodoloji</a>.
-      Mevsimsel/aylık kırılım bu yayınlarda yok.
+      Kaynak: OGM Ormancılık İstatistikleri 2025, Tablo 2.11 (1988-2025) —
+      bkz. <a href="metodoloji.html">Metodoloji</a>. Mevsimsel/aylık kırılım
+      bu yayında yok.
     </p>
   </main>
 
@@ -70,7 +69,6 @@
       const yillar = yillik.map((s) => s.yil);
 
       document.getElementById("yil-araligi").textContent = `${yillar[0]}-${yillar[yillar.length - 1]}`;
-      document.getElementById("son-yil-notu").textContent = yillar[yillar.length - 1];
 
       cizgiKartiOlustur({
         canvasId: "grafik-sayi",

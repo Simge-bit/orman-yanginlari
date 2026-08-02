@@ -37,7 +37,7 @@ def transform_yillik_metrikler(config: dict):
 
 
 def transform_il_metrikleri():
-    il_df = pd.read_csv(data_path("interim", "il_dagilim_2024.csv"))
+    il_df = pd.read_csv(data_path("interim", "il_dagilim_2025.csv"))
     orman_df = pd.read_csv(data_path("interim", "orman_alani_il.csv"))[["il", "orman_alani_ha"]]
 
     df = il_df.merge(orman_df, on="il", how="left", validate="one_to_one")

@@ -11,8 +11,9 @@ esikler:
   mega_yangin_ha: 1000
 
 kaynaklar:
-  ogm: "OGM Ormancılık İstatistikleri 2024 (https://www.ogm.gov.tr/tr/e-kutuphane/resmi-istatistikler), erişim: 2026-07-31"
-  ogm_faaliyet_2025: "OGM 2025 Faaliyet Raporu, Tablo 16/17 (https://www.ogm.gov.tr/tr/e-kutuphane-sitesi/FaaliyetRaporu/2025 - Orman Genel Müdürlüğü Faaliyet Raporu.pdf), erişim: 2026-07-31 — 'Ormancılık İstatistikleri 2025' yıllığı henüz yayınlanmadığı için son yıl bu ayrı resmi yayından alındı"
+  ogm: "OGM Ormancılık İstatistikleri 2024 (https://www.ogm.gov.tr/tr/e-kutuphane/resmi-istatistikler), erişim: 2026-07-31 — artık pipeline'da kullanılmıyor, sadece KAYNAKLAR.md'de tarihsel referans olarak duruyor (yerini ogm_2025 aldı)"
+  ogm_2025: "OGM Ormancılık İstatistikleri 2025 (tam yıllık: 1.x/2.x/3.x tüm tablolar, https://www.ogm.gov.tr/tr/e-kutuphane-sitesi/Ormancilikistatistikleri/2025%20ORMANCILIK%20%C4%B0STAT%C4%B0ST%C4%B0KLER%C4%B0.zip), erişim: 2026-08-02"
+  ogm_faaliyet_2025: "OGM 2025 Faaliyet Raporu, Tablo 16/17 (https://www.ogm.gov.tr/tr/e-kutuphane-sitesi/FaaliyetRaporu/2025 - Orman Genel Müdürlüğü Faaliyet Raporu.pdf), erişim: 2026-07-31 — sadece bölge müdürlüğü neden kırılımı (Ek 6) için kullanılıyor; bunun dışındaki her şey artık gerçek 'Ormancılık İstatistikleri 2025' yıllığından (ogm_2025) geliyor"
   effis: "EFFIS/Copernicus, Forest Fires in Europe report_2024.xlsx (https://forest-fire.emergency.copernicus.eu/applications/data-and-services), erişim: 2026-07-31"
   geojson: "cihadturhan/tr-geojson, ODbL (https://github.com/cihadturhan/tr-geojson), erişim: 2026-07-31"
   iklim: "henüz eklenmedi — bkz. data/raw/KAYNAKLAR.md 'Eksikler' bölümü"

@@ -157,7 +157,7 @@ def analyze_orman_kaplama_korelasyonu():
         "p_degeri": round(float(p_degeri), 3),
         "anlamli_mi": bool(p_degeri < 0.05),
         "il_sayisi": len(df),
-        "kapsam_yili": 2024,
+        "kapsam_yili": 2025,
     }])
     sonuc.to_csv(data_path("interim", "korelasyon.csv"), index=False)
     anlamli_metni = "anlamlı" if p_degeri < 0.05 else "anlamlı değil"
@@ -215,13 +215,13 @@ def analyze_silvikultur_siralama():
     # orantısız yüksek olduğu, en az 50 ha'lık bölgeler arasında sıralanır
     # (çok küçük alanlı bir bölgede tek bir karar tüm oranı çarpıtmasın diye).
     MIN_ALAN_HA = 50
-    df = pd.read_csv(data_path("interim", "silvikultur_2024.csv"))
+    df = pd.read_csv(data_path("interim", "silvikultur_2025.csv"))
     yeterli = df[df["toplam_alan_ha"] >= MIN_ALAN_HA].copy()
     yeterli["sira_gelecek_yillara_oran"] = yeterli["gelecek_yillara_ha_oran"].rank(ascending=False, method="min").astype(int)
     yeterli = yeterli.sort_values("sira_gelecek_yillara_oran")
-    yeterli.to_csv(data_path("interim", "silvikultur_siralama_2024.csv"), index=False)
+    yeterli.to_csv(data_path("interim", "silvikultur_siralama_2025.csv"), index=False)
     ilk = yeterli.iloc[0]
-    print(f"[analyze] silvikultur_siralama_2024.csv: en yüksek 'gelecek yıllara bırakılan' oranı="
+    print(f"[analyze] silvikultur_siralama_2025.csv: en yüksek 'gelecek yıllara bırakılan' oranı="
           f"{ilk['bolge_muduru']} (%{ilk['gelecek_yillara_ha_oran']:.1f}, min {MIN_ALAN_HA} ha şartıyla)")
 
 
@@ -238,22 +238,22 @@ def analyze_neden_alt_kategori_siralama():
     # Ulusal 4 kategorinin (kasıt/ihmal-kaza/doğal/bilinmeyen) altında,
     # gerçekte hangi TEK davranış en çok alanı yakıyor? 14 alt-nedeni alan
     # bazında sıralar.
-    ulusal = pd.read_csv(data_path("interim", "neden_bolge_2024_ulusal.csv")).iloc[0]
+    ulusal = pd.read_csv(data_path("interim", "neden_bolge_2025_ulusal.csv")).iloc[0]
     satirlar = [{
         "kategori": kategori,
         "alan_ha": float(ulusal[f"{kategori}_ha"]),
         "sayi": float(ulusal[f"{kategori}_sayi"]),
     } for kategori in NEDEN_ALT_KATEGORILERI]
     sonuc = pd.DataFrame(satirlar).sort_values("alan_ha", ascending=False)
-    sonuc.to_csv(data_path("interim", "neden_alt_kategori_siralama_2024.csv"), index=False)
+    sonuc.to_csv(data_path("interim", "neden_alt_kategori_siralama_2025.csv"), index=False)
     ilk = sonuc.iloc[0]
-    print(f"[analyze] neden_alt_kategori_siralama_2024.csv: en büyük tek alt-neden="
+    print(f"[analyze] neden_alt_kategori_siralama_2025.csv: en büyük tek alt-neden="
           f"{ilk['kategori']} ({ilk['alan_ha']:.0f} ha)")
 
 
 def analyze_bolge_cok_yillik_egim():
     # Bölge verisinin sadece 2025'te tek yıl var sanılıyordu — bu tablo
-    # (2004-2024) aslında 21 yıllık bir seri, yani ülke karşılaştırmasında
+    # (2004-2025) aslında 22 yıllık bir seri, yani ülke karşılaştırmasında
     # yaptığımız "kendi eğilimi" analizinin bölge müdürlüğü versiyonu
     # mümkün: hangi bölge gerçekten kötüleşti, hangisi iyileşti?
     MIN_VERI_YILI = 10
@@ -284,7 +284,7 @@ def analyze_vasif_siralama():
     # Yanan alan sağlıklı/verimli orman mı ("Normal Koru"), yoksa bozuk/
     # bakımsız mı ("Boşluklu Kapalı" olanlar)? Ulusal düzeyde kategori
     # payları hesaplanır.
-    ulusal = pd.read_csv(data_path("interim", "vasif_dagilimi_2024_ulusal.csv")).iloc[0]
+    ulusal = pd.read_csv(data_path("interim", "vasif_dagilimi_2025_ulusal.csv")).iloc[0]
     kategoriler = [
         "normal_koru_ha", "bosluklu_koru_ha", "normal_baltalik_ha",
         "bosluklu_baltalik_ha", "makilik_ha", "agaclandirma_sahasi_ha",
@@ -295,9 +295,9 @@ def analyze_vasif_siralama():
         "oran_yuzde": float(ulusal[f"{kategori}_oran"]),
     } for kategori in kategoriler]
     sonuc = pd.DataFrame(satirlar).sort_values("alan_ha", ascending=False)
-    sonuc.to_csv(data_path("interim", "vasif_siralama_2024.csv"), index=False)
+    sonuc.to_csv(data_path("interim", "vasif_siralama_2025.csv"), index=False)
     ilk = sonuc.iloc[0]
-    print(f"[analyze] vasif_siralama_2024.csv: en büyük kategori={ilk['kategori']} "
+    print(f"[analyze] vasif_siralama_2025.csv: en büyük kategori={ilk['kategori']} "
           f"(%{ilk['oran_yuzde']:.1f})")
 
 

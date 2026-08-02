@@ -47,13 +47,12 @@
     <div id="tablo-egim"></div>
 
     <p class="kaynak-notu">
-      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.11; en güncel yıl
-      için OGM 2025 Faaliyet Raporu, Tablo 16/17 (bkz.
+      Kaynak: OGM Ormancılık İstatistikleri 2025, Tablo 2.11 (bkz.
       <a href="metodoloji.html">Metodoloji</a>). 1997 öncesi neden kırılımı
       yayınlanmamıştır.
     </p>
 
-    <h2>2024: Yangınların Daha İnce Nedenleri</h2>
+    <h2>2025: Yangınların Daha İnce Nedenleri</h2>
     <p class="aciklama" id="alt-kategori-aciklama-1"></p>
     <p class="aciklama" id="alt-kategori-aciklama-2"></p>
     <div class="chart-karti">
@@ -63,10 +62,9 @@
       </details>
     </div>
     <p class="kaynak-notu">
-      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.15/2.16 —
+      Kaynak: OGM Ormancılık İstatistikleri 2025, Tablo 2.15/2.16 —
       ulusal 4 kategoriden (kasıt/ihmal-kaza/doğal/bilinmeyen) çok daha
-      ince bir kırılım. Bu düzeyde ayrıntının 2025 sürümü henüz
-      yayınlanmadı; bkz. <a href="metodoloji.html">Metodoloji</a>.
+      ince bir kırılım. Bkz. <a href="metodoloji.html">Metodoloji</a>.
     </p>
   </main>
 
@@ -101,7 +99,7 @@
     const BELIRSIZ_KATEGORILER = ["ihmal_diger", "kasit_diger", "kaza_diger", "bilinmeyen"];
 
     async function nedenleriCiz() {
-      const { yillik, egim, alt_kategori_2024: altKategori } = await veriYukle("nedenler");
+      const { yillik, egim, alt_kategori_2025: altKategori } = await veriYukle("nedenler");
       const yillar = yillik.map((s) => s.yil);
       document.getElementById("yil-araligi").textContent = `${yillar[0]}-${yillar[yillar.length - 1]}`;
 
@@ -153,7 +151,7 @@
         ]),
       });
 
-      // --- 2024: ince neden kırılımı ---
+      // --- 2025: ince neden kırılımı ---
       const belirsizToplam = altKategori.kategoriler
         .filter((k) => BELIRSIZ_KATEGORILER.includes(k.kategori))
         .reduce((t, k) => t + k.alan_ha, 0);
@@ -167,7 +165,7 @@
       const acma = altKategori.kategoriler.find((k) => k.kategori === "kasit_acma");
 
       document.getElementById("alt-kategori-aciklama-1").textContent =
-        `2024'te yanan ${sayiFormatla(altKategori.toplam_alan_ha)} hektarın %${sayiFormatla(belirsizOran, 1)}'sı ` +
+        `2025'te yanan ${sayiFormatla(altKategori.toplam_alan_ha)} hektarın %${sayiFormatla(belirsizOran, 1)}'sı ` +
         `("diğer" alt kategorileri + tamamen bilinmeyen nedenler toplamı) spesifik olarak adlandırılamayan bir ` +
         `nedene bağlanıyor — en büyük tek kalem bile "İhmal — diğer" (${sayiFormatla(altKategori.kategoriler.find(k=>k.kategori==="ihmal_diger").alan_ha)} ha).`;
       document.getElementById("alt-kategori-aciklama-2").textContent =

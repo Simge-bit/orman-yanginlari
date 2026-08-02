@@ -42,10 +42,10 @@ def clean_yillik_seri():
 
 
 def clean_il_dagilim():
-    df = pd.read_csv(data_path("interim", "il_dagilim_2024_ham.csv"))
+    df = pd.read_csv(data_path("interim", "il_dagilim_2025_ham.csv"))
     df["il"] = df["il"].apply(standardize_il)
     # Bu tabloda "-" (yillik_seri'deki neden kırılımının aksine) "veri yok"
-    # değil "o il için 2024'te sıfır yangın/alan" anlamına geliyor — OGM
+    # değil "o il için 2025'te sıfır yangın/alan" anlamına geliyor — OGM
     # yayınladığı 81 ilin tamamı için bir satır veriyor, eksik il yok.
     df["yangin_sayisi"] = _sayiya_cevir(df["yangin_sayisi"]).fillna(0)
     df["yanan_alan_ha"] = _sayiya_cevir(df["yanan_alan_ha"]).fillna(0)
@@ -55,8 +55,8 @@ def clean_il_dagilim():
     if len(df) != 81:
         raise ValueError(f"81 il bekleniyordu, {len(df)} bulundu")
 
-    df.to_csv(data_path("interim", "il_dagilim_2024.csv"), index=False)
-    print(f"[clean] il_dagilim_2024.csv: {len(df)} il, toplam yangın={df['yangin_sayisi'].sum():.0f}, "
+    df.to_csv(data_path("interim", "il_dagilim_2025.csv"), index=False)
+    print(f"[clean] il_dagilim_2025.csv: {len(df)} il, toplam yangın={df['yangin_sayisi'].sum():.0f}, "
           f"toplam alan={df['yanan_alan_ha'].sum():.0f} ha")
 
 
@@ -161,8 +161,8 @@ def clean_bolge_neden_2025():
     print(f"[clean] bolge_neden_2025.csv: {len(df)} bölge müdürlüğü, neden oranları hesaplandı")
 
 
-def clean_silvikultur_2024():
-    df = pd.read_csv(data_path("interim", "silvikultur_2024_ham.csv"))
+def clean_silvikultur_2025():
+    df = pd.read_csv(data_path("interim", "silvikultur_2025_ham.csv"))
     bilesen_kolonlari = [
         "zarar_gormeyen_ha", "dogal_genclestirme_ha", "suni_genclestirme_ha",
         "rehabilitasyon_ha", "agaclandirma_ha", "koruma_ha", "gelecek_yillara_ha",
@@ -190,18 +190,18 @@ def clean_silvikultur_2024():
               f"'Toplam-Total' satırıyla ({ulusal_alan:.1f}) uyuşmuyor")
 
     yillik = pd.read_csv(data_path("interim", "yillik_seri.csv"))
-    ulusal_2024 = yillik[yillik["yil"] == 2024].iloc[0]
-    if abs(ulusal_alan - ulusal_2024["yanan_alan_ha"]) > 1.0:
+    ulusal_2025 = yillik[yillik["yil"] == 2025].iloc[0]
+    if abs(ulusal_alan - ulusal_2025["yanan_alan_ha"]) > 1.0:
         print(f"[clean] UYARI: silvikültür ulusal toplamı ({ulusal_alan:.1f}) "
-              f"2024 ulusal yangın toplamıyla ({ulusal_2024['yanan_alan_ha']:.1f}) uyuşmuyor")
+              f"2025 ulusal yangın toplamıyla ({ulusal_2025['yanan_alan_ha']:.1f}) uyuşmuyor")
 
     for kolon in bilesen_kolonlari:
         bolge_df[f"{kolon}_oran"] = bolge_df[kolon] / bolge_df["toplam_alan_ha"] * 100
         ulusal[f"{kolon}_oran"] = ulusal[kolon] / ulusal["toplam_alan_ha"] * 100
 
-    bolge_df.to_csv(data_path("interim", "silvikultur_2024.csv"), index=False)
-    ulusal.to_csv(data_path("interim", "silvikultur_2024_ulusal.csv"), index=False)
-    print(f"[clean] silvikultur_2024.csv: {len(bolge_df)} bölge müdürlüğü, ulusal toplam {ulusal_alan:.0f} ha")
+    bolge_df.to_csv(data_path("interim", "silvikultur_2025.csv"), index=False)
+    ulusal.to_csv(data_path("interim", "silvikultur_2025_ulusal.csv"), index=False)
+    print(f"[clean] silvikultur_2025.csv: {len(bolge_df)} bölge müdürlüğü, ulusal toplam {ulusal_alan:.0f} ha")
 
 
 NEDEN_ALT_KATEGORILERI = [
@@ -213,9 +213,9 @@ NEDEN_ALT_KATEGORILERI = [
 ]
 
 
-def clean_neden_bolge_2024():
-    alansal = pd.read_csv(data_path("interim", "neden_bolge_alansal_2024_ham.csv"))
-    sayisal = pd.read_csv(data_path("interim", "neden_bolge_sayisal_2024_ham.csv"))
+def clean_neden_bolge_2025():
+    alansal = pd.read_csv(data_path("interim", "neden_bolge_alansal_2025_ham.csv"))
+    sayisal = pd.read_csv(data_path("interim", "neden_bolge_sayisal_2025_ham.csv"))
 
     for kolon in NEDEN_ALT_KATEGORILERI + ["toplam"]:
         alansal[kolon] = _sayiya_cevir(alansal[kolon]).fillna(0)
@@ -231,7 +231,7 @@ def clean_neden_bolge_2024():
     fark_sayi = (df[alt_sayi_kolonlari].sum(axis=1) - df["toplam_sayi"]).abs()
     uyumsuz = (fark_ha > 1.0) | (fark_sayi > 1)
     if uyumsuz.any():
-        print(f"[clean] UYARI: neden_bolge_2024 alt kategorileri toplamla uyuşmuyor -> "
+        print(f"[clean] UYARI: neden_bolge_2025 alt kategorileri toplamla uyuşmuyor -> "
               f"{df.loc[uyumsuz, 'bolge_muduru'].tolist()}")
 
     ulusal = df[df["bolge_muduru"] == "Toplam-Total"].copy()
@@ -240,7 +240,7 @@ def clean_neden_bolge_2024():
     bolge_toplam_ha = bolge_df["toplam_ha"].sum()
     ulusal_toplam_ha = ulusal.iloc[0]["toplam_ha"]
     if abs(bolge_toplam_ha - ulusal_toplam_ha) > 2.0:
-        print(f"[clean] UYARI: neden_bolge_2024 bölge toplamı ({bolge_toplam_ha:.1f}) "
+        print(f"[clean] UYARI: neden_bolge_2025 bölge toplamı ({bolge_toplam_ha:.1f}) "
               f"'Toplam-Total' satırıyla ({ulusal_toplam_ha:.1f}) uyuşmuyor")
 
     # OGM'nin aynı yıllığındaki farklı tablolar (bu ince kırılım Tablo
@@ -248,14 +248,14 @@ def clean_neden_bolge_2024():
     # küçük, bilinen bir tutarsızlık var (bkz. KAYNAKLAR.md) — burada
     # sadece bilgi amaçlı karşılaştırılıyor, hata olarak işlenmiyor.
     yillik = pd.read_csv(data_path("interim", "yillik_seri.csv"))
-    ulusal_2024 = yillik[yillik["yil"] == 2024].iloc[0]
-    fark_ulusal = abs(ulusal_toplam_ha - ulusal_2024["yanan_alan_ha"])
-    print(f"[clean] neden_bolge_2024 ulusal toplam alan ({ulusal_toplam_ha:.1f} ha) ile "
-          f"yillik_seri 2024 toplamı ({ulusal_2024['yanan_alan_ha']:.0f} ha) arasında fark: {fark_ulusal:.1f} ha")
+    ulusal_2025 = yillik[yillik["yil"] == 2025].iloc[0]
+    fark_ulusal = abs(ulusal_toplam_ha - ulusal_2025["yanan_alan_ha"])
+    print(f"[clean] neden_bolge_2025 ulusal toplam alan ({ulusal_toplam_ha:.1f} ha) ile "
+          f"yillik_seri 2025 toplamı ({ulusal_2025['yanan_alan_ha']:.0f} ha) arasında fark: {fark_ulusal:.1f} ha")
 
-    bolge_df.to_csv(data_path("interim", "neden_bolge_2024.csv"), index=False)
-    ulusal.to_csv(data_path("interim", "neden_bolge_2024_ulusal.csv"), index=False)
-    print(f"[clean] neden_bolge_2024.csv: {len(bolge_df)} bölge müdürlüğü")
+    bolge_df.to_csv(data_path("interim", "neden_bolge_2025.csv"), index=False)
+    ulusal.to_csv(data_path("interim", "neden_bolge_2025_ulusal.csv"), index=False)
+    print(f"[clean] neden_bolge_2025.csv: {len(bolge_df)} bölge müdürlüğü")
 
 
 def clean_bolge_cok_yillik():
@@ -275,7 +275,7 @@ def clean_bolge_cok_yillik():
     if uyumsuz_yillar:
         print(f"[clean] UYARI: bolge_cok_yillik bölge toplamı bazı yıllarda 'Toplam-Total' ile uyuşmuyor -> {uyumsuz_yillar}")
 
-    # Örtüşen yıllarda (2004-2024) ulusal yillik_seri ile çapraz kontrol —
+    # Örtüşen yıllarda (2004-2025) ulusal yillik_seri ile çapraz kontrol —
     # bilgi amaçlı, farklı OGM tabloları arasında küçük farklar bilinen bir durum.
     yillik_seri = pd.read_csv(data_path("interim", "yillik_seri.csv"))
     karsilastirma = ulusal.merge(yillik_seri[["yil", "yanan_alan_ha"]], on="yil", how="inner")
@@ -295,8 +295,8 @@ VASIF_KATEGORILERI = [
 ]
 
 
-def clean_vasif_dagilimi_2024():
-    df = pd.read_csv(data_path("interim", "vasif_dagilimi_2024_ham.csv"))
+def clean_vasif_dagilimi_2025():
+    df = pd.read_csv(data_path("interim", "vasif_dagilimi_2025_ham.csv"))
     for kolon in ["toplam_ha"] + VASIF_KATEGORILERI:
         df[kolon] = _sayiya_cevir(df[kolon]).fillna(0)
 
@@ -310,19 +310,19 @@ def clean_vasif_dagilimi_2024():
     bolge_df = df[df["bolge_muduru"] != "Toplam-Total"].copy()
 
     yillik = pd.read_csv(data_path("interim", "yillik_seri.csv"))
-    ulusal_2024 = yillik[yillik["yil"] == 2024].iloc[0]
+    ulusal_2025 = yillik[yillik["yil"] == 2025].iloc[0]
     ulusal_toplam = ulusal.iloc[0]["toplam_ha"]
-    fark = abs(ulusal_toplam - ulusal_2024["yanan_alan_ha"])
-    print(f"[clean] vasif_dagilimi_2024 ulusal toplam ({ulusal_toplam:.1f} ha) ile "
-          f"yillik_seri 2024 toplamı ({ulusal_2024['yanan_alan_ha']:.0f} ha) arasında fark: {fark:.1f} ha")
+    fark = abs(ulusal_toplam - ulusal_2025["yanan_alan_ha"])
+    print(f"[clean] vasif_dagilimi_2025 ulusal toplam ({ulusal_toplam:.1f} ha) ile "
+          f"yillik_seri 2025 toplamı ({ulusal_2025['yanan_alan_ha']:.0f} ha) arasında fark: {fark:.1f} ha")
 
     for kolon in VASIF_KATEGORILERI:
         ulusal[f"{kolon}_oran"] = ulusal[kolon] / ulusal["toplam_ha"] * 100
         bolge_df[f"{kolon}_oran"] = bolge_df[kolon] / bolge_df["toplam_ha"] * 100
 
-    bolge_df.to_csv(data_path("interim", "vasif_dagilimi_2024.csv"), index=False)
-    ulusal.to_csv(data_path("interim", "vasif_dagilimi_2024_ulusal.csv"), index=False)
-    print(f"[clean] vasif_dagilimi_2024.csv: {len(bolge_df)} bölge müdürlüğü")
+    bolge_df.to_csv(data_path("interim", "vasif_dagilimi_2025.csv"), index=False)
+    ulusal.to_csv(data_path("interim", "vasif_dagilimi_2025_ulusal.csv"), index=False)
+    print(f"[clean] vasif_dagilimi_2025.csv: {len(bolge_df)} bölge müdürlüğü")
 
 
 def main():
@@ -332,10 +332,10 @@ def main():
     clean_effis()
     clean_bolge_2025()
     clean_bolge_neden_2025()
-    clean_silvikultur_2024()
-    clean_neden_bolge_2024()
+    clean_silvikultur_2025()
+    clean_neden_bolge_2025()
     clean_bolge_cok_yillik()
-    clean_vasif_dagilimi_2024()
+    clean_vasif_dagilimi_2025()
 
 
 if __name__ == "__main__":

@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Türkiye Orman Yangınları — Coğrafi Dağılım</title>
-  <meta name="description" content="İl bazında (2024) orman yangını yoğunluk haritası, 2025 bölge müdürlüğü verileri ve NASA FIRMS canlı sıcak nokta katmanı." />
+  <meta name="description" content="İl bazında (2025) orman yangını yoğunluk haritası, 2025 bölge müdürlüğü verileri ve NASA FIRMS canlı sıcak nokta katmanı." />
   <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16.png" />
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
   <meta property="og:title" content="Türkiye Orman Yangınları — Coğrafi Dağılım" />
-  <meta property="og:description" content="İl bazında (2024) orman yangını yoğunluk haritası, 2025 bölge müdürlüğü verileri ve NASA FIRMS canlı sıcak nokta katmanı." />
+  <meta property="og:description" content="İl bazında (2025) orman yangını yoğunluk haritası, 2025 bölge müdürlüğü verileri ve NASA FIRMS canlı sıcak nokta katmanı." />
   <meta property="og:type" content="website" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="assets/css/style.css" />
@@ -18,12 +18,12 @@
   <div id="site-header"></div>
 
   <main>
-    <h1>Coğrafi Dağılım (2024) ve Canlı Sıcak Noktalar</h1>
+    <h1>Coğrafi Dağılım (2025) ve Canlı Sıcak Noktalar</h1>
     <p class="aciklama">
-      İl renkleri <strong>yoğunluk indeksini</strong> gösterir: 2024'te yanan
+      İl renkleri <strong>yoğunluk indeksini</strong> gösterir: 2025'te yanan
       alanın, o ilin toplam orman alanına oranı. Yalnızca yanan hektara
       bakmak büyük ama ormanı az olan illeri yanıltıcı şekilde öne
-      çıkarabilir — oranlama bunu düzeltir. Kırmızı noktalar ise 2024 ile
+      çıkarabilir — oranlama bunu düzeltir. Kırmızı noktalar ise 2025 ile
       ilgisi olmayan, <strong>şu anki</strong> uydu tabanlı sıcak nokta
       kümeleridir (NASA FIRMS/VIIRS, son 3 gün) — bir tespit yangın olabilir
       ama olmayabilir de (duman, endüstriyel ısı kaynağı, anız yakma vb.
@@ -54,12 +54,11 @@
       <p id="canli-il-ozeti" class="kaynak-notu"></p>
     </div>
 
-    <h2>En çok etkilenen 10 il (yanan alan, 2024)</h2>
+    <h2>En çok etkilenen 10 il (yanan alan, 2025)</h2>
     <p class="aciklama">
-      İl bazında yayınlanmış en güncel resmi veri 2024'e ait — OGM, 2025
-      için il kırılımı henüz yayınlamadı. 2025'in en güncel (ama il değil,
-      <strong>bölge müdürlüğü</strong> bazındaki) verisi aşağıda ayrı bir
-      tabloda.
+      İl bazında yayınlanmış en güncel resmi veri 2025'e ait. Aşağıda ayrıca
+      <strong>Orman Bölge Müdürlüğü</strong> bazında (il ile birebir
+      örtüşmeyen ayrı bir idari birim) tamamlayıcı bir kırılım da var.
     </p>
     <div class="chart-karti">
       <canvas id="grafik-il-siralama"></canvas>
@@ -69,12 +68,12 @@
     </div>
 
     <p class="kaynak-notu">
-      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.14 (il bazında,
-      sadece 2024) ve Tablo 1.6 (il orman alanı referansı). Çok yıllı il
+      Kaynak: OGM Ormancılık İstatistikleri 2025, Tablo 2.14 (il bazında,
+      sadece 2025) ve Tablo 1.6 (il orman alanı referansı). Çok yıllı il
       serisi mevcut değil.
     </p>
 
-    <h2>Orman Kaplama Oranı ile Yoğunluk İndeksi İlişkisi (2024)</h2>
+    <h2>Orman Kaplama Oranı ile Yoğunluk İndeksi İlişkisi (2025)</h2>
     <p class="aciklama" id="korelasyon-notu"></p>
     <div class="chart-karti">
       <canvas id="grafik-korelasyon"></canvas>
@@ -107,7 +106,7 @@
       müdürlükleri arasında, alan bazında kasıt oranına göre sıralanmıştır.
     </p>
 
-    <h2>2024: Yanan Alanların Akıbeti</h2>
+    <h2>2025: Yanan Alanların Akıbeti</h2>
     <p class="aciklama" id="silvikultur-aciklama"></p>
     <div class="chart-karti">
       <canvas id="grafik-silvikultur-ulusal"></canvas>
@@ -125,14 +124,14 @@
       </details>
     </div>
     <p class="kaynak-notu">
-      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.18 (yanan alanların
+      Kaynak: OGM Ormancılık İstatistikleri 2025, Tablo 2.18 (yanan alanların
       silvikültürel değerlendirmesi). "Gelecek yıllara bırakılan" alanda o
       alanda hiçbir işlem yapılmayacağı anlamına gelmez — rapor tarihi
       itibarıyla henüz bir karara/uygulamaya geçilmediğini gösterir. Bkz.
       <a href="metodoloji.html">Metodoloji</a>.
     </p>
 
-    <h2>2004-2024: Hangi Bölgeler Kötüleşti, Hangileri İyileşti?</h2>
+    <h2>2004-2025: Hangi Bölgeler Kötüleşti, Hangileri İyileşti?</h2>
     <p class="aciklama" id="bolge-egim-aciklama"></p>
     <div class="chart-karti">
       <canvas id="grafik-bolge-egim"></canvas>
@@ -141,13 +140,13 @@
       </details>
     </div>
     <p class="kaynak-notu">
-      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.12/2.13 (bölge
-      müdürlüklerine göre yangın dağılımı, 2004-2024). Her bölgenin kendi
-      21 yıllık serisindeki doğrusal eğilim; kırmızı=artıyor, yeşil=azalıyor.
+      Kaynak: OGM Ormancılık İstatistikleri 2025, Tablo 2.12/2.13 (bölge
+      müdürlüklerine göre yangın dağılımı, 2004-2025). Her bölgenin kendi
+      22 yıllık serisindeki doğrusal eğilim; kırmızı=artıyor, yeşil=azalıyor.
       Bkz. <a href="metodoloji.html">Metodoloji</a>.
     </p>
 
-    <h2>2024: Yanan Ormanın Türü</h2>
+    <h2>2025: Yanan Ormanın Türü</h2>
     <p class="aciklama" id="vasif-aciklama"></p>
     <div class="chart-karti">
       <canvas id="grafik-vasif"></canvas>
@@ -156,8 +155,11 @@
       </details>
     </div>
     <p class="kaynak-notu">
-      Kaynak: OGM Ormancılık İstatistikleri 2024, Tablo 2.17 (yangınların
-      orman vasfına göre dağılımı). Bkz. <a href="metodoloji.html">Metodoloji</a>.
+      Kaynak: OGM Ormancılık İstatistikleri 2025, Tablo 2.17 (yangınların
+      orman vasfına göre dağılımı). Bu yıl 6 vasıf kategorisinin toplamı
+      OGM'nin kendi tablosunda beyan edilen toplam alanı %13,5 aşıyor —
+      kategoriler muhtemelen birbirini dışlamıyor (bkz.
+      <a href="metodoloji.html">Metodoloji</a>).
     </p>
 
     <h2>Kötüleşme Eğilimi ile Kasıt Oranı İlişkisi</h2>
@@ -167,7 +169,7 @@
       <canvas id="grafik-egim-kasit"></canvas>
     </div>
     <p class="kaynak-notu">
-      X ekseni: bölgenin 2004-2024 yanan alan eğilimi (ha/yıl). Y ekseni:
+      X ekseni: bölgenin 2004-2025 yanan alan eğilimi (ha/yıl). Y ekseni:
       2025 kasıt (kundaklama) oranı (%, alan bazında). Bkz.
       <a href="metodoloji.html">Metodoloji</a>.
     </p>
@@ -228,7 +230,7 @@
       const kor = cografi.orman_kaplama_korelasyonu;
       document.getElementById("korelasyon-notu").textContent =
         `Bulgu: orman kaplama oranı ile yoğunluk indeksi arasında r=${sayiFormatla(kor.pearson_r, 2)}, ` +
-        `p=${sayiFormatla(kor.p_degeri, 3)} (${kor.il_sayisi} il, 2024). ${kor.aciklama}`;
+        `p=${sayiFormatla(kor.p_degeri, 3)} (${kor.il_sayisi} il, 2025). ${kor.aciklama}`;
       saciliminOlustur({
         canvasId: "grafik-korelasyon",
         noktalar: cografi.iller
@@ -260,7 +262,7 @@
         ]),
       });
 
-      const sv = cografi.silvikultur_2024;
+      const sv = cografi.silvikultur_2025;
       const SV_ETIKET = {
         gelecek_yillara_ha: "Gelecek yıllara bırakılan",
         zarar_gormeyen_ha: "Zarar görmeyen (örtü yangını)",
@@ -275,7 +277,7 @@
         .sort((a, b) => b.ha - a.ha);
 
       document.getElementById("silvikultur-aciklama").textContent =
-        `2024'te yanan ${sayiFormatla(sv.ulusal.toplam_alan_ha)} hektarın en büyük tek kalemi ` +
+        `2025'te yanan ${sayiFormatla(sv.ulusal.toplam_alan_ha)} hektarın en büyük tek kalemi ` +
         `(%${sayiFormatla(sv.ulusal.gelecek_yillara_ha_oran, 1)}, ${sayiFormatla(sv.ulusal.gelecek_yillara_ha)} ha) ` +
         `"gelecek yıllara bırakılan" — yani rapor tarihi itibarıyla henüz bir işleme alınmamış. Aktif ağaçlandırma ` +
         `programına alınan pay ise sadece %${sayiFormatla(sv.ulusal.agaclandirma_ha_oran, 1)} ` +
@@ -313,13 +315,13 @@
         ]),
       });
 
-      // --- 2004-2024: bölge eğilimi ---
-      const tumBolgeEgim = cografi.bolge_egim_2004_2024.bolgeler;
+      // --- 2004-2025: bölge eğilimi ---
+      const tumBolgeEgim = cografi.bolge_egim_2004_2025.bolgeler;
       const enKotu8 = tumBolgeEgim.slice(0, 8);
       const enIyi4 = tumBolgeEgim.slice(-4);
       const gosterilecekEgim = [...enKotu8, ...enIyi4];
       document.getElementById("bolge-egim-aciklama").textContent =
-        `${cografi.bolge_egim_2004_2024.kapsam_notu} En hızlı kötüleşen: ${enKotu8[0].bolge_muduru} ` +
+        `${cografi.bolge_egim_2004_2025.kapsam_notu} En hızlı kötüleşen: ${enKotu8[0].bolge_muduru} ` +
         `(yılda ${sayiFormatla(enKotu8[0].egim_ha_yil, 0)} ha artış). En hızlı iyileşen: ` +
         `${enIyi4[enIyi4.length - 1].bolge_muduru} (yılda ${sayiFormatla(Math.abs(enIyi4[enIyi4.length - 1].egim_ha_yil), 0)} ha azalış).`;
       cubukKartiOlustur({
@@ -331,12 +333,12 @@
       });
       tabloOlustur({
         detailsId: "tablo-bolge-egim",
-        basliklar: ["Orman Bölge Müdürlüğü", "Kapsam", "Eğim (ha/yıl)", "21 yıllık toplam (ha)"],
+        basliklar: ["Orman Bölge Müdürlüğü", "Kapsam", "Eğim (ha/yıl)", "22 yıllık toplam (ha)"],
         satirlar: tumBolgeEgim.map((b) => [b.bolge_muduru, b.kapsam, egimIsaretliHa(b.egim_ha_yil), sayiFormatla(b.toplam_ha)]),
       });
 
-      // --- 2024: orman vasfı ---
-      const vasif = cografi.vasif_dagilimi_2024;
+      // --- 2025: orman vasfı ---
+      const vasif = cografi.vasif_dagilimi_2025;
       const VASIF_ETIKET = {
         normal_koru_ha: "Normal Koru (sağlıklı/verimli)",
         bosluklu_koru_ha: "Boşluklu Kapalı Koru (bozuk)",
@@ -347,7 +349,7 @@
       };
       const enBuyukVasif = vasif.kategoriler[0];
       document.getElementById("vasif-aciklama").textContent =
-        `2024'te yanan ${sayiFormatla(vasif.toplam_alan_ha)} hektarın %${sayiFormatla(enBuyukVasif.oran_yuzde, 1)}'si ` +
+        `2025'te yanan ${sayiFormatla(vasif.toplam_alan_ha)} hektarın %${sayiFormatla(enBuyukVasif.oran_yuzde, 1)}'si ` +
         `${VASIF_ETIKET[enBuyukVasif.kategori].toLowerCase()} — yani bozuk/bakımsız değil, sağlıklı ve verimli orman.`;
       cubukKartiOlustur({
         canvasId: "grafik-vasif",

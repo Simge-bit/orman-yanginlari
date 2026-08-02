@@ -6,51 +6,57 @@ başlar.
 
 ## Birincil kaynaklar
 
-### `ogm_yillik_yangin_1988_2024.xls`
+### `ogm_yillik_yangin_1988_2025.xls`
 - **Kaynak:** T.C. Tarım ve Orman Bakanlığı, Orman Genel Müdürlüğü (OGM),
-  "Ormancılık İstatistikleri 2024", Tablo 2.11 "Orman yangınları, 1988-2024"
-- **URL:** https://www.ogm.gov.tr/tr/e-kutuphane-sitesi/Istatistikler/Ormancılık%20İstatistikleri/Ormancılık%20İstatistikleri%202024.zip
-  (bkz. `ogm_ormancilik_istatistikleri_2024_kaynak.zip` — orijinal zip, tam
-  provenance için saklanıyor)
+  "Ormancılık İstatistikleri 2025", Tablo 2.11 "Orman yangınları, 1988-2025"
+- **URL:** https://www.ogm.gov.tr/tr/e-kutuphane-sitesi/Ormancilikistatistikleri/2.11%20Orman%20yang%C4%B1nlar%C4%B1%2C%201988-2025.xls
+  — erişim: 2026-08-02. OGM Haziran 2026'da yıllığı yeni bir SharePoint
+  listesine (`Ormancilikistatistikleri`) taşımış; her tablo artık ayrı bir
+  öğe/dosya (eski tek-zip yapısının yerine), ve genel liste sayfası
+  (`/tr/e-kutuphane/kitaplik/Ormancilik-istatistikleri`) dosyaları JS ile
+  grupluyor, doğrudan linkleri göstermiyor — gerçek dosya adı `listfeed.aspx`
+  (SharePoint RSS) üzerinden bulundu.
 - **İçerik:** Yıl, yanan alan (ha), yangın sayısı, ve 1997'den itibaren neden
   kategorisine göre (Kasıt / İhmal-Kaza / Doğal / Sebebi Bilinmeyen) sayı ve
-  alan kırılımı.
+  alan kırılımı. 2025 satırı: 3.224 yangın, 81.473 ha.
 - **En yetkili kaynak bu dosyadır** — diğer ikincil kaynaklarla (haber,
-  blog) çelişki olursa buna güvenilir.
+  blog) çelişki olursa buna güvenilir. Eski `ogm_yillik_yangin_1988_2024.xls`
+  hâlâ `data/raw/`'da duruyor (provenance için), ama pipeline artık bu
+  dosyayı okuyor.
 - **Bilinen sorun:** 2024 için bu dosya 3.797 yangın / 27.485 ha veriyor;
   bazı ikincil kaynaklar (Greenpeace blog, çevresel göstergeler metni)
   3.408 / 26.101 rakamını veriyor. EFFIS'in bağımsız 2024 verisi (aşağıya
   bkz.) 27.485 ha ile bu dosyayı doğruluyor — bu yüzden 27.485 ha / 3.797
   yangın esas alınmalı, diğer rakam muhtemelen ön/geçici veri.
 
-### `ogm_faaliyet_raporu_2025_yangin.csv` + `ogm_faaliyet_raporu_2025.pdf`
-- **Kaynak:** T.C. Tarım ve Orman Bakanlığı, OGM, "2025 Yılı Faaliyet
-  Raporu", Tablo 16 (çıkış sebebine göre sayısal dağılım, 2021-2025) ve
-  Tablo 17 (alansal dağılım, 2021-2025).
-- **URL:** https://www.ogm.gov.tr/tr/e-kutuphane-sitesi/FaaliyetRaporu/2025%20-%20Orman%20Genel%20M%C3%BCd%C3%BCrl%C3%BC%C4%9F%C3%BC%20Faaliyet%20Raporu.pdf
-- **Neden bu kaynak:** Erişim tarihinde (2026-07-31) OGM'nin "Ormancılık
-  İstatistikleri" yıllığının 2025 sürümü henüz yayınlanmamıştı (portal hâlâ
-  2024.zip'te duruyor) ve OGM'nin Haziran 2026 haber bülteni de yangın
-  konusunu içermiyordu (ağaçlandırma/sertifika konularıydı). Faaliyet
-  Raporu, 2025 yangın rakamlarını içeren tek resmi OGM yayını olarak
-  bulundu.
-- **İçerik:** 2025: 3.224 yangın, 81.473 ha; kasıt/ihmal-kaza/doğal/
-  bilinmeyen kırılımı (sayı+alan). `ogm_faaliyet_raporu_2025_yangin.csv`
-  içinde sadece 2025 satırı tutuluyor (2021-2024 zaten
-  `ogm_yillik_yangin_1988_2024.xls`'te var).
-- **Bilinen sorun:** Bu rapor 2021-2024 için de aynı tabloları veriyor,
-  ama kategori dağılımı `ogm_yillik_yangin_1988_2024.xls`'teki değerlerden
-  hafifçe farklı (ör. 2024 "Sebebi Belirlenemeyen": bu raporda 1.111,
-  yıllıkta 1.084 — toplam her ikisinde de 3.797, sadece kategoriler arası
-  dağılım farklı). Bu yüzden 2021-2024 için yine yıllık istatistik dosyası
-  esas alınıyor, sadece 2025 bu rapordan ekleniyor — iki farklı OGM
-  yayınının kategori sınırları arasında küçük bir tutarsızlık olduğu
-  metodoloji sayfasında belirtiliyor.
-- **Eksik:** Bu rapor il (81 il) bazında kırılım vermiyor, sadece "Ek 6"da
-  Orman Bölge Müdürlüğü (~30 bölge) bazında yangın sayısı VE alanı var
-  (bkz. `ogm_faaliyet_raporu_2025_bolge_yangin.csv` altında). Bu yüzden
-  `cografi.json` / harita 2024'te kalmaya devam ediyor — 2025 il bazında
-  veri hiçbir resmi kaynakta yok.
+### `ogm_faaliyet_raporu_2025_yangin.csv` + `ogm_faaliyet_raporu_2025.pdf` — artık kullanılmıyor (superseded)
+- Bu dosya, "Ormancılık İstatistikleri 2025" yıllığı henüz yayınlanmadığı
+  dönemde (2026-07-31'e kadar) ulusal yıllık seriye 2025 eklemek için
+  geçici bir kaynak olarak kullanılıyordu. 2026-08-02'de gerçek yıllık
+  (Tablo 2.11, yukarı bkz.) bulunduğu için `01_ingest.py` artık bu dosyayı
+  okumuyor — dosya sadece provenance için `data/raw/`'da duruyor.
+- **Not:** İki kaynağın rakamları neredeyse özdeş ama birebir aynı değil
+  (ör. ihmal-kaza sayısı: Faaliyet Raporu 1.774, yıllık Tablo 2.11 1.753;
+  toplam alan ve toplam yangın sayısı her ikisinde de birebir aynı:
+  81.473 ha / 3.224 yangın) — beklenen bir ön-rapor/kesin-rapor farkı,
+  şimdi kesin (yıllık) rakam esas alınıyor.
+- **Hâlâ geçerli olan kısıt:** Bu Faaliyet Raporu il (81 il) bazında kırılım
+  vermiyor, sadece "Ek 6"da Orman Bölge Müdürlüğü (~30 bölge) bazında
+  yangın sayısı VE alanı var (bkz. `ogm_faaliyet_raporu_2025_bolge_yangin.csv`
+  altında) — bu iki dosya hâlâ kullanımda, sadece bölge kırılımı için.
+  `cografi.json` / harita 2024'te kalmaya devam ediyor: "Ormancılık
+  İstatistikleri 2025" listesinde il-bazlı Tablo 2.14 (`İllere göre orman
+  yangınlarının dağılımı, 2025`) VE Tablo 2.12/2.13/2.15/2.16/2.17/2.18/
+  1.3/1.6'nın 2025 sürümleri de listelendiği doğrulandı (OGM'nin
+  `Ormancilikistatistikleri` SharePoint listesinin RSS akışında görülüyor),
+  ANCAK bu dosyaların gerçek indirme adları görüntülenen başlıklarıyla
+  eşleşmiyor ve gerçek adı ortaya çıkaracak her yöntem (anonim REST API,
+  WebDAV PROPFIND, arama API'si, grup-genişletme AJAX'i, başlık varyasyonu
+  denemesi) engellendi/başarısız oldu — sadece Tablo 2.11 (yukarıdaki
+  yıllık dosya) rastlantısal olarak dosya adı=başlık olduğu için erişilebildi.
+  İl/bölge/neden/orman-türü/silvikültür kırılımları bu yüzden 2024'te
+  kalıyor; kullanıcı kendi tarayıcısından o SharePoint listesini açıp ilgili
+  dosyaların gerçek linklerini bulabilirse ileride güncellenebilir.
 
 ### `ogm_faaliyet_raporu_2025_bolge_yangin.csv` + `ogm_faaliyet_raporu_2025_bolge_neden.csv`
 - **Kaynak:** Aynı "2025 Yılı Faaliyet Raporu", Ek 6 "Orman Yangın
@@ -95,15 +101,28 @@ başlar.
   `ogm_il_yangin_dagilimi_2024.xlsx` kullanılmalı, bu dosyalar zaman
   serisi/bölge kesitleri için tamamlayıcıdır.
 
-### `ogm_vasif_dagilimi_2024.xlsx`
-- **Kaynak:** OGM, Tablo 2.17 — yangınların orman vasfına göre dağılımı, 2024.
+### `ogm_vasif_dagilimi_2025.xlsx` (2024 sürümü de `ogm_vasif_dagilimi_2024.xlsx` olarak duruyor)
+- **Kaynak:** OGM, Tablo 2.17 — yangınların orman vasfına göre dağılımı, 2025.
 - **İçerik:** Yanan alanın orman türüne göre dağılımı: Normal Koru
   (sağlıklı/verimli), Boşluklu Kapalı Koru (bozuk), Normal/Boşluklu Kapalı
   Baltalık, Makilik, Ağaçlandırma Sahası. Bölge müdürlüğü bazında (DKMPGM
   dahil, 31 satır) + "Toplam-Total".
-- **Doğrulama:** Bileşenlerin toplamı satır bazında beyan edilen toplam
-  alanla, "Toplam-Total" satırı ise 2024 ulusal yangın toplamıyla
+- **Doğrulama (2024):** Bileşenlerin toplamı satır bazında beyan edilen
+  toplam alanla, "Toplam-Total" satırı ise 2024 ulusal yangın toplamıyla
   (~0,4 ha farkla) eşleşiyor.
+- **Bilinen sorun (2025 — yeni):** 2024'ün aksine, 2025 tablosunda bileşen
+  toplamı beyan edilen alanla artık eşleşmiyor. Ulusal "Toplam-Total"
+  satırında bileşenler toplamı (92.508 ha) beyan edilen toplam alandan
+  (81.473 ha) %13,5 daha fazla. Bölge bazında fark çok daha değişken ve
+  bazı bölgelerde çok daha büyük (bir bölgede bileşenler beyan edilen
+  alanın ~4,3 katına çıkıyor, bazılarında ise hafifçe eksik kalıyor) —
+  bu, kategorilerin bu yıl artık birbirini dışlamadığını (bir yangının
+  alanının birden fazla vasıf kategorisinde sayıldığını) düşündürüyor.
+  OGM'nin kendi tablosunda var, düzeltilmedi, footnote'larda bir açıklama
+  da yok. Sitede sadece ULUSAL toplam kullanıldığı için (bölge bazında bir
+  vasıf grafiği yok), gösterilen rakam sadece %13,5'lik farkı taşıyor —
+  ama bu satırın altındaki veri kalitesinin bu yıl daha zayıf olduğu
+  açıkça belgelenmeli.
 
 ### `ogm_silvikultur_degerlendirme_2024.xlsx`
 - **Kaynak:** OGM, Tablo 2.18 — yanan alanların silvikültürel değerlendirmesi, 2024.
@@ -234,6 +253,28 @@ projeden çıkarıldı. Bu proje sadece birincil/resmi istatistik yayınlarına
 (OGM, EFFIS/Copernicus) dayanır. Yukarıdaki 2024 rakamı çelişkisi zaten
 iki bağımsız resmi kaynağın (OGM tablosu + EFFIS raporu) birbirini
 doğrulamasıyla çözüldü; ikincil kaynaklara ihtiyaç kalmadı.
+
+## OGM'nin yayın takvimi — veri gecikmesi
+
+OGM'nin duyurular arşivinde ("...Ormancılık İstatistikleri **YIL** Yayınlandı"
+kalıbıyla, `https://www.ogm.gov.tr/tr/duyurular/resmi-istatistik-programi-
+kapsaminda-yer-alan-ormancilik-istatistikleri-<YIL>-yayinlandi`) bulunan 3
+duyurunun yayın tarihleri:
+
+| Veri yılı | Yayın tarihi | Yıl sonundan gecikme |
+|---|---|---|
+| 2023 | 26.06.2024 | 178 gün (~5,8 ay) |
+| 2024 | 26.06.2025 | 177 gün (~5,8 ay) |
+| 2025 | 26.06.2026 | 177 gün (~5,8 ay) |
+
+Üç yılda da neredeyse aynı gün (26 Haziran) — sabit bir kurumsal takvim,
+tesadüf değil. Bu kalıba göre **2026 verisi ancak Haziran 2027'de
+yayınlanır**; bu proje o tarihe kadar en güncel resmi veri olarak 2025'te
+kalacak (bkz. `metodoloji.json` bilinen sınırlamalar). Bu 3 duyuru dışında
+(2018-2022 için) aynı URL kalıbıyla bir duyuru bulunamadı (404) — daha eski
+yıllar için OGM ya farklı bir duyuru başlığı/URL kalıbı kullanmış ya da
+duyuru arşivi bu kadar geriye gitmiyor, bu yüzden 3 yıldan daha uzun bir
+tarihsel seri kurulamadı.
 
 ## Eksikler / Faz 1 devamı için notlar
 

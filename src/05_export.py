@@ -46,7 +46,7 @@ def export_ozet():
         "onceki_yila_gore_sayi_degisim_yuzde": round(float(son["yangin_sayisi"] / onceki["yangin_sayisi"] * 100 - 100), 1),
         "onceki_yila_gore_alan_degisim_yuzde": round(float(son["yanan_alan_ha"] / onceki["yanan_alan_ha"] * 100 - 100), 1),
         "en_buyuk_yil": {"yil": int(en_buyuk_yil["yil"]), "yanan_alan_ha": float(en_buyuk_yil["yanan_alan_ha"])},
-        "en_cok_etkilenen_il_2024": {
+        "en_cok_etkilenen_il_2025": {
             "il": en_cok_etkilenen_il["il"],
             "yanan_alan_ha": float(en_cok_etkilenen_il["yanan_alan_ha"]),
         },
@@ -113,8 +113,8 @@ def export_cografi():
         "zarar_gormeyen_ha", "dogal_genclestirme_ha", "suni_genclestirme_ha",
         "rehabilitasyon_ha", "agaclandirma_ha", "koruma_ha", "gelecek_yillara_ha",
     ]
-    silvikultur_ulusal = pd.read_csv(data_path("interim", "silvikultur_2024_ulusal.csv")).iloc[0]
-    silvikultur_siralama_df = pd.read_csv(data_path("interim", "silvikultur_siralama_2024.csv"))
+    silvikultur_ulusal = pd.read_csv(data_path("interim", "silvikultur_2025_ulusal.csv")).iloc[0]
+    silvikultur_siralama_df = pd.read_csv(data_path("interim", "silvikultur_siralama_2025.csv"))
     silvikultur_kolonlar = ["bolge_muduru", "toplam_alan_ha"] + silvikultur_bilesenleri + ["gelecek_yillara_ha_oran", "sira_gelecek_yillara_oran"]
     silvikultur_bolge_kayitlar = json.loads(
         silvikultur_siralama_df[silvikultur_kolonlar].round(2).to_json(orient="records")
@@ -126,8 +126,8 @@ def export_cografi():
         .round(1).to_json(orient="records")
     )
 
-    vasif_ulusal = pd.read_csv(data_path("interim", "vasif_dagilimi_2024_ulusal.csv")).iloc[0]
-    vasif_siralama_df = pd.read_csv(data_path("interim", "vasif_siralama_2024.csv"))
+    vasif_ulusal = pd.read_csv(data_path("interim", "vasif_dagilimi_2025_ulusal.csv")).iloc[0]
+    vasif_siralama_df = pd.read_csv(data_path("interim", "vasif_siralama_2025.csv"))
     vasif_kayitlar = json.loads(vasif_siralama_df.round(1).to_json(orient="records"))
 
     egim_kasit_ozet = pd.read_csv(data_path("interim", "bolge_egim_kasit_korelasyonu.csv")).iloc[0]
@@ -137,8 +137,8 @@ def export_cografi():
     )
 
     _yaz("cografi", {
-        "yil": 2024,
-        "kapsam_notu": "il bazında sadece 2024 verisi mevcut",
+        "yil": 2025,
+        "kapsam_notu": "il bazında sadece 2025 verisi mevcut",
         "iller": kayitlar,
         "orman_kaplama_korelasyonu": {
             "pearson_r": float(korelasyon["pearson_r"]),
@@ -157,10 +157,11 @@ def export_cografi():
         "bolge_2025": {
             "yil": 2025,
             "kapsam_notu": (
-                "İl bazında 2025 verisi hiçbir resmi kaynakta yok. Bu, OGM'nin 2025 "
-                "Faaliyet Raporu'ndaki tek coğrafi kırılım — 'Orman Bölge Müdürlüğü' "
-                "il ile birebir örtüşmeyen ayrı bir idari birimdir (bazı bölgeler "
-                "birden fazla ili kapsar)."
+                "İl bazında 2025 verisi artık yukarıdaki 'iller' listesinde mevcut. "
+                "Bu bölüm, OGM'nin 2025 Faaliyet Raporu'ndan tamamlayıcı bir kırılım — "
+                "'Orman Bölge Müdürlüğü' il ile birebir örtüşmeyen ayrı bir idari "
+                "birimdir (bazı bölgeler birden fazla ili kapsar) ve kasıt oranı gibi "
+                "sadece bu düzeyde hesaplanabilen ek analizlerin temelini oluşturuyor."
             ),
             "bolgeler": bolge_kayitlar,
             "kasit_orani_siralama": {
@@ -168,10 +169,10 @@ def export_cografi():
                 "bolgeler": bolge_neden_kayitlar,
             },
         },
-        "silvikultur_2024": {
-            "yil": 2024,
+        "silvikultur_2025": {
+            "yil": 2025,
             "kapsam_notu": (
-                "OGM Tablo 2.18: 2024'te yanan alanın (Orman Bölge Müdürlüğü bazında, "
+                "OGM Tablo 2.18: 2025'te yanan alanın (Orman Bölge Müdürlüğü bazında, "
                 "Milli Parklar hariç) hangi işleme alındığı. 'Ağaçlandırma programına alınan' "
                 "ve 'gençleştirme' aktif müdahaleyi, 'gelecek yıllara bırakılan' ise henüz "
                 "hiçbir işlem yapılmadığını gösterir."
@@ -186,24 +187,27 @@ def export_cografi():
                 "bolgeler": silvikultur_bolge_kayitlar,
             },
         },
-        "bolge_egim_2004_2024": {
+        "bolge_egim_2004_2025": {
             "kapsam_notu": (
-                "OGM Tablo 2.12/2.13: her bölge müdürlüğünün (DKMPGM dahil) 2004-2024 arası kendi "
+                "OGM Tablo 2.12/2.13: her bölge müdürlüğünün (DKMPGM dahil) 2004-2025 arası kendi "
                 "yanan alan serisindeki doğrusal eğilimi (basit doğrusal regresyon eğimi). En az "
                 "10 yıllık veri şartı arandı."
             ),
             "bolgeler": bolge_egim_kayitlar,
         },
-        "vasif_dagilimi_2024": {
-            "yil": 2024,
-            "kapsam_notu": "OGM Tablo 2.17: 2024'te yanan alanın orman türüne (vasfına) göre dağılımı.",
+        "vasif_dagilimi_2025": {
+            "yil": 2025,
+            "kapsam_notu": "OGM Tablo 2.17: 2025'te yanan alanın orman türüne (vasfına) göre dağılımı.",
             "toplam_alan_ha": float(vasif_ulusal["toplam_ha"]),
             "kategoriler": vasif_kayitlar,
         },
         "bolge_egim_kasit_korelasyonu": {
             "kapsam_notu": (
-                "Bölgenin 2004-2024 arası yanan alan eğilimi (egim_ha_yil) ile 2025 kasıt "
-                "(kundaklama) oranı arasındaki ilişki, en az 15 yangınlık bölgeler arasında."
+                "Bölgenin 2004-2025 arası yanan alan eğilimi (egim_ha_yil) ile 2025 kasıt "
+                "(kundaklama) oranı arasındaki ilişki, en az 15 yangınlık bölgeler arasında. "
+                "Eğilim serisinin son yılı (2025) ile korelasyona giren kasıt oranı aynı yıla "
+                "ait — bu iki değişken arasında tam bağımsızlık yok, sonucu yorumlarken akılda "
+                "tutulmalı."
             ),
             "n_tum": int(egim_kasit_ozet["n_tum"]),
             "r_tum": round(float(egim_kasit_ozet["r_tum"]), 3),
@@ -236,9 +240,9 @@ def export_nedenler():
         egim_df[["kategori", "sayi_oran_egimi_puan_yil", "alan_oran_egimi_puan_yil"]].round(3).to_json(orient="records")
     )
 
-    alt_kategori_df = pd.read_csv(data_path("interim", "neden_alt_kategori_siralama_2024.csv"))
+    alt_kategori_df = pd.read_csv(data_path("interim", "neden_alt_kategori_siralama_2025.csv"))
     alt_kategori_kayitlar = json.loads(alt_kategori_df.round(1).to_json(orient="records"))
-    ulusal_2024 = pd.read_csv(data_path("interim", "neden_bolge_2024_ulusal.csv")).iloc[0]
+    ulusal_2025 = pd.read_csv(data_path("interim", "neden_bolge_2025_ulusal.csv")).iloc[0]
 
     _yaz("nedenler", {
         "kapsam_notu": "1997 öncesi neden kırılımı OGM tarafından yayınlanmamış",
@@ -247,15 +251,13 @@ def export_nedenler():
             "kapsam": egim_df.iloc[0]["kapsam"],
             "kategoriler": egim_kayitlar,
         },
-        "alt_kategori_2024": {
+        "alt_kategori_2025": {
             "kapsam_notu": (
-                "OGM Tablo 2.15/2.16: 2024'te yangınların çıkış nedeni, ulusal 4 kategoriden "
-                "(kasıt/ihmal-kaza/doğal/bilinmeyen) çok daha ince ayrıştırılmış. Bu kırılımın "
-                "2025 sürümü henüz yayınlanmadı (yıllık istatistik kitabının bir tablosu, "
-                "2025 Faaliyet Raporu'nda bu düzeyde ayrıntı yok)."
+                "OGM Tablo 2.15/2.16: 2025'te yangınların çıkış nedeni, ulusal 4 kategoriden "
+                "(kasıt/ihmal-kaza/doğal/bilinmeyen) çok daha ince ayrıştırılmış."
             ),
-            "toplam_alan_ha": float(ulusal_2024["toplam_ha"]),
-            "toplam_sayi": float(ulusal_2024["toplam_sayi"]),
+            "toplam_alan_ha": float(ulusal_2025["toplam_ha"]),
+            "toplam_sayi": float(ulusal_2025["toplam_sayi"]),
             "kategoriler": alt_kategori_kayitlar,
         },
     })
@@ -281,14 +283,14 @@ def export_metodoloji(config: dict):
 
     veri = {
         "kaynaklar": [
-            {"ad": "OGM Ormancılık İstatistikleri 2024", "kurum": config["kaynaklar"]["ogm"]},
-            {"ad": "OGM 2025 Faaliyet Raporu (sadece son yıl için)", "kurum": config["kaynaklar"].get("ogm_faaliyet_2025", "")},
+            {"ad": "OGM Ormancılık İstatistikleri 2025 (yıllık seri, il/bölge kırılım tabloları)", "kurum": config["kaynaklar"].get("ogm_2025", "")},
+            {"ad": "OGM 2025 Faaliyet Raporu (sadece bölge müdürlüğü neden kırılımı için)", "kurum": config["kaynaklar"].get("ogm_faaliyet_2025", "")},
             {"ad": "EFFIS/Copernicus ülke karşılaştırma raporu", "kurum": config["kaynaklar"]["effis"]},
             {"ad": "81 il sınırı (GeoJSON)", "kurum": config["kaynaklar"]["geojson"]},
-            {"ad": "OGM Tablo 2.18: Yanan alanların silvikültürel değerlendirmesi, 2024", "kurum": config["kaynaklar"]["ogm"]},
-            {"ad": "OGM Tablo 2.15/2.16: Çıkış nedenlerinin ince kırılımı, 2024", "kurum": config["kaynaklar"]["ogm"]},
-            {"ad": "OGM Tablo 2.12/2.13: Bölge müdürlüklerine göre yangın dağılımı, 2004-2024", "kurum": config["kaynaklar"]["ogm"]},
-            {"ad": "OGM Tablo 2.17: Yangınların orman vasfına göre dağılımı, 2024", "kurum": config["kaynaklar"]["ogm"]},
+            {"ad": "OGM Tablo 2.18: Yanan alanların silvikültürel değerlendirmesi, 2025", "kurum": config["kaynaklar"].get("ogm_2025", "")},
+            {"ad": "OGM Tablo 2.15/2.16: Çıkış nedenlerinin ince kırılımı, 2025", "kurum": config["kaynaklar"].get("ogm_2025", "")},
+            {"ad": "OGM Tablo 2.12/2.13: Bölge müdürlüklerine göre yangın dağılımı, 2004-2025", "kurum": config["kaynaklar"].get("ogm_2025", "")},
+            {"ad": "OGM Tablo 2.17: Yangınların orman vasfına göre dağılımı, 2025", "kurum": config["kaynaklar"].get("ogm_2025", "")},
             {"ad": "Canlı sıcak nokta katmanı (cografi.html)", "kurum": "NASA FIRMS (VIIRS uydu verisi), https://firms.modaps.eosdis.nasa.gov/ — istatistik değil, ham gözlem verisi"},
             {"ad": "Sıcak noktaların ilçe/köy adı (cografi.html)", "kurum": "OpenStreetMap Nominatim, https://nominatim.openstreetmap.org — resmi bir istatistik kaynağı değil, topluluk kaynaklı yer-adı sorgu servisi; sadece konum etiketlemek için kullanılıyor, hiçbir sayı bu kaynaktan gelmiyor"},
         ],
@@ -305,35 +307,36 @@ def export_metodoloji(config: dict):
             {"id": "nedenler.egim.*_oran_egimi_puan_yil", "tanim": "Neden kategorisinin (kasıt/ihmal-kaza/doğal/bilinmeyen) yıllık payındaki doğrusal eğilim (basit doğrusal regresyon eğimi)", "birim": "yüzde puan/yıl"},
             {"id": "ulke_egimleri.egim_ha_yil", "tanim": "Ülkenin kendi yanan alan serisindeki doğrusal eğilim (basit doğrusal regresyon eğimi); pozitif değer artış, negatif değer azalış gösterir", "birim": "hektar/yıl"},
             {"id": "son_donem_karsilastirmasi.*", "tanim": "Son 10 yıl ile ondan önceki tüm dönemin (1988'e kadar) toplam/ortalama yanan alan ve yangın sayısı karşılaştırması", "birim": "hektar, adet, %"},
-            {"id": "silvikultur_2024.*_oran", "tanim": "Yanan alanın, verilen işlem kategorisine (ağaçlandırma, gençleştirme, rehabilitasyon, gelecek yıllara bırakılan vb.) ayrılan payı", "birim": "%"},
-            {"id": "nedenler.alt_kategori_2024", "tanim": "Çıkış nedeninin 14 alt-kategoriye (anız, sigara, piknik, kundaklama, terör, açma, enerji hattı, trafik kazası vb.) ayrıştırılmış hali, 2024", "birim": "hektar, adet"},
-            {"id": "bolge_egim_2004_2024.egim_ha_yil", "tanim": "Bölge müdürlüğünün kendi yanan alan serisindeki (2004-2024) doğrusal eğilimi; pozitif değer artış, negatif değer azalış gösterir", "birim": "hektar/yıl"},
-            {"id": "vasif_dagilimi_2024.*", "tanim": "Yanan alanın orman türüne (sağlıklı/verimli 'Normal Koru', bozuk 'Boşluklu Kapalı' olanlar, baltalık, makilik, ağaçlandırma sahası) göre dağılımı, 2024", "birim": "hektar, %"},
-            {"id": "bolge_egim_kasit_korelasyonu.r_tum / r_haric", "tanim": "Bölgenin 2004-2024 yanan alan eğilimi ile 2025 kasıt oranı arasındaki Pearson korelasyonu; sırasıyla tüm veriyle ve iki uç nokta (Muğla, Antalya) çıkarılarak hesaplanmış", "birim": "-1 ile 1 arası"},
+            {"id": "silvikultur_2025.*_oran", "tanim": "Yanan alanın, verilen işlem kategorisine (ağaçlandırma, gençleştirme, rehabilitasyon, gelecek yıllara bırakılan vb.) ayrılan payı", "birim": "%"},
+            {"id": "nedenler.alt_kategori_2025", "tanim": "Çıkış nedeninin 14 alt-kategoriye (anız, sigara, piknik, kundaklama, terör, açma, enerji hattı, trafik kazası vb.) ayrıştırılmış hali, 2025", "birim": "hektar, adet"},
+            {"id": "bolge_egim_2004_2025.egim_ha_yil", "tanim": "Bölge müdürlüğünün kendi yanan alan serisindeki (2004-2025) doğrusal eğilimi; pozitif değer artış, negatif değer azalış gösterir", "birim": "hektar/yıl"},
+            {"id": "vasif_dagilimi_2025.*", "tanim": "Yanan alanın orman türüne (sağlıklı/verimli 'Normal Koru', bozuk 'Boşluklu Kapalı' olanlar, baltalık, makilik, ağaçlandırma sahası) göre dağılımı, 2025", "birim": "hektar, %"},
+            {"id": "bolge_egim_kasit_korelasyonu.r_tum / r_haric", "tanim": "Bölgenin 2004-2025 yanan alan eğilimi ile 2025 kasıt oranı arasındaki Pearson korelasyonu; sırasıyla tüm veriyle ve iki uç nokta (Muğla, Antalya) çıkarılarak hesaplanmış", "birim": "-1 ile 1 arası"},
         ],
         "kapsam": {
             "yil_araligi": gercek_yil_araligi,
-            "il_bazinda_yil": 2024,
+            "il_bazinda_yil": 2025,
             "karsilastirma_ulkeleri": config["karsilastirma_ulkeler"],
         },
         "bilinen_sinirlamalar": [
             "Mevsimsellik hesaplanamadı: OGM'nin yıllık istatistik yayınında aylık kırılım yok.",
             f"'Mega yangın' eşiği (config: {config['esikler']['mega_yangin_ha']} ha) uygulanamadı: mevcut veri yıllık/il toplamları düzeyinde, tekil yangın kaydı yok.",
-            "İl bazında kırılım sadece 2024 için mevcut; çok yıllı il serisi yok. En güncel yıl için il bazında resmi veri yok — bunun yerine 'Orman Bölge Müdürlüğü' (il ile birebir örtüşmeyen ayrı bir idari birim) düzeyinde bir tablo eklendi (cografi.html, cografi.json bolge_2025).",
-            "En güncel yıl (bkz. kapsam) 'Ormancılık İstatistikleri' yıllığından değil, OGM'nin 2025 Faaliyet Raporu'ndan (Tablo 16/17) alındı — yıllık istatistik yayınının o yılki sürümü erişim tarihinde henüz yayınlanmamıştı. Bu iki OGM yayını, aynı yıllar için neden kategorileri arasında (toplamlar aynı kalsa da) küçük dağılım farkları taşıyabiliyor.",
+            "İl bazında kırılım sadece 2025 için mevcut; çok yıllı il serisi yok (geçmiş yıllar için ayrı yılların yıllıkları indirilip aynı tablo çıkarılabilir, bkz. KAYNAKLAR.md).",
+            "OGM Haziran 2026'da yıllığı yeni bir SharePoint listesine taşıdı; bu listede her tablo (1.x/2.x/3.x) ayrı bir dosya. Bu sitedeki TÜM il/bölge/neden/orman-türü/silvikültür/ulusal-seri tabloları artık bu gerçek 'Ormancılık İstatistikleri 2025' yıllığından geliyor — sadece bölge müdürlüğü düzeyindeki ince neden kırılımı (Ek 6, 5 kategori) hâlâ ayrı bir yayın olan 2025 Faaliyet Raporu'ndan (bu düzeyde bir eşdeğeri yıllıkta yok).",
+            "OGM'nin yıllık istatistik yayını sabit bir takvimle çıkıyor: 2023, 2024 ve 2025 verileri sırasıyla 26.06.2024, 26.06.2025 ve 26.06.2026'da yayınlandı — yıl sonundan ortalama ~178 gün (~5,8 ay) sonra, üç yılda da neredeyse aynı gün. Bu düzene göre 2026 verisi ancak Haziran 2027'de yayınlanır; bu site o tarihe kadar en güncel resmi veri olarak 2025'te kalacaktır.",
             "EFFIS ülke karşılaştırması en güncel yılı içermiyor: EFFIS'in ilgili yıla ait raporu erişim tarihinde henüz yayınlanmamıştı.",
             "2013 yılı için OGM kaynağının kendi tablosunda ~0.5 ha'lık küçük bir yuvarlama farkı var (neden kırılımı toplamı ile yıl toplamı arasında).",
             "GeoJSON'da 'Afyon', OGM tablolarında 'Afyonkarahisar' olarak geçiyor; eşleme pipeline'da yapılıyor (bkz. src/utils.py IL_ALIASLARI).",
             "EFFIS ülke karşılaştırmasında bazı ülkeler erken yıllarda (1980'ler) veri bildirmemiş; grafikte ve tabloda bu yıllar boşluk olarak görünür.",
-            "Bölge müdürlüğü bazında 2025 neden kırılımı (Ek 6), ulusal tablonun 4 kategorisinden farklı olarak İhmal ve Kaza'yı ayrı sütunlarda veriyor; siteyle tutarlı olsun diye ikisi 'ihmal_kaza' olarak toplanıyor. Kasıt oranı sıralaması, tesadüfen çarpık oran çıkmasın diye en az 15 yangınlık bölgelerle sınırlı.",
-            "Orman kaplama % ile yoğunluk indeksi arasındaki korelasyon sadece 2024 kesitinde (81 il, tek yıl) hesaplandı — zaman içindeki değişimi yakalamaz, sadece o yılki iller-arası ilişkiyi gösterir.",
+            "Bölge müdürlüğü bazında 2025 neden kırılımı (Ek 6, Faaliyet Raporu), ulusal tablonun 4 kategorisinden farklı olarak İhmal ve Kaza'yı ayrı sütunlarda veriyor; siteyle tutarlı olsun diye ikisi 'ihmal_kaza' olarak toplanıyor. Kasıt oranı sıralaması, tesadüfen çarpık oran çıkmasın diye en az 15 yangınlık bölgelerle sınırlı.",
+            "Orman kaplama % ile yoğunluk indeksi arasındaki korelasyon sadece 2025 kesitinde (81 il, tek yıl) hesaplandı — zaman içindeki değişimi yakalamaz, sadece o yılki iller-arası ilişkiyi gösterir.",
             "Ülke eğimleri (ulke_egimleri), her ülkenin kendi veri bulunan yıllarına göre hesaplandı; bazı ülkeler erken yıllarda EFFIS'e veri bildirmediği için ülkeler arasında kapsanan yıl sayısı farklı olabilir (en az 5 yıllık veri şartı arandı). Bu yüzden eğimler doğrudan aynı yıl aralığına göre birebir kıyaslanabilir değildir.",
             "Neden payı eğilimi (nedenler.egim) tek bir doğrusal eğim özetidir; yıldan yıla dalgalanmayı veya eğilimin yön değiştirdiği dönemleri yakalamaz. Sadece neden kırılımı yayınlanan yıllar (1997+) dahil edildi.",
-            "Silvikültürel değerlendirme (Tablo 2.18) sadece 2024 için mevcut, çok yıllı seri yok; Milli Parklar bu tabloda ayrı sınıflandırıldığı için 30 bölge müdürlüğünü kapsıyor (bölge yangın tablosundaki 31'den farklı). OGM'nin kendi tablosunda Balıkesir satırının bileşen toplamı (261,41 ha) ile beyan edilen toplam alanı (260,86 ha) arasında ~0,55 ha'lık küçük bir yuvarlama farkı var. 'Gelecek yıllara bırakılan' kategorisi, o alanda hiçbir işlem yapılmayacağı anlamına gelmez — rapor tarihi itibarıyla henüz bir karara/uygulamaya geçilmediğini gösterir.",
-            "Neden alt kategorisi kırılımı (Tablo 2.15/2.16) sadece 2024 için mevcut; 2025 Faaliyet Raporu bu düzeyde ayrıntı içermiyor. OGM'nin aynı yıllığındaki bu tablo ile ulusal 4-kategori tablosu arasında (aynı yıl için) birkaç yüzdelik küçük, bilinen bir tutarsızlık var — örn. kasıt toplamı bu tabloda 218,4 ha, ulusal tabloda 223 ha.",
-            "Bölge müdürlüğü eğilimi (bolge_egim_2004_2024) 2004-2024 arası mevcut olan tek çok yıllı bölge serisidir; 2025 için bölge bazında sadece tek yıllık veri var (bolge_2025), bu yüzden 2025 bu eğilime dahil değil. En az 10 yıllık veri şartı arandı; tüm bölgeler zaten 21 yılın tamamını kapsıyor.",
-            "Orman vasfına göre dağılım (Tablo 2.17) sadece 2024 için mevcut, çok yıllı seri yok.",
-            "Bölge eğilimi ile kasıt oranı arasındaki korelasyon (bolge_egim_kasit_korelasyonu) örnek bir 'uç nokta etkisi' vakası: tüm veriyle r=0,83 (güçlü, anlamlı) ama Muğla ve Antalya çıkarıldığında r=-0,18'e (anlamsız) düşüyor — yani bu iki bölgeye özgü bir örtüşme, kasıtın kötüleşmeyi ulusal düzeyde açıkladığı iddia edilemez. İki farklı yıl (eğilim 2004-2024, kasıt oranı 2025) karşılaştırıldığı için nedensellik yönü de belirsizdir.",
+            "Silvikültürel değerlendirme (Tablo 2.18) sadece 2025 için mevcut, çok yıllı seri yok; Milli Parklar bu tabloda ayrı sınıflandırıldığı için 30 bölge müdürlüğünü kapsıyor (bölge yangın tablosundaki 31'den farklı). OGM'nin kendi tablosunda Balıkesir satırının bileşen toplamı ile beyan edilen toplam alanı arasında küçük bir yuvarlama farkı olabiliyor. 'Gelecek yıllara bırakılan' kategorisi, o alanda hiçbir işlem yapılmayacağı anlamına gelmez — rapor tarihi itibarıyla henüz bir karara/uygulamaya geçilmediğini gösterir.",
+            "Neden alt kategorisi kırılımı (Tablo 2.15/2.16) sadece 2025 için mevcut; çok yıllı seri yok. OGM'nin aynı yıllığındaki bu tablo ile ulusal 4-kategori tablosu arasında (aynı yıl için) birkaç yüzdelik küçük, bilinen bir tutarsızlık olabiliyor.",
+            "Bölge müdürlüğü eğilimi (bolge_egim_2004_2025) 2004-2025 arası mevcut olan tek çok yıllı bölge serisidir. En az 10 yıllık veri şartı arandı; tüm bölgeler zaten 22 yılın tamamını kapsıyor.",
+            "Orman vasfına göre dağılım (Tablo 2.17) sadece 2025 için mevcut, çok yıllı seri yok. 2024 tablosunda 6 vasıf kategorisinin toplamı beyan edilen toplam alanla neredeyse birebir eşleşirken (fark ~0,4 ha), 2025 tablosunda ulusal düzeyde kategoriler toplamı (92.508 ha) beyan edilen toplam alandan (81.473 ha) %13,5 daha fazla — yani kategoriler bu yıl birbirini dışlamıyor olabilir (bir yangının alanı birden fazla vasıf kategorisinde sayılmış olabilir). Bu OGM'nin kendi tablosunda var, pipeline'da düzeltilmedi; kategori paylarının (oran_yuzde) toplamı bu yüzden %100'ü aşabilir.",
+            "Bölge eğilimi ile kasıt oranı arasındaki korelasyon (bolge_egim_kasit_korelasyonu) örnek bir 'uç nokta etkisi' vakası: tüm veriyle r=0,83 (güçlü, anlamlı) ama Muğla ve Antalya çıkarıldığında r=-0,18'e (anlamsız) düşüyor — yani bu iki bölgeye özgü bir örtüşme, kasıtın kötüleşmeyi ulusal düzeyde açıkladığı iddia edilemez. Eğilim serisinin son yılı (2025) ile korelasyona giren kasıt oranı aynı yıla ait olduğu için nedensellik yönü de belirsizdir.",
             "Tüm istatistiksel rakamlar (yangın sayısı, alan, oran) birincil/resmi kaynaklardan (OGM, EFFIS) gelir; haber/blog/STK derlemesi istatistik kaynağı olarak alınmadı. Canlı harita katmanı (NASA FIRMS) ve yer adı etiketleme (OpenStreetMap Nominatim) bu kuralın istisnası değil ama farklı bir kategoridir: ilki ham gözlem verisi, ikincisi sadece görüntüleme amaçlı yer-adı sorgusu — hiçbiri istatistiksel bir iddia taşımıyor.",
         ],
         "olusturulma_notu": "Bu dosya src/05_export.py tarafından otomatik üretilir, elle düzenlenmez.",

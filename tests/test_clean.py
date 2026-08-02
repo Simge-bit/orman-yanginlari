@@ -16,7 +16,7 @@ def canonical_iller():
 
 
 def test_il_dagilim_81_il_ve_eslesme(canonical_iller):
-    df = pd.read_csv(data_path("interim", "il_dagilim_2024.csv"))
+    df = pd.read_csv(data_path("interim", "il_dagilim_2025.csv"))
     assert len(df) == 81
     assert not df["il"].duplicated().any()
     assert set(df["il"]) == canonical_iller
@@ -29,12 +29,14 @@ def test_orman_alani_81_il_ve_eslesme(canonical_iller):
 
 
 def test_il_toplami_ulusal_toplamla_eslesiyor():
-    il_df = pd.read_csv(data_path("interim", "il_dagilim_2024.csv"))
+    il_df = pd.read_csv(data_path("interim", "il_dagilim_2025.csv"))
     yillik_df = pd.read_csv(data_path("interim", "yillik_seri.csv"))
-    ulusal_2024 = yillik_df[yillik_df["yil"] == 2024].iloc[0]
+    ulusal_2025 = yillik_df[yillik_df["yil"] == 2025].iloc[0]
 
-    assert il_df["yangin_sayisi"].sum() == ulusal_2024["yangin_sayisi"]
-    assert il_df["yanan_alan_ha"].sum() == ulusal_2024["yanan_alan_ha"]
+    assert il_df["yangin_sayisi"].sum() == ulusal_2025["yangin_sayisi"]
+    # OGM'nin Tablo 2.14 (il bazında) ile Tablo 2.11 (ulusal yıllık) arasında
+    # ~0,5 ha'lık bilinen küçük bir yuvarlama farkı var.
+    assert abs(il_df["yanan_alan_ha"].sum() - ulusal_2025["yanan_alan_ha"]) < 1.0
 
 
 def test_yillik_seri_surekli_1988_guncel():
@@ -75,12 +77,12 @@ def test_bolge_neden_2025_bolge_toplamiyla_eslesiyor():
     assert (neden_df[oran_kolonlari].sum(axis=1).round(1) == 100.0).all()
 
 
-def test_silvikultur_2024_bolge_toplami_ulusal_toplamla_eslesiyor():
-    bolge_df = pd.read_csv(data_path("interim", "silvikultur_2024.csv"))
+def test_silvikultur_2025_bolge_toplami_ulusal_toplamla_eslesiyor():
+    bolge_df = pd.read_csv(data_path("interim", "silvikultur_2025.csv"))
     yillik_df = pd.read_csv(data_path("interim", "yillik_seri.csv"))
-    ulusal_2024 = yillik_df[yillik_df["yil"] == 2024].iloc[0]
+    ulusal_2025 = yillik_df[yillik_df["yil"] == 2025].iloc[0]
 
-    assert abs(bolge_df["toplam_alan_ha"].sum() - ulusal_2024["yanan_alan_ha"]) < 1.0
+    assert abs(bolge_df["toplam_alan_ha"].sum() - ulusal_2025["yanan_alan_ha"]) < 1.0
 
     bilesen_kolonlari = [
         "zarar_gormeyen_ha", "dogal_genclestirme_ha", "suni_genclestirme_ha",
@@ -92,8 +94,8 @@ def test_silvikultur_2024_bolge_toplami_ulusal_toplamla_eslesiyor():
     assert (fark < 1.0).all()
 
 
-def test_neden_bolge_2024_alt_kategoriler_toplamla_tutarli():
-    df = pd.read_csv(data_path("interim", "neden_bolge_2024.csv"))
+def test_neden_bolge_2025_alt_kategoriler_toplamla_tutarli():
+    df = pd.read_csv(data_path("interim", "neden_bolge_2025.csv"))
     alt_kategoriler = [
         "ihmal_aniz", "ihmal_copluk", "ihmal_avcilik_coban",
         "ihmal_sigara", "ihmal_piknik", "ihmal_diger",
@@ -114,7 +116,7 @@ def test_bolge_cok_yillik_her_yil_ulusal_toplamla_tutarli():
     yillik_df = pd.read_csv(data_path("interim", "yillik_seri.csv"))
 
     assert df["bolge_muduru"].nunique() == 31
-    assert set(df["yil"]) == set(range(2004, 2025))
+    assert set(df["yil"]) == set(range(2004, 2026))
 
     bolge_yillik_toplam = df.groupby("yil")["alan_ha"].sum()
     for yil, toplam in bolge_yillik_toplam.items():
@@ -122,11 +124,19 @@ def test_bolge_cok_yillik_her_yil_ulusal_toplamla_tutarli():
         assert abs(toplam - ulusal) < 2.0, f"{yil}: bölge toplamı {toplam:.1f} != ulusal {ulusal:.1f}"
 
 
-def test_vasif_dagilimi_2024_bilesenleri_toplamla_tutarli():
-    df = pd.read_csv(data_path("interim", "vasif_dagilimi_2024.csv"))
+def test_vasif_dagilimi_2025_ulusal_bilesenleri_bilinen_sapma_icinde():
+    # 2024'ün aksine (bileşenler toplamı ~birebir eşleşiyordu), 2025
+    # tablosunda OGM'nin kendi verisinde kategoriler artık birbirini
+    # dışlamıyor gibi görünüyor — ulusal düzeyde bileşen toplamı beyan
+    # edilen alandan %13,5 fazla, bölge bazında fark çok daha büyük ve
+    # tutarsız (bkz. KAYNAKLAR.md). Bu yüzden per-bölge sıkı eşitlik yerine
+    # sadece ULUSAL satırın bilinen sapma aralığında kaldığını doğruluyoruz
+    # (site de sadece bu ulusal satırı kullanıyor, bölge bazında vasıf
+    # grafiği yok) — sapma beklenmedik şekilde büyürse bu test yakalar.
+    ulusal = pd.read_csv(data_path("interim", "vasif_dagilimi_2025_ulusal.csv")).iloc[0]
     kategoriler = [
         "normal_koru_ha", "bosluklu_koru_ha", "normal_baltalik_ha",
         "bosluklu_baltalik_ha", "makilik_ha", "agaclandirma_sahasi_ha",
     ]
-    fark = (df[kategoriler].sum(axis=1) - df["toplam_ha"]).abs()
-    assert (fark < 1.0).all()
+    fark_orani = (sum(ulusal[k] for k in kategoriler) - ulusal["toplam_ha"]) / ulusal["toplam_ha"]
+    assert 0.10 < fark_orani < 0.20

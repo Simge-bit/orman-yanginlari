@@ -148,12 +148,12 @@
         (a, b) => a.sira_kasit_alan_oran - b.sira_kasit_alan_oran
       )[0];
       document.getElementById("rapor-cografi-bolge").textContent =
-        `${cografi.bolge_2025.yil} için il bazında resmi veri yok, ama OGM'nin Faaliyet Raporu'ndaki Orman Bölge ` +
-        `Müdürlüğü kırılımına göre en çok yanan bölge ${ilkBolge.bolge_muduru} (${sayiFormatla(ilkBolge.yanan_alan_ha)} ha) ` +
-        `oldu. Aynı verinin neden kırılımına göre, en az 15 yangınlık bölgeler arasında kasıt oranı en yüksek olan ` +
-        `bölge ${ilkKasitBolge.bolge_muduru} (alan bazında %${sayiFormatla(ilkKasitBolge.kasit_alan_oran, 1)}).`;
+        `${cografi.bolge_2025.yil} için OGM'nin Faaliyet Raporu'ndaki Orman Bölge Müdürlüğü kırılımına göre en çok ` +
+        `yanan bölge ${ilkBolge.bolge_muduru} (${sayiFormatla(ilkBolge.yanan_alan_ha)} ha) oldu. Aynı verinin neden ` +
+        `kırılımına göre, en az 15 yangınlık bölgeler arasında kasıt oranı en yüksek olan bölge ` +
+        `${ilkKasitBolge.bolge_muduru} (alan bazında %${sayiFormatla(ilkKasitBolge.kasit_alan_oran, 1)}).`;
 
-      const sv = cografi.silvikultur_2024;
+      const sv = cografi.silvikultur_2025;
       document.getElementById("rapor-silvikultur").textContent =
         `${sv.yil} yılında yanan ${sayiFormatla(sv.ulusal.toplam_alan_ha)} hektarın en büyük tek kalemi ` +
         `(%${sayiFormatla(sv.ulusal.gelecek_yillara_ha_oran, 1)}) "gelecek yıllara bırakılan" — yani rapor tarihi ` +
@@ -162,7 +162,7 @@
 
       const ek = cografi.bolge_egim_kasit_korelasyonu;
       document.getElementById("rapor-egim-kasit").textContent =
-        `Bölgenin 2004-2024 kötüleşme eğilimi ile 2025 kasıt oranı arasında tüm bölgelerle r=${sayiFormatla(ek.r_tum, 2)} ` +
+        `Bölgenin 2004-2025 kötüleşme eğilimi ile 2025 kasıt oranı arasında tüm bölgelerle r=${sayiFormatla(ek.r_tum, 2)} ` +
         `(${pDegeriFormatla(ek.p_tum)}) gibi güçlü bir ilişki çıkıyor, ama bu neredeyse tamamen ${ek.uc_noktalar} ` +
         `bölgelerinden kaynaklanıyor; bu ikisi çıkarıldığında ilişki kayboluyor (r=${sayiFormatla(ek.r_haric, 2)}, ` +
         `anlamsız) — yani ulusal düzeyde değil, sadece bu iki bölgeye özgü bir örtüşme.`;
