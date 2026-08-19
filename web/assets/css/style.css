@@ -88,11 +88,6 @@ header.site-header a { color: #fff; }
   gap: 0.6rem;
 }
 
-.site-header .parti-logo {
-  height: 28px;
-  width: auto;
-}
-
 .site-header nav {
   display: flex;
   gap: 1.25rem;
